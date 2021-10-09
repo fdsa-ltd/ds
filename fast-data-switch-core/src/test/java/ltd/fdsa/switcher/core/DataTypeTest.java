@@ -2,7 +2,7 @@ package ltd.fdsa.switcher.core;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.switcher.core.model.*;
+import ltd.fdsa.switcher.core.sbor.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import java.util.Date;
 import java.util.Random;
 
@@ -27,6 +28,15 @@ import java.util.Random;
 public class DataTypeTest {
     @Autowired
     private StandardEnvironment env;
+
+    @Test
+    public void TestData() {
+
+        StringData data = new StringData("inputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinput");
+        var bytes = data.toBytes();
+        var output = data.parse(bytes).getValue();
+        Assert.assertEquals("TestData", data.getValue(), output);
+    }
 
     @Test
     public void TestBoolData() {

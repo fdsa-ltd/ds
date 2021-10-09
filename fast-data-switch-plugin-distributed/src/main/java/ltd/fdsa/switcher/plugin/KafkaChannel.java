@@ -2,7 +2,7 @@ package ltd.fdsa.switcher.plugin;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.switcher.core.PluginType;
+import ltd.fdsa.switcher.core.container.PluginType;
 import ltd.fdsa.switcher.core.job.model.Result;
 import ltd.fdsa.switcher.core.model.Record;
 import ltd.fdsa.switcher.core.pipeline.Channel;
@@ -13,7 +13,6 @@ import okhttp3.MediaType;
 import okhttp3.RequestBody;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.function.Function;
 
 /*

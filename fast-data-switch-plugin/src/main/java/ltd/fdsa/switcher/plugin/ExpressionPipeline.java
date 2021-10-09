@@ -62,8 +62,8 @@ public class ExpressionPipeline extends AbstractPipeline implements Process {
         }
         for (var record : records) {
             Map<String, Object> env = new HashMap<String, Object>(128);
-            for (var sss : record.entrySet()) {
-                env.put(sss.getKey().getValue().toString(), sss.getValue().getValue());
+            for (var column : record.entrySet()) {
+                env.put(column.getKey(), column.getValue());
             }
             var result = this.expression.execute(env);
             for (var item : this.nextSteps) {

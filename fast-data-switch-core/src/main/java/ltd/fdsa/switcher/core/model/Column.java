@@ -1,67 +1,35 @@
 package ltd.fdsa.switcher.core.model;
 
-import com.alibaba.fastjson.JSON;
 import lombok.Data;
-import ltd.fdsa.switcher.core.util.TypeConvertUtils;
+import lombok.var;
+import ltd.fdsa.switcher.core.cbor.CborBuilder;
+import ltd.fdsa.switcher.core.cbor.CborDecoder;
+import ltd.fdsa.switcher.core.cbor.CborEncoder;
+import ltd.fdsa.switcher.core.cbor.CborException;
+import ltd.fdsa.switcher.core.cbor.model.DataItem;
+import ltd.fdsa.switcher.core.cbor.model.MajorType;
+import ltd.fdsa.switcher.core.sbor.DateData;
+import ltd.fdsa.switcher.core.sbor.StringData;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Date;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
 
 @Data
 public class Column {
+    private final String key;
+    private final Object value;
 
-    private Item value;
-
-    private int byteSize;
-
-    private Item key;
-
-    public Column(final String name, final Item object) {
-        this(name, object, object.toBytes().length);
+    public Column(String key, Object value) {
+        this.key = key;
+        this.value = value;
     }
 
-    public Column(final String name, final Object object) {
-
-    }
-
-    public Column(final String name, final Item object, int byteSize) {
-        this.key = new StringData(name);
-        this.value = object;
-        this.byteSize = byteSize;
-    }
-
-    public Long asLong() {
-        return TypeConvertUtils.convert(this.value.getValue(), Long.class);
-    }
-
-    public Double asDouble() {
-        return TypeConvertUtils.convert(this.value.getValue(), Double.class);
-    }
-
-    public String asString() {
-        return TypeConvertUtils.convert(this.value.getValue(), String.class);
-    }
-
-    public Date asDate() {
-        return TypeConvertUtils.convert(this.value.getValue(), Date.class);
-    }
-
-    public Boolean asBoolean() {
-        return TypeConvertUtils.convert(this.value.getValue(), Boolean.class);
-    }
-
-    public BigDecimal asBigDecimal() {
-        return TypeConvertUtils.convert(this.value.getValue(), BigDecimal.class);
-    }
-
-    public BigInteger asBigInteger() {
-        return TypeConvertUtils.convert(this.value.getValue(), BigInteger.class);
-    }
-
-    @Override
-    public String toString() {
-        return JSON.toJSONString(this);
+    public byte[] toByteArray() {
+        var item = new StringData(key);
+        var kya = new DateData((long) this.value);
+        return item.toBytes();
     }
 
 }

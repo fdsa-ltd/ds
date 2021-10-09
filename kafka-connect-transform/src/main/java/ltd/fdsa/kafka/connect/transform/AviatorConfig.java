@@ -95,7 +95,6 @@ public class AviatorConfig extends AbstractConfig {
         super(config(), settings);
         String expression = this.getString(EXPRESSION_CONF);
         if (!cache.containsKey(expression)) {
-
             // 编译表达式
             Expression ep = AviatorEvaluator.compile(expression);
             cache.put(expression, ep);

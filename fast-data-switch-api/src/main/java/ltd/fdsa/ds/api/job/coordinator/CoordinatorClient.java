@@ -1,0 +1,47 @@
+package ltd.fdsa.ds.api.job.coordinator;
+
+import ltd.fdsa.ds.api.job.model.HandleCallbackParam;
+import ltd.fdsa.ds.api.job.model.RegistryParam;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.util.JobRemotingUtil;
+
+
+import java.util.List;
+
+/**
+ * executor invoke coordinator api
+ */
+public class CoordinatorClient implements Coordinator {
+
+    private String addressUrl;
+    private String accessToken;
+
+    public CoordinatorClient() {
+    }
+
+    public CoordinatorClient(String addressUrl, String accessToken) {
+        this.addressUrl = addressUrl;
+        this.accessToken = accessToken;
+
+        // valid
+        if (!this.addressUrl.endsWith("/")) {
+            this.addressUrl = this.addressUrl + "/";
+        }
+    }
+
+    @Override
+    public Result<String> callback(List<HandleCallbackParam> callbackParamList) {
+        return JobRemotingUtil.postBody(addressUrl + "api/callback", accessToken, callbackParamList, 3);
+    }
+
+    @Override
+    public Result<String> registry(RegistryParam registryParam) {
+        return JobRemotingUtil.postBody(addressUrl + "api/registry", accessToken, registryParam, 3);
+    }
+
+    @Override
+    public Result<String> registryRemove(RegistryParam registryParam) {
+        return JobRemotingUtil.postBody(
+                addressUrl + "api/registryRemove", accessToken, registryParam, 3);
+    }
+}

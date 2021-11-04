@@ -1,0 +1,95 @@
+package ltd.fdsa.ds.api.cbor.decoder;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.List;
+
+import org.junit.Test;
+
+import ltd.fdsa.ds.api.cbor.CborBuilder;
+import ltd.fdsa.ds.api.cbor.CborDecoder;
+import ltd.fdsa.ds.api.cbor.CborEncoder;
+import ltd.fdsa.ds.api.cbor.CborException;
+import ltd.fdsa.ds.api.cbor.model.ByteString;
+import ltd.fdsa.ds.api.cbor.model.DataItem;
+import ltd.fdsa.ds.api.cbor.model.MajorType;
+
+public class ByteStringDecoderTest {
+
+    @Test
+    public void shouldDecodeChunkedByteString() throws CborException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        CborEncoder encoder = new CborEncoder(baos);
+        encoder.encode(new CborBuilder().startByteString().add(new byte[] { '\0' }).add(new byte[] { 0x10 })
+            .add(new byte[] { 0x13 }).end().build());
+        byte[] encodedBytes = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(encodedBytes);
+        CborDecoder decoder = new CborDecoder(bais);
+        List<DataItem> dataItems = decoder.decode();
+        assertNotNull(dataItems);
+        assertEquals(1, dataItems.size());
+    }
+
+    @Test
+    public void shouldDecodeByteString1K() throws CborException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        CborEncoder encoder = new CborEncoder(baos);
+        encoder.encode(new CborBuilder().add(new byte[1024]).build());
+        byte[] encodedBytes = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(encodedBytes);
+        CborDecoder decoder = new CborDecoder(bais);
+        List<DataItem> dataItems = decoder.decode();
+        assertNotNull(dataItems);
+        assertEquals(1, dataItems.size());
+    }
+
+    @Test
+    public void shouldDecodeByteString1M() throws CborException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        CborEncoder encoder = new CborEncoder(baos);
+        encoder.encode(new CborBuilder().add(new byte[1024 * 1024]).build());
+        byte[] encodedBytes = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(encodedBytes);
+        CborDecoder decoder = new CborDecoder(bais);
+        List<DataItem> dataItems = decoder.decode();
+        assertNotNull(dataItems);
+        assertEquals(1, dataItems.size());
+    }
+
+    @Test(expected = CborException.class)
+    public void shouldThrowOnIncompleteByteString() throws CborException {
+        byte[] bytes = new byte[] { 0x42, 0x20 };
+        CborDecoder.decode(bytes);
+    }
+
+    @Test(expected = CborException.class)
+    public void shouldTrowOnMissingBreak() throws CborException {
+        byte[] bytes = new byte[] { 0x5f, 0x41, 0x20 };
+        CborDecoder.decode(bytes);
+    }
+
+    public void decodingExample() throws CborException {
+        byte bytes[] = { 0, 1, 2, 3 };
+        // Encode
+        ByteArrayOutputStream encodedStream = new ByteArrayOutputStream();
+        new CborEncoder(encodedStream).encode(new ByteString(bytes));
+        byte encodedBytes[] = encodedStream.toByteArray();
+        // Decode
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(encodedBytes);
+        CborDecoder decoder = new CborDecoder(inputStream);
+        DataItem dataItem = decoder.decodeNext();
+        assertEquals(MajorType.BYTE_STRING, dataItem.getMajorType());
+        ByteString byteString = (ByteString) dataItem;
+        byte[] decodedBytes = byteString.getBytes();
+        // Verify
+        assertEquals(bytes.length, decodedBytes.length);
+        assertEquals(bytes[0], decodedBytes[0]);
+        assertEquals(bytes[1], decodedBytes[1]);
+        assertEquals(bytes[2], decodedBytes[2]);
+        assertEquals(bytes[3], decodedBytes[3]);
+    }
+
+}

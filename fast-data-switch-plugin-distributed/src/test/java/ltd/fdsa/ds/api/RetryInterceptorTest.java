@@ -1,7 +1,7 @@
 package ltd.fdsa.ds.api;
 
 import lombok.extern.slf4j.Slf4j;
-import ltd.fdsa.ds.plugin.RetryInterceptor;
+import ltd.fdsa.ds.channel.http.RetryInterceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;

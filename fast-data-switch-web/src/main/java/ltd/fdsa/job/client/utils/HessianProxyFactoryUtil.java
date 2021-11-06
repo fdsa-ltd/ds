@@ -1,4 +1,4 @@
-package ltd.fdsa.job.controller;
+package ltd.fdsa.job.client.utils;
 import com.caucho.hessian.client.HessianProxyFactory;
 /**
  * <获取客户端连接工厂对象>

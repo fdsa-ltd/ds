@@ -1,4 +1,4 @@
-package ltd.fdsa.ds.plugin;
+package ltd.fdsa.ds.channel.http;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;

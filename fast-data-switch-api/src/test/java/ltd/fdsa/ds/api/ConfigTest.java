@@ -1,20 +1,20 @@
 package ltd.fdsa.ds.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.config.YamlConfig;
+import ltd.fdsa.ds.api.props.Configuration;
+import ltd.fdsa.ds.api.props.DefaultConfig;
 import ltd.fdsa.ds.api.util.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import java.util.Arrays;
+import java.util.Date;
 
 
 /**
@@ -27,70 +27,66 @@ import java.util.Properties;
 @ContextConfiguration(classes = {String.class})
 @Slf4j
 public class ConfigTest {
-    @Autowired
-    private StandardEnvironment env;
-
-    @Test
-    public void TestConfig() {
-        //得到配置
-        var url = this.getClass().getClassLoader().getResource("application.yml");
-        var content = FileUtils.readFile(url.getFile());
-
-        var config = new YamlConfig(content);// YamlConfig(content);
-        var slaves = config.getString("spring.datasource.slaves");
-        log.info("{}", slaves);
-        var app = config.getString("spring.application.name");
-        log.info("{}", app);
-
-        var list = config.getConfigurations("spring.datasource.slaves");
-
-        log.info("{}", list);
-
-        var nu = config.getConfiguration("spring.datasource.slaves");
-        log.info("{}", nu);
-        var datasource = config.getConfiguration("spring.datasource");
-        log.info("{}", datasource);
-
-        for (var item : this.env.getPropertySources()) {
-            try {
-
-                log.info("{}", item.getClass());
-            } catch (Exception ex) {
-                log.error("ss", ex);
-            }
+    private void doPrint(Configuration config) {
+        var name = config.get("name");
+        log.info("job.name:{}", name);
+        var pipelines = config.getConfigurations("pipelines");
+        for (var pipeline : pipelines) {
+            log.info("pipeline.class:{}", pipeline.get("class"));
         }
+        var pipeline = config.getConfiguration("pipelines.1");
+        log.info("pipeline.class:{}", pipeline.get("class"));
     }
 
-
     @Test
-    public void TestProperty() {
-        //得到配置
-        var url = this.getClass().getClassLoader().getResource("application.properties");
-        var content = FileUtils.readFile(url.getFile());
-        Properties config = new Properties();
-        try {
-            InputStream inputStream = url.openStream();
-            config.load(inputStream);
-        } catch (IOException e) {
+    public void TestCreateConfig() throws JsonProcessingException {
+        var list = new User[10];
+        for (var i = 0; i < list.length; i++) {
+            list[i] = User.builder()
+                    .age(Math.random())
+                    .name("test" + i)
+                    .createTime(new Date())
+                    .id(i).types(null).build();
         }
-
-
-        var slaves = config.getProperty("spring.datasource.slaves");
-        log.info("{}", slaves);
-        var app = config.getProperty("spring.application.name");
-        log.info("{}", app);
-        var application = config.getProperty("spring.application");
-        log.info("{}", application);
-
-        var list = config.getProperty("spring.datasource.slaves");
-
-        log.info("{}", list);
-
-        var nu = config.getProperty("spring.datasource.slaves");
-        log.info("{}", nu);
-        var datasource = config.getProperty("spring.datasource");
-        log.info("{}", datasource);
+        var obj = User.builder().age(18D).createTime(new Date())
+                .id(1).name("adam zhu")
+                .types(Arrays.asList("男", "高", "富", "帅"))
+                .friends(list).build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        var content = objectMapper.writeValueAsString(obj);
+        DefaultConfig config = (DefaultConfig) DefaultConfig.getYamlConfig(content);// YamlConfig(content);
+        System.out.println("===========props:===========");
+        System.out.println(config.toString());
+        System.out.println("===========json:===========");
+        System.out.println(config.toJson());
+        System.out.println("===========yaml:===========");
+        System.out.println(config.toYaml());
     }
 
+    @Test
+    public void TestYamlConfig() {
+        //得到配置
+        var url = this.getClass().getClassLoader().getResource("simple_job.yml");
+        var content = FileUtils.readFile(url.getFile());
+        var config = DefaultConfig.getYamlConfig(content);// YamlConfig(content);
+        doPrint(config);
+    }
 
+    @Test
+    public void TestJsonConfig() {
+        //得到配置
+        var url = this.getClass().getClassLoader().getResource("simple_job.json");
+        var content = FileUtils.readFile(url.getFile());
+        var config = DefaultConfig.getJsonConfig(content);
+        doPrint(config);
+    }
+
+    @Test
+    public void TestPropertyConfig() {
+        //得到配置
+        var url = this.getClass().getClassLoader().getResource("simple_job.properties");
+        var content = FileUtils.readFile(url.getFile());
+        var config = DefaultConfig.getPropsConfig(content);
+        doPrint(config);
+    }
 }

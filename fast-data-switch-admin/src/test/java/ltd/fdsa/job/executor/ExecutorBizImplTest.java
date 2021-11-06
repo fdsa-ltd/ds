@@ -1,10 +1,11 @@
 package ltd.fdsa.job.executor;
 
-import ltd.fdsa.switcher.core.job.executor.Executor;
-import ltd.fdsa.switcher.core.job.model.LogResult;
-import ltd.fdsa.switcher.core.job.model.TriggerParam;
-import ltd.fdsa.switcher.core.job.enums.ExecutorBlockStrategyEnum;
-import ltd.fdsa.switcher.core.job.executor.JobExecutor;
+import ltd.fdsa.ds.api.job.executor.Executor;
+import ltd.fdsa.ds.api.job.model.LogResult;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.job.model.TriggerParam;
+import ltd.fdsa.ds.api.job.enums.ExecutorBlockStrategyEnum;
+import ltd.fdsa.ds.api.job.executor.JobExecutor;
 
 import org.junit.After;
 import org.junit.Assert;

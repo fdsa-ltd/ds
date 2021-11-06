@@ -1,22 +1,47 @@
 package ltd.fdsa.ds.api.pipeline;
 
 
-import ltd.fdsa.ds.api.config.Configuration;
-import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.props.Configuration;
 import ltd.fdsa.ds.api.model.Record;
 
-import org.springframework.context.SmartLifecycle;
-
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
-public interface Pipeline extends SmartLifecycle {
+public interface Pipeline {
+    default Configuration config() {
+        return null;
+    }
 
     // init
-    Result<String> init(Configuration configuration);
+    default void init() {
+    }
 
-    // collector
+    // start
+    default void start() {
+    }
+
+    // collect
     void collect(Record... records);
 
     // output
-    Map<String, String> scheme();
+    default Map<String, String> scheme() {
+        return Collections.emptyMap();
+    }
+
+    default List<Pipeline> nextSteps() {
+        return Collections.emptyList();
+    }
+
+    default void stop() {
+    }
+
+    default void stop(Runnable callback) {
+        stop();
+        callback.run();
+    }
+
+    default boolean isRunning() {
+        return false;
+    }
 }

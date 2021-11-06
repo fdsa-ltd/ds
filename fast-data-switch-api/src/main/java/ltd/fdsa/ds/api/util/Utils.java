@@ -1,5 +1,9 @@
 package ltd.fdsa.ds.api.util;
 
+import lombok.var;
+
+import java.util.Set;
+
 public class Utils {
 
     /**
@@ -20,7 +24,11 @@ public class Utils {
      *
      * @return
      */
-    public static String getConfigDir() {
-        return System.getProperty("hdata.conf.dir") + System.getProperty("file.separator");
+    public static String getName(Set<String> list) {
+        var i = 0;
+        while (list.contains("field" + i)) {
+            i++;
+        }
+        return "field" + i;
     }
 }

@@ -1,4 +1,4 @@
-package ltd.fdsa.ds.api.config;
+package ltd.fdsa.ds.api.props;
 
 import lombok.var;
 

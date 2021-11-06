@@ -1,58 +1,73 @@
-package ltd.fdsa.ds.plugin;
+package ltd.fdsa.ds.reader.kafka;
 
+import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
+import ltd.fdsa.ds.api.model.Column;
+import ltd.fdsa.ds.api.model.Record;
+import ltd.fdsa.ds.api.pipeline.Reader;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.time.Duration;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 @Slf4j
-public class KafkaClient {
+public class KafkaReader implements Reader {
+    static final String TOPICS_CONFIG = "topics";
+    Collection<String> topics;
+    KafkaConsumer<String, String> kafkaConsumer;
+    Duration duration;
 
-    private final static AtomicInteger next = new AtomicInteger(0);
-    public final String topic;
-    private final KafkaProducer<String, String> kafkaProducer;
-    private final KafkaConsumer<String, String> kafkaConsumer;
-
-    public KafkaClient(String topic, String... hosts) {
-        this.topic = topic;
-        Properties p = new Properties();
-        p.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, String.join(",", hosts));//kafka地址，多个地址用逗号分割
-        p.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        p.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        this.kafkaProducer = new KafkaProducer<String, String>(p);
-        p.put(ConsumerConfig.GROUP_ID_CONFIG, this.topic);
-        this.kafkaConsumer = new KafkaConsumer<String, String>(p);
+    @Override
+    public void init() {
+        this.topics = Arrays.asList(this.config().get(TOPICS_CONFIG).split(","));
+        this.duration = Duration.ofMillis(this.config().getLong(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 100));
+        Properties properties = new Properties();
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, this.config().get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG));
+        //kafka地址，多个地址用逗号分割
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, this.config().get(ConsumerConfig.GROUP_ID_CONFIG));
+        this.kafkaConsumer = new KafkaConsumer<String, String>(properties);
     }
 
-
-    public void send(String... messages) throws InterruptedException {
-        for (var msg : messages) {
-            ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, msg);
-            kafkaProducer.send(record);
-        }
-    }
-
-    public void start(Function<String, Boolean> callback) {
-
-        kafkaConsumer.subscribe(Collections.singletonList(this.topic));// 订阅消息
-
-        while (true) {
-            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
-            for (ConsumerRecord<String, String> record : records) {
-                callback.apply(record.value());
+    @Override
+    public void collect(Record... records) {
+        if (this.isRunning()) {
+            for (var item : this.nextSteps()) {
+                item.collect(records);
             }
         }
+    }
+
+    @Override
+    public void start() {
+        this.kafkaConsumer.subscribe(this.topics);// 订阅消息
+        while (this.isRunning()) {
+            this.kafkaConsumer
+                    .poll(this.duration)
+                    .forEach(record -> {
+                        var key = record.key();
+                        var value = record.value();
+                        var item = new Record();
+                        if (!Strings.isNullOrEmpty(key)) {
+                            item.add(new Column("key", key));
+                        }
+                        if (!Strings.isNullOrEmpty(value)) {
+                            item.add(new Column("value", value));
+                        }
+                        this.collect(item);
+                    });
+        }
+    }
+
+    @Override
+    public void stop() {
+        this.kafkaConsumer.unsubscribe();
     }
 }

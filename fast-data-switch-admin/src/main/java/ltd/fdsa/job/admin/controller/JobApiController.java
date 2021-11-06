@@ -1,12 +1,12 @@
 package ltd.fdsa.job.admin.controller;
 
 import ltd.fdsa.job.admin.annotation.PermissionLimit;
-import ltd.fdsa.switcher.core.exception.FastDataSwitchException;
-import ltd.fdsa.switcher.core.job.coordinator.Coordinator;
-import ltd.fdsa.switcher.core.job.model.HandleCallbackParam;
-import ltd.fdsa.switcher.core.job.model.RegistryParam;
-import ltd.fdsa.switcher.core.job.model.Result;
-import ltd.fdsa.switcher.core.util.JacksonUtil;
+import ltd.fdsa.ds.api.exception.FastDataSwitchException;
+import ltd.fdsa.ds.api.job.coordinator.Coordinator;
+import ltd.fdsa.ds.api.job.model.HandleCallbackParam;
+import ltd.fdsa.ds.api.job.model.RegistryParam;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.util.JacksonUtil;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -14,7 +14,7 @@ import javax.annotation.Resource;
  * @version 2018-11-18 16:55
  * @see [相关类/方法] (可选)
  **/
-@Configuration //标记为spring 配置类
+@Configuration
 public class HessianServiceConfig {
 
     @Resource

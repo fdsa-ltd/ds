@@ -1,68 +1,61 @@
-package ltd.fdsa.ds.plugin;
+package ltd.fdsa.ds.channel.kafka;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.container.PluginType;
-import ltd.fdsa.ds.api.model.Result;
 import ltd.fdsa.ds.api.model.Record;
 import ltd.fdsa.ds.api.pipeline.Channel;
-import ltd.fdsa.ds.api.config.Configuration;
-import ltd.fdsa.ds.api.pipeline.impl.AbstractPipeline;
-
+import ltd.fdsa.ds.channel.http.HttpClient;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Arrays;
-import java.util.function.Function;
+import java.util.Properties;
 
 /*
 使用Kafka实现数据渠道功能
 */
 @Slf4j
-public class KafkaChannel extends AbstractPipeline implements Channel, Function<String, Boolean> {
-    KafkaClient kafkaClient;
+public class KafkaChannel implements Channel {
+
     HttpClient httpClient = new HttpClient(null);
+    String topic;
+    KafkaProducer<String, String> kafkaProducer;
+
 
     @Override
-    public Result<String> init(Configuration configuration) {
-        this.config = configuration;
-        this.name = this.config.getString("name", this.getClass().getCanonicalName());
-        this.type = PluginType.valueOf(this.config.getString("type", "pipeline"));
-        this.description = this.config.getString("description", this.getClass().getCanonicalName());
-        String[] hosts = Arrays.stream(this.config.getString("hosts").split(",")).map(m -> m.trim()).toArray(String[]::new);
-        this.kafkaClient = new KafkaClient(this.config.getString("topic"), hosts);
+    public void init() {
+        this.topic  = "//todo 根据上下文名称" ;
+        Properties properties = new Properties();
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.config().get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG));
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        this.kafkaProducer = new KafkaProducer<String, String>(properties);
+
         // Send Job Config to Cluster
-        var configurations = this.config.getConfigurations("pipelines");
+        var configurations = this.config().getConfigurations("pipelines");
         if (configurations != null && configurations.length > 0) {
             // invoke rpc to init
-            httpClient.post("/api/job/init", RequestBody.create(MediaType.get("application/json"), this.config.toString()));
+            httpClient.post("/api/job/init", RequestBody.create(MediaType.get("application/json"), this.config().toString()));
         }
         // Cluster will return related job Token
         // create clients to manager cluster nodes
         // then we can remote process call to collect data;
-        return Result.success();
     }
-
-    @Override
-    public void start() {
-        if (this.running.compareAndSet(false, true)) {
-            // monitor cluster nodes
-            kafkaClient.start(this::apply);
-        }
-    }
-
 
     @Override
     public void collect(Record... records) {
         if (!this.isRunning()) {
             return;
         }
-        httpClient.post("/api/job/collect", RequestBody.create(MediaType.get("app"), ""));
-    }
 
+        Arrays.stream(records).map(item -> new ProducerRecord<String, String>(topic, item.toJson()))
+                .forEach(record -> {
+                    this.kafkaProducer.send(record);
+                });
+     }
 
-    @Override
-    public Boolean apply(String s) {
-        return false;
-    }
 }

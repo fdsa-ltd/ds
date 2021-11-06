@@ -1,4 +1,4 @@
-package ltd.fdsa.ds.plugin;
+package ltd.fdsa.ds.jdbc;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;

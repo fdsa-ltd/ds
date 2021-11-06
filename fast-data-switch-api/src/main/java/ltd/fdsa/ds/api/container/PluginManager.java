@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
+import ltd.fdsa.ds.api.props.Configuration;
+import ltd.fdsa.ds.api.pipeline.Pipeline;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +28,6 @@ public class PluginManager {
         }
         return mgr;
     }
-
 
     private Class<?> loadPluginClass(String className) {
         var classLoader = this.classLoaderCache.get(className);
@@ -53,6 +54,17 @@ public class PluginManager {
         throw new IllegalArgumentException("class:" + className + " not sub class of " + required);
     }
 
+    public Pipeline getInstance(String className, Configuration configuration) {
+        Class<?> cls = this.loadPluginClass(className);
+        if (Pipeline.class.isAssignableFrom(cls)) {
+            try {
+                return PipelineProxyFactory.getProxy(configuration, cls.newInstance());
+            } catch (Exception e) {
+                throw new IllegalArgumentException("can not newInstance class:" + className, e);
+            }
+        }
+        throw new IllegalArgumentException("class:" + className + " not sub class of pipeline");
+    }
 
     public <T> T getInstance(String className, Class<T> required, Object... objects) {
         Class<?> cls = this.loadPluginClass(className);

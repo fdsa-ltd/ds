@@ -1,4 +1,4 @@
-package ltd.fdsa.ds.plugin;
+package ltd.fdsa.ds.jdbc;
 
 public class Properties {
 

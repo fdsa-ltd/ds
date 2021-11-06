@@ -1,17 +1,16 @@
 package ltd.fdsa.ds.api.job.thread;
 
 import ltd.fdsa.ds.api.HessianSerializer;
-import ltd.fdsa.ds.api.job.model.HandleCallbackParam;
 import ltd.fdsa.ds.api.job.coordinator.Coordinator;
 import ltd.fdsa.ds.api.job.enums.RegistryConfig;
-import ltd.fdsa.ds.api.job.executor.JobExecutor;
 import ltd.fdsa.ds.api.job.log.JobFileAppender;
 import ltd.fdsa.ds.api.job.log.JobLogger;
+import ltd.fdsa.ds.api.job.model.HandleCallbackParam;
 import ltd.fdsa.ds.api.model.Result;
 import ltd.fdsa.ds.api.util.FileUtil;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -29,18 +28,16 @@ public class TriggerCallbackThread {
                     .concat(File.separator)
                     .concat("callbacklog")
                     .concat(File.separator);
-    private static String failCallbackFileName =
-            failCallbackFilePath.concat("project.job-callback-{x}").concat(".log");
+    private static String failCallbackFileName = failCallbackFilePath.concat("project.job-callback-{x}").concat(".log");
     /**
      * job results callback queue
      */
-    private LinkedBlockingQueue<HandleCallbackParam> callBackQueue =
-            new LinkedBlockingQueue<HandleCallbackParam>();
+    private LinkedBlockingQueue<HandleCallbackParam> callBackQueue = new LinkedBlockingQueue<HandleCallbackParam>();
     /**
      * callback thread
      */
     private Thread triggerCallbackThread;
-
+    Coordinator client;
     private Thread triggerRetryCallbackThread;
     private volatile boolean toStop = false;
 
@@ -54,12 +51,6 @@ public class TriggerCallbackThread {
     }
 
     public void start() {
-
-        // valid
-        if (JobExecutor.getCoordinators() == null) {
-            logger.warn(">>>>>>>>>>> project.job, executor callback config fail, adminAddresses is null.");
-            return;
-        }
 
         // callback
         triggerCallbackThread =
@@ -175,13 +166,12 @@ public class TriggerCallbackThread {
     private void doCallback(List<HandleCallbackParam> callbackParamList) {
         boolean callbackRet = false;
         // callback, will retry if error
-        for (Coordinator adminBiz : JobExecutor.getCoordinators()) {
-            try {
-                Result<String> callbackResult = adminBiz.callback(callbackParamList);
+
+        try {
+            Result<String> callbackResult = client.callback(callbackParamList);
                 if (callbackResult != null && Result.success().getCode() == callbackResult.getCode()) {
                     callbackLog(callbackParamList, "<br>----------- project.job job callback finish.");
                     callbackRet = true;
-                    break;
                 } else {
                     callbackLog(
                             callbackParamList,
@@ -192,7 +182,7 @@ public class TriggerCallbackThread {
                         callbackParamList,
                         "<br>----------- project.job job callback error, errorMsg:" + e.getMessage());
             }
-        }
+
         if (!callbackRet) {
             appendFailCallbackFile(callbackParamList);
         }

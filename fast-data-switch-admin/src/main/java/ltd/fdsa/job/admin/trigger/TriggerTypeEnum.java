@@ -1,6 +1,6 @@
 package ltd.fdsa.job.admin.trigger;
 
-import ltd.fdsa.switcher.core.util.I18nUtil;
+import ltd.fdsa.ds.api.util.I18nUtil;
 
 /**
  * trigger type enum

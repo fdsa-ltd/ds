@@ -6,61 +6,38 @@ import com.lmax.disruptor.dsl.Disruptor;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.model.Result;
 import ltd.fdsa.ds.api.model.Record;
 import ltd.fdsa.ds.api.pipeline.Channel;
 import ltd.fdsa.ds.api.pipeline.Pipeline;
-import ltd.fdsa.ds.api.config.Configuration;
-
 
 import java.util.List;
 import java.util.concurrent.Executors;
 
 @Slf4j
-public class DisruptorChannel extends AbstractPipeline implements Channel {
+public class DisruptorChannel implements Channel {
     private Disruptor<Record> disruptor;
 
     @Override
-    public Result<String> init(Configuration configuration) {
-        var result = super.init(configuration);
-        if (result.getCode() == 200) {
-            int bufferSize = this.config.getInt("bufferSize", 1024);
-            // Construct the Disruptor
-            this.disruptor = new Disruptor<Record>(Record::new, bufferSize, Executors.defaultThreadFactory());
-            return Result.success();
-        }
-        return result;
+    public void init() {
+        int bufferSize = this.config().getInt("bufferSize", 1024);
+        // Construct the Disruptor
+        this.disruptor = new Disruptor<Record>(Record::new, bufferSize, Executors.defaultThreadFactory());
     }
 
     @Override
     public void start() {
-        if (this.running.compareAndSet(false, true)) {
-            // Connect the handler
-            disruptor.handleEventsWith(new RecordHandler(this.nextSteps));
-            // Start the Disruptor, starts all threads running
-            disruptor.start();
-        }
+        // Connect the handler
+        disruptor.handleEventsWith(new RecordHandler(this.nextSteps()));
+        // Start the Disruptor, starts all threads running
+        disruptor.start();
     }
 
     @Override
     public void collect(Record... records) {
-        if (!this.isRunning()) {
-            return;
-        }
-
-        //var ringBuffer = this.disruptor.getRingBuffer();
-        //for (var record : records) {
-        //    var sequence = ringBuffer.next();
-        //    var re = ringBuffer.get(sequence);
-        //    re.putAll(record);
-        //    ringBuffer.publish(sequence);
-        //}
-
         for (var record : records) {
             this.disruptor.publishEvent(new RecordSender(record));
         }
     }
-
 
     @AllArgsConstructor
     class RecordHandler implements EventHandler<Record> {

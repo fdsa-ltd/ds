@@ -5,14 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import ltd.fdsa.ds.api.job.coordinator.Coordinator;
 import ltd.fdsa.ds.api.job.handler.JobHandler;
 import ltd.fdsa.ds.api.job.log.JobFileAppender;
-import ltd.fdsa.ds.api.job.coordinator.CoordinatorClient;
 import ltd.fdsa.ds.api.job.thread.JobThread;
 import ltd.fdsa.ds.api.job.thread.TriggerCallbackThread;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.remoting.caucho.HessianServiceExporter;
 
-import java.util.*;
+import javax.annotation.Resource;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
+
 
 /**
  * 客户端执行器
@@ -23,12 +27,6 @@ public class JobExecutor {
     private static ConcurrentMap<String, JobHandler> jobHandlerRepository = new ConcurrentHashMap<String, JobHandler>();
     // ---------------------- job thread repository ----------------------
     private static ConcurrentMap<Integer, JobThread> jobThreadRepository = new ConcurrentHashMap<Integer, JobThread>();
-    private final static List<Coordinator> coordinators = new LinkedList<>();
-
-    public static List<Coordinator> getCoordinators() {
-        return coordinators;
-    }
-
     private final String appName;
     private final String ip;
     private final int port;
@@ -43,7 +41,6 @@ public class JobExecutor {
         this.logPath = properties.getProperty("log_path", "./logs");
         this.logRetentionDays = Integer.parseInt(properties.getProperty("log_days", "7"));
         this.accessToken = properties.getProperty("access_token", "");
-        this.coordinators.addAll(Arrays.stream(properties.getProperty("", "").split(",")).map(m -> new CoordinatorClient(m, this.accessToken)).collect(Collectors.toList()));
     }
 
 

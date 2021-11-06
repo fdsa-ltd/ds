@@ -1,8 +1,8 @@
 package ltd.fdsa.job.admin.route.strategy;
 
 import ltd.fdsa.job.admin.route.ExecutorRouter;
-import ltd.fdsa.switcher.core.job.model.Result;
-import ltd.fdsa.switcher.core.job.model.TriggerParam;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.job.model.TriggerParam;
 
 
 import java.util.ArrayList;

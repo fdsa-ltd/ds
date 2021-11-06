@@ -1,4 +1,4 @@
-package ltd.fdsa.job;
+package ltd.fdsa.job.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;

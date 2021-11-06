@@ -2,17 +2,15 @@ package ltd.fdsa.ds.api.job.thread;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-
 import ltd.fdsa.ds.api.job.coordinator.Coordinator;
 import ltd.fdsa.ds.api.job.enums.RegistryConfig;
-import ltd.fdsa.ds.api.job.executor.JobExecutor;
 import ltd.fdsa.ds.api.job.model.RegistryParam;
 import ltd.fdsa.ds.api.model.Result;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.scheduling.TaskScheduler;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Properties;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -21,13 +19,17 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ExecutorRegistryThread implements SmartLifecycle {
     private final Properties properties;
     private final TaskScheduler taskScheduler;
+    private final Coordinator client;
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final AtomicReference<BigInteger> catalogServicesIndex = new AtomicReference<>();
     private ScheduledFuture<?> serviceWatchFuture;
-    public ExecutorRegistryThread(Properties properties, TaskScheduler taskScheduler) {
+
+    public ExecutorRegistryThread(Properties properties, Coordinator client, TaskScheduler taskScheduler) {
         this.properties = properties;
         this.taskScheduler = taskScheduler;
+        this.client = client;
     }
+
     @Override
     public void start() {
         if (this.running.compareAndSet(false, true)) {
@@ -35,7 +37,7 @@ public class ExecutorRegistryThread implements SmartLifecycle {
         }
     }
 
-    public void serviceRegister() {
+    void serviceRegister() {
         //判断服务是否已经启动
         if (!this.running.get()) {
             return;
@@ -46,27 +48,24 @@ public class ExecutorRegistryThread implements SmartLifecycle {
                 log.warn("project.executor registry config fail, appName is null.");
                 return;
             }
-            if (JobExecutor.getCoordinators() == null || JobExecutor.getCoordinators().size() <= 0) {
-                log.warn("project.executor registry config fail, adminAddresses is null.");
-                return;
-            }
+
 
             var address = this.properties.getProperty("address", "");
             RegistryParam registryParam = new RegistryParam(RegistryConfig.EXECUTOR.name(), appName, address);
-            for (Coordinator client : JobExecutor.getCoordinators()) {
-                try {
-                    Result<String> registryResult = client.registry(registryParam);
-                    if (registryResult != null && Result.success().getCode() == registryResult.getCode()) {
-                        registryResult = Result.success();
-                        log.debug("project.registry success, registryParam:{}, registryResult:{}", new Object[]{registryParam, registryResult});
-                        break;
-                    } else {
-                        log.info("project.registry fail, registryParam:{},registryResult:{}", new Object[]{registryParam, registryResult});
-                    }
-                } catch (Exception e) {
-                    log.info("project.registry error, registryParam:{}", registryParam, e);
+
+            try {
+                Result<String> registryResult = client.registry(registryParam);
+                if (registryResult != null && Result.success().getCode() == registryResult.getCode()) {
+                    registryResult = Result.success();
+                    log.debug("project.registry success, registryParam:{}, registryResult:{}", new Object[]{registryParam, registryResult});
+
+                } else {
+                    log.info("project.registry fail, registryParam:{},registryResult:{}", new Object[]{registryParam, registryResult});
                 }
+            } catch (Exception e) {
+                log.info("project.registry error, registryParam:{}", registryParam, e);
             }
+
         } catch (Exception e) {
             log.error("Error Consul register", e);
         }
@@ -106,22 +105,21 @@ public class ExecutorRegistryThread implements SmartLifecycle {
                 var address = this.properties.getProperty("address");
                 try {
                     RegistryParam registryParam = new RegistryParam(RegistryConfig.EXECUTOR.name(), appName, address);
-                    for (Coordinator client : JobExecutor.getCoordinators()) {
-                        try {
-                            Result<String> registryResult = client.registryRemove(registryParam);
-                            if (registryResult != null
-                                    && Result.success().getCode() == registryResult.getCode()) {
-                                registryResult = Result.success();
-                                log.info("project.registry - remove success, registryParam:{},registryResult:{}",
-                                        new Object[]{registryParam, registryResult});
-                                break;
-                            } else {
-                                log.info("project.registry - remove fail, registryParam:{},registryResult:{}",
-                                        new Object[]{registryParam, registryResult});
-                            }
-                        } catch (Exception e) {
-                            log.info("project.registry - remove error, registryParam:{}", registryParam, e);
+
+                    try {
+                        Result<String> registryResult = client.registryRemove(registryParam);
+                        if (registryResult != null
+                                && Result.success().getCode() == registryResult.getCode()) {
+                            registryResult = Result.success();
+                            log.info("project.registry - remove success, registryParam:{},registryResult:{}",
+                                    new Object[]{registryParam, registryResult});
+
+                        } else {
+                            log.info("project.registry - remove fail, registryParam:{},registryResult:{}",
+                                    new Object[]{registryParam, registryResult});
                         }
+                    } catch (Exception e) {
+                        log.info("project.registry - remove error, registryParam:{}", registryParam, e);
                     }
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);

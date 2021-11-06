@@ -1,4 +1,4 @@
-package ltd.fdsa.job.admin.jpa.service.impl;
+package ltd.fdsa.job.admin.service.impl;
 
 
 import ltd.fdsa.job.admin.thread.JobTriggerPoolHelper;
@@ -27,8 +27,8 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class AdminBizImpl implements Coordinator {
-    private static Logger logger = LoggerFactory.getLogger(AdminBizImpl.class);
+public class CoordinatorImpl implements Coordinator {
+    private static Logger logger = LoggerFactory.getLogger(CoordinatorImpl.class);
 
     @Resource
     public JobLogService JobLogDao;

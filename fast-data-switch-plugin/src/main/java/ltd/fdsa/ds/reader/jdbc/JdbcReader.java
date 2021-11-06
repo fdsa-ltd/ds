@@ -1,14 +1,10 @@
-package ltd.fdsa.ds.plugin;
+package ltd.fdsa.ds.reader.jdbc;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.job.enums.HttpCode;
-import ltd.fdsa.ds.api.model.Result;
 import ltd.fdsa.ds.api.model.Column;
 import ltd.fdsa.ds.api.model.Record;
 import ltd.fdsa.ds.api.pipeline.Reader;
-import ltd.fdsa.ds.api.config.Configuration;
-import ltd.fdsa.ds.api.pipeline.impl.AbstractPipeline;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -18,7 +14,7 @@ import java.util.Map;
 
 
 @Slf4j
-public class JdbcReader extends AbstractPipeline implements Reader {
+public class JdbcReader implements Reader {
     String driver;
     String url;
     String user;
@@ -27,39 +23,44 @@ public class JdbcReader extends AbstractPipeline implements Reader {
     Map<String, String> scheme;
     Connection conn;
 
+    @Override
+    public void init() {
+        try {
+            this.url = this.config().getString("url");
+            this.driver = this.config().getString("driver");
+            this.user = this.config().getString("username");
+            this.password = this.config().getString("password");
+            this.sql = this.config().getString("sql");
+            this.scheme = new HashMap<>(64);
+            Class.forName(driver);
+            this.conn = DriverManager.getConnection(url, user, password);
+        } catch (SQLException e) {
+//                return Result.error(e);
+        } catch (ClassNotFoundException e) {
+//                return Result.error(e);
+        }
+        try (Statement stmt = conn.createStatement()) {
+            ResultSet rs = stmt.executeQuery(String.format("select * from (%s) a where 1=2", sql));
+            ResultSetMetaData metaData = rs.getMetaData(); // 获取键名
+            int columnCount = metaData.getColumnCount(); // 获取行的数量
+            for (int i = 1; i <= columnCount; i++) {
+                scheme.put(metaData.getColumnName(i), metaData.getColumnTypeName(i));
+            }
+//                return Result.success();
+        } catch (SQLException e) {
+            log.error("JdbcSourcePipeline.getColumn", e);
+//                return Result.error(e);
+        }
+
+    }
 
     @Override
-    public Result<String> init(Configuration configuration) {
-        var result = super.init(configuration);
-        if (result.getCode() == 200) {
-            try {
-                this.url = config.getString("url");
-                this.driver = config.getString("driver");
-                this.user = config.getString("username");
-                this.password = config.getString("password");
-                this.sql = config.getString("sql");
-                this.scheme = new HashMap<>(64);
-                Class.forName(driver);
-                this.conn = DriverManager.getConnection(url, user, password);
-            } catch (SQLException e) {
-                return Result.error(e);
-            } catch (ClassNotFoundException e) {
-                return Result.error(e);
-            }
-            try (Statement stmt = conn.createStatement()) {
-                ResultSet rs = stmt.executeQuery(String.format("select * from (%s) a where 1=2", sql));
-                ResultSetMetaData metaData = rs.getMetaData(); // 获取键名
-                int columnCount = metaData.getColumnCount(); // 获取行的数量
-                for (int i = 1; i <= columnCount; i++) {
-                    scheme.put(metaData.getColumnName(i), metaData.getColumnTypeName(i));
-                }
-                return Result.success();
-            } catch (SQLException e) {
-                log.error("JdbcSourcePipeline.getColumn", e);
-                return Result.error(e);
+    public void collect(Record... records) {
+        if (this.isRunning()) {
+            for (var item : this.nextSteps()) {
+                item.collect(records);
             }
         }
-        return Result.fail(HttpCode.EXPECTATION_FAILED, result.getMessage());
     }
 
     @Override
@@ -69,27 +70,22 @@ public class JdbcReader extends AbstractPipeline implements Reader {
 
     @Override
     public void start() {
-        if (this.running.compareAndSet(false, true)) {
-            while (this.isRunning()) {
-                List<Record> list = new ArrayList<>();
-                try (Statement stmt = conn.createStatement()) {
-                    ResultSet rs = stmt.executeQuery(sql);
-                    while (rs.next()) {
-                        Record record = new Record();
-                        for (var key : this.scheme.keySet()) {
-                            record.Add(new Column(key, rs.getObject(key)));
-                        }
-                        list.add(record);
+        while (this.isRunning()) {
+            List<Record> list = new ArrayList<>();
+            try (Statement stmt = conn.createStatement()) {
+                ResultSet rs = stmt.executeQuery(sql);
+                while (rs.next()) {
+                    Record record = new Record();
+                    for (var key : this.scheme.keySet()) {
+                        record.add(new Column(key, rs.getObject(key)));
                     }
-                    // STEP 6: Clean-up environment
-                    rs.close();
-                } catch (SQLException e) {
-                    log.error("JdbcSourcePipeline.process", e);
+                    list.add(record);
                 }
-                super.collect(list.toArray(new Record[0]));
+                rs.close();
+            } catch (SQLException e) {
+                log.error("JdbcSourcePipeline.process", e);
             }
+            this.collect(list.toArray(new Record[0]));
         }
-
     }
-
 }

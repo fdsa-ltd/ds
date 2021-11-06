@@ -1,4 +1,4 @@
-package ltd.fdsa.ds.plugin;
+package ltd.fdsa.ds.channel.kafka;
 
 
 public class KafkaProperties {

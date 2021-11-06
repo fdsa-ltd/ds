@@ -1,7 +1,7 @@
 package ltd.fdsa.job.admin.route;
 
-import ltd.fdsa.switcher.core.job.model.Result;
-import ltd.fdsa.switcher.core.job.model.TriggerParam;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.job.model.TriggerParam;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

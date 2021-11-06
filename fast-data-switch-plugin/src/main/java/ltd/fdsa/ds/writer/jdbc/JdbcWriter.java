@@ -1,12 +1,10 @@
-package ltd.fdsa.ds.plugin;
+package ltd.fdsa.ds.writer.jdbc;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.model.Result;
 import ltd.fdsa.ds.api.model.Record;
 import ltd.fdsa.ds.api.pipeline.Writer;
-import ltd.fdsa.ds.api.config.Configuration;
-import ltd.fdsa.ds.api.pipeline.impl.AbstractPipeline;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -15,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class JdbcWriter extends AbstractPipeline implements Writer {
+public class JdbcWriter implements Writer {
     String driver;
     String url;
     String user;
@@ -26,27 +24,22 @@ public class JdbcWriter extends AbstractPipeline implements Writer {
     Set<String> scheme;
 
     @Override
-    public Result<String> init(Configuration configuration) {
-        var result = super.init(configuration);
-        if (result.getCode() == 200) {
-            this.url = configuration.getString("url");
-            this.driver = configuration.getString("driver");
-            this.user = configuration.getString("username");
-            this.password = configuration.getString("password");
-            this.sql = configuration.getString("sql");
-            this.table = configuration.getString("table");
-            try {
-                Class.forName(driver);
-                this.conn = DriverManager.getConnection(url, user, password);
-                return Result.success();
-            } catch (SQLException e) {
-                return Result.error(e);
-            } catch (ClassNotFoundException e) {
-                return Result.error(e);
-            }
-
+    public void init() {
+        this.url = this.config().getString("url");
+        this.driver = this.config().getString("driver");
+        this.user = this.config().getString("username");
+        this.password = this.config().getString("password");
+        this.sql = this.config().getString("sql");
+        this.table = this.config().getString("table");
+        try {
+            Class.forName(driver);
+            this.conn = DriverManager.getConnection(url, user, password);
+//                return Result.success();
+        } catch (SQLException e) {
+//                return Result.error(e);
+        } catch (ClassNotFoundException e) {
+//                return Result.error(e);
         }
-        return result;
     }
 
 
@@ -54,9 +47,6 @@ public class JdbcWriter extends AbstractPipeline implements Writer {
     public void collect(Record... records) {
         if (!this.isRunning()) {
             return;
-        }
-        for (var item : this.nextSteps) {
-            item.collect(records);
         }
         StringBuilder sb = new StringBuilder();
         sb.append("insert into ");
@@ -75,11 +65,14 @@ public class JdbcWriter extends AbstractPipeline implements Writer {
 
         try (var stmt = conn.createStatement()) {
             // STEP 4: Execute a query
-            log.info(  "Creating statement...");
+            log.info("Creating statement...");
             stmt.addBatch(sb.toString());
             stmt.executeBatch();
         } catch (Exception se) {
             log.error("JdbcTargetPipeline.executeBatch", se);
+        }
+        for (var item : this.nextSteps()) {
+            item.collect(records);
         }
     }
 }

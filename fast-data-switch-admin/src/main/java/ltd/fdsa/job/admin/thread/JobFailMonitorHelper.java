@@ -9,8 +9,8 @@ import ltd.fdsa.job.admin.jpa.entity.JobInfo;
 import ltd.fdsa.job.admin.jpa.entity.JobLog;
 import ltd.fdsa.job.admin.jpa.service.JobGroupService;
 import ltd.fdsa.job.admin.jpa.service.JobLogService;
-import ltd.fdsa.switcher.core.job.model.Result;
-import ltd.fdsa.switcher.core.util.I18nUtil;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.util.I18nUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

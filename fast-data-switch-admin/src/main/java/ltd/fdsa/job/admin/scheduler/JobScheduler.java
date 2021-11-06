@@ -3,10 +3,10 @@ package ltd.fdsa.job.admin.scheduler;
 
 import ltd.fdsa.job.admin.thread.JobFailMonitorHelper;
 import ltd.fdsa.job.admin.thread.JobTriggerPoolHelper;
-import ltd.fdsa.switcher.core.job.enums.ExecutorBlockStrategyEnum;
-import ltd.fdsa.switcher.core.util.I18nUtil;
-import ltd.fdsa.switcher.core.job.executor.Executor;
-import ltd.fdsa.switcher.core.job.executor.ExecutorImpl;
+import ltd.fdsa.ds.api.job.enums.ExecutorBlockStrategyEnum;
+import ltd.fdsa.ds.api.util.I18nUtil;
+import ltd.fdsa.ds.api.job.executor.Executor;
+import ltd.fdsa.ds.api.job.executor.ExecutorImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

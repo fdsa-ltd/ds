@@ -6,8 +6,8 @@ import ltd.fdsa.job.admin.jpa.entity.SystemUser;
 import ltd.fdsa.job.admin.jpa.service.JobGroupService;
 import ltd.fdsa.job.admin.jpa.service.SystemUserService;
 import ltd.fdsa.job.admin.jpa.service.impl.SystemUserServiceImpl;
-import ltd.fdsa.switcher.core.job.model.Result;
-import ltd.fdsa.switcher.core.util.I18nUtil;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.util.I18nUtil;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

@@ -14,7 +14,7 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <modules>
-        <module>fast-data-switch-core</module>
+        <module>fast-data-switch-api</module>
         <module>fast-data-switch-admin</module>
         <module>fast-data-switch-web</module>
         <module>fast-data-switch-plugin</module>

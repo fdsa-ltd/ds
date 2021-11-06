@@ -2,7 +2,7 @@ package ltd.fdsa.ds.api;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.config.JsonConfig;
+import ltd.fdsa.ds.api.props.DefaultConfig;
 import ltd.fdsa.ds.api.container.PluginManager;
 import ltd.fdsa.ds.api.job.context.JobContext;
 import ltd.fdsa.ds.api.util.FileUtils;
@@ -41,9 +41,8 @@ public class TestDataPipeline {
         // step 3 得到作业所有任务
         var url = this.getClass().getClassLoader().getResource("simple_job.json");
         var json = FileUtils.readFile(url.getFile());
-        final JsonConfig config = new JsonConfig(json);
-        JobContext context = new JobContext();
-        context.init(config);
+        var config = DefaultConfig.getJsonConfig(json);
+        JobContext context = new JobContext(new Metric(), config);
         context.start();
     }
 }

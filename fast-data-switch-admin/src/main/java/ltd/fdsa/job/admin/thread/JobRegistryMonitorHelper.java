@@ -5,7 +5,7 @@ import ltd.fdsa.core.context.ApplicationContextHolder;
 import ltd.fdsa.job.admin.config.JobAdminConfig;
 import ltd.fdsa.job.admin.jpa.entity.JobGroup;
 import ltd.fdsa.job.admin.jpa.entity.JobRegistry;
-import ltd.fdsa.switcher.core.job.enums.RegistryConfig;
+import ltd.fdsa.ds.api.job.enums.RegistryConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

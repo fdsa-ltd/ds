@@ -1,8 +1,8 @@
 package ltd.fdsa.job.admin.resolver;
 
-import ltd.fdsa.switcher.core.exception.FastDataSwitchException;
-import ltd.fdsa.switcher.core.job.model.Result;
-import ltd.fdsa.switcher.core.util.JacksonUtil;
+import ltd.fdsa.ds.api.exception.FastDataSwitchException;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.util.JacksonUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

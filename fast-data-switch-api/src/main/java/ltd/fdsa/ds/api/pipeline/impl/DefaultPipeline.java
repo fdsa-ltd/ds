@@ -6,7 +6,7 @@ import ltd.fdsa.ds.api.model.Record;
 import ltd.fdsa.ds.api.pipeline.Process;
 
 @Slf4j
-public class DefaultPipeline extends AbstractPipeline implements Process {
+public class DefaultPipeline implements Process {
 
     @Override
     public void collect(Record... records) {
@@ -20,10 +20,8 @@ public class DefaultPipeline extends AbstractPipeline implements Process {
                     sb.append('"');
                     sb.append(',').append(' ');
                 }
-                log.info("{}:{}", this.name, sb.toString());
+                log.info("{}:{}", this.toString(), sb.toString());
             }
         }
     }
-
-
 }

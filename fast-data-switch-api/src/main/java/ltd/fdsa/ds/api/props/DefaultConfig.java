@@ -1,5 +1,5 @@
 
-package ltd.fdsa.ds.api.config;
+package ltd.fdsa.ds.api.props;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

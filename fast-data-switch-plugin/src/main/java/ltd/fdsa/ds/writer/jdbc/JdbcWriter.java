@@ -2,11 +2,11 @@ package ltd.fdsa.ds.plugin;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.core.job.model.Result;
-import ltd.fdsa.ds.core.model.Record;
-import ltd.fdsa.ds.core.pipeline.Writer;
-import ltd.fdsa.ds.core.config.Configuration;
-import ltd.fdsa.ds.core.pipeline.impl.AbstractPipeline;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.model.Record;
+import ltd.fdsa.ds.api.pipeline.Writer;
+import ltd.fdsa.ds.api.config.Configuration;
+import ltd.fdsa.ds.api.pipeline.impl.AbstractPipeline;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

@@ -2,13 +2,13 @@ package ltd.fdsa.ds.plugin;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.core.job.enums.HttpCode;
-import ltd.fdsa.ds.core.job.model.Result;
-import ltd.fdsa.ds.core.model.Column;
-import ltd.fdsa.ds.core.model.Record;
-import ltd.fdsa.ds.core.pipeline.Reader;
-import ltd.fdsa.ds.core.config.Configuration;
-import ltd.fdsa.ds.core.pipeline.impl.AbstractPipeline;
+import ltd.fdsa.ds.api.job.enums.HttpCode;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.model.Column;
+import ltd.fdsa.ds.api.model.Record;
+import ltd.fdsa.ds.api.pipeline.Reader;
+import ltd.fdsa.ds.api.config.Configuration;
+import ltd.fdsa.ds.api.pipeline.impl.AbstractPipeline;
 
 import java.sql.*;
 import java.util.ArrayList;

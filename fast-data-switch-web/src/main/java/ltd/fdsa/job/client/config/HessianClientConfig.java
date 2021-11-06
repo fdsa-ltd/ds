@@ -1,0 +1,20 @@
+package ltd.fdsa.job.config;
+
+import ltd.fdsa.ds.api.job.coordinator.Coordinator;
+import ltd.fdsa.job.utils.HessianProxyFactoryUtil;
+import org.springframework.beans.factory.annotation.Value;
+
+public class HessianClientConfig {
+
+    @Value("rpc.host")
+    String url;
+
+    public Coordinator coordinator() {
+        try {
+            return HessianProxyFactoryUtil.getHessianClientBean(Coordinator.class, url);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+}

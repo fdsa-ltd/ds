@@ -38,16 +38,16 @@ public class ExpressionPipeline implements Process {
 
     @Override
     public void init() {
-        String expression = this.config().getString(EXPRESSION_KEY);
+        String expression = this.context().getString(EXPRESSION_KEY);
         if (!cache.containsKey(expression)) {
             cache.put(expression, AviatorEvaluator.compile(expression));
         }
         this.expression = cache.get(expression);
-        this.field = this.config().getString(NAME_KEY);
+        this.field = this.context().getString(NAME_KEY);
     }
 
     @Override
-    public void collect(Record... records) {
+    public void execute(Record... records) {
         // 判断是否在运行
         if (!this.isRunning()) {
             return;
@@ -67,7 +67,7 @@ public class ExpressionPipeline implements Process {
         }
         // 下沉数据
         for (var item : this.nextSteps()) {
-            item.collect(records);
+            item.execute(records);
         }
     }
 

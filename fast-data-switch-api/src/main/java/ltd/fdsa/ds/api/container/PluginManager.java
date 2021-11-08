@@ -2,31 +2,55 @@ package ltd.fdsa.ds.api.container;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
+import com.google.common.io.Files;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.props.Configuration;
-import ltd.fdsa.ds.api.pipeline.Pipeline;
+import ltd.fdsa.ds.api.props.DefaultProps;
+import ltd.fdsa.ds.api.props.Props;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 public class PluginManager {
-    private static volatile PluginManager mgr;
+    private final Map<String, PluginClassLoader> classLoaderCache = new HashMap<String, PluginClassLoader>();
+    private final Map<String, Props> propsCache = new HashMap<String, Props>();
+
     final ObjectMapper mapper = new ObjectMapper();
 
-    private final Map<String, PluginClassLoader> classLoaderCache = new HashMap<String, PluginClassLoader>();
+    public PluginManager(String pluginPath) {
+        if (Strings.isNullOrEmpty(pluginPath)) {
+            throw new IllegalArgumentException("basePath can not be empty!");
+        }
+        File directory = new File(pluginPath);
+        if (!directory.exists()) {
+            throw new IllegalArgumentException("basePath not exists:" + pluginPath);
+        }
+        if (!directory.isDirectory()) {
+            throw new IllegalArgumentException("basePath must be a directory:" + pluginPath);
+        }
+        for (var dir : directory.list()) {
 
-    public static PluginManager getDefaultInstance() {
-        if (mgr == null) {
-            synchronized (PluginManager.class) {
-                if (mgr == null) mgr = new PluginManager();
+            var pluginFile = new File(dir + "/plugins.json");
+            if (!pluginFile.exists()) {
+                continue;
+            }
+            PluginClassLoader classLoader = new PluginClassLoader(dir);
+            try {
+                var content = String.join("\n", Files.readLines(pluginFile, StandardCharsets.UTF_8));
+                var props = DefaultProps.fromJson(content);
+                for (var pluginInfo : props.getConfigurations("")) {
+                    classLoaderCache.put(pluginInfo.get("className"), classLoader);
+                    propsCache.put(pluginInfo.get("className"), pluginInfo);
+                }
+            } catch (IOException e) {
+                log.error("file miss", e);
             }
         }
-        return mgr;
     }
 
     private Class<?> loadPluginClass(String className) {
@@ -42,6 +66,10 @@ public class PluginManager {
         return this.classLoaderCache.get(className);
     }
 
+    public Map<String, Props> getPlugins() {
+        return propsCache;
+    }
+
     public <T> T getInstance(String className, Class<T> required) {
         Class<?> cls = this.loadPluginClass(className);
         if (required.isAssignableFrom(cls)) {
@@ -52,18 +80,6 @@ public class PluginManager {
             }
         }
         throw new IllegalArgumentException("class:" + className + " not sub class of " + required);
-    }
-
-    public Pipeline getInstance(String className, Configuration configuration) {
-        Class<?> cls = this.loadPluginClass(className);
-        if (Pipeline.class.isAssignableFrom(cls)) {
-            try {
-                return PipelineProxyFactory.getProxy(configuration, cls.newInstance());
-            } catch (Exception e) {
-                throw new IllegalArgumentException("can not newInstance class:" + className, e);
-            }
-        }
-        throw new IllegalArgumentException("class:" + className + " not sub class of pipeline");
     }
 
     public <T> T getInstance(String className, Class<T> required, Object... objects) {
@@ -83,35 +99,5 @@ public class PluginManager {
         }
         throw new IllegalArgumentException("class:" + className + " not sub class of " + required);
     }
-
-
-    public synchronized void scan(String pluginPath) {
-        if (Strings.isNullOrEmpty(pluginPath)) {
-            throw new IllegalArgumentException("basePath can not be empty!");
-        }
-        File directory = new File(pluginPath);
-        if (!directory.exists()) {
-            throw new IllegalArgumentException("basePath not exists:" + pluginPath);
-        }
-        if (!directory.isDirectory()) {
-            throw new IllegalArgumentException("basePath must be a directory:" + pluginPath);
-        }
-        for (var dir : directory.list()) {
-
-            var pluginFile = new File(dir + "/plugins.json");
-            if (!pluginFile.exists()) {
-                continue;
-            }
-            PluginClassLoader classLoader = new PluginClassLoader(dir);
-            try {
-                for (var pluginInfo : mapper.readTree(pluginFile)) {
-                    classLoaderCache.put(pluginInfo.get("className").asText(), classLoader);
-                }
-            } catch (IOException e) {
-                log.error("file miss", e);
-            }
-        }
-    }
-
 
 }

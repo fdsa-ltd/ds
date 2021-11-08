@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.props.Configuration;
-import ltd.fdsa.ds.api.props.DefaultConfig;
+import ltd.fdsa.ds.api.props.DefaultProps;
+import ltd.fdsa.ds.api.props.Props;
 import ltd.fdsa.ds.api.util.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +27,7 @@ import java.util.Date;
 @ContextConfiguration(classes = {String.class})
 @Slf4j
 public class ConfigTest {
-    private void doPrint(Configuration config) {
+    private void doPrint(Props config) {
         var name = config.get("name");
         log.info("job.name:{}", name);
         var pipelines = config.getConfigurations("pipelines");
@@ -54,7 +54,7 @@ public class ConfigTest {
                 .friends(list).build();
         ObjectMapper objectMapper = new ObjectMapper();
         var content = objectMapper.writeValueAsString(obj);
-        DefaultConfig config = (DefaultConfig) DefaultConfig.getYamlConfig(content);// YamlConfig(content);
+        DefaultProps config = (DefaultProps) DefaultProps.fromYaml(content);// YamlConfig(content);
         System.out.println("===========props:===========");
         System.out.println(config.toString());
         System.out.println("===========json:===========");
@@ -68,7 +68,7 @@ public class ConfigTest {
         //得到配置
         var url = this.getClass().getClassLoader().getResource("simple_job.yml");
         var content = FileUtils.readFile(url.getFile());
-        var config = DefaultConfig.getYamlConfig(content);// YamlConfig(content);
+        var config = DefaultProps.fromYaml(content);// YamlConfig(content);
         doPrint(config);
     }
 
@@ -77,7 +77,7 @@ public class ConfigTest {
         //得到配置
         var url = this.getClass().getClassLoader().getResource("simple_job.json");
         var content = FileUtils.readFile(url.getFile());
-        var config = DefaultConfig.getJsonConfig(content);
+        var config = DefaultProps.fromJson(content);
         doPrint(config);
     }
 
@@ -86,7 +86,18 @@ public class ConfigTest {
         //得到配置
         var url = this.getClass().getClassLoader().getResource("simple_job.properties");
         var content = FileUtils.readFile(url.getFile());
-        var config = DefaultConfig.getPropsConfig(content);
+        var config = DefaultProps.fromProps(content);
         doPrint(config);
+    }
+
+    @Test
+    public void TestConfig() {
+        //得到配置
+        var url = this.getClass().getClassLoader().getResource("plugins.json");
+        var content = FileUtils.readFile(url.getFile());
+        var config = DefaultProps.fromJson(content);
+        for (var item : config.getConfigurations("")) {
+            log.info(item.toString());
+        }
     }
 }

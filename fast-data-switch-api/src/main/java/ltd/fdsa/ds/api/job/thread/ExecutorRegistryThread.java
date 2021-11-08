@@ -2,9 +2,10 @@ package ltd.fdsa.ds.api.job.thread;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
+import ltd.fdsa.ds.api.container.PluginManager;
 import ltd.fdsa.ds.api.job.coordinator.Coordinator;
 import ltd.fdsa.ds.api.job.enums.RegistryConfig;
-import ltd.fdsa.ds.api.job.model.RegistryParam;
+import ltd.fdsa.ds.api.model.NewService;
 import ltd.fdsa.ds.api.model.Result;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.scheduling.TaskScheduler;
@@ -20,14 +21,16 @@ public class ExecutorRegistryThread implements SmartLifecycle {
     private final Properties properties;
     private final TaskScheduler taskScheduler;
     private final Coordinator client;
+    private final PluginManager pluginManager;
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final AtomicReference<BigInteger> catalogServicesIndex = new AtomicReference<>();
     private ScheduledFuture<?> serviceWatchFuture;
 
-    public ExecutorRegistryThread(Properties properties, Coordinator client, TaskScheduler taskScheduler) {
+    public ExecutorRegistryThread(Properties properties, Coordinator client, TaskScheduler taskScheduler, PluginManager pluginManager) {
         this.properties = properties;
         this.taskScheduler = taskScheduler;
         this.client = client;
+        this.pluginManager = pluginManager;
     }
 
     @Override
@@ -48,22 +51,26 @@ public class ExecutorRegistryThread implements SmartLifecycle {
                 log.warn("project.executor registry config fail, appName is null.");
                 return;
             }
-
+            var list = this.pluginManager.getPlugins();
 
             var address = this.properties.getProperty("address", "");
-            RegistryParam registryParam = new RegistryParam(RegistryConfig.EXECUTOR.name(), appName, address);
+            NewService newService = NewService.builder()
+                    .url(address)
+                    .id(RegistryConfig.EXECUTOR.name())
+                    .name(appName)
+                    .handles(list)
+                    .build();
+
 
             try {
-                Result<String> registryResult = client.registry(registryParam);
-                if (registryResult != null && Result.success().getCode() == registryResult.getCode()) {
-                    registryResult = Result.success();
-                    log.debug("project.registry success, registryParam:{}, registryResult:{}", new Object[]{registryParam, registryResult});
-
+                Result<String> registryResult = client.registry(newService);
+                if (registryResult != null && Result.OK == registryResult.getCode()) {
+                    log.info("project.registry success, registryParam:{}, registryResult:{}", new Object[]{newService, registryResult});
                 } else {
-                    log.info("project.registry fail, registryParam:{},registryResult:{}", new Object[]{registryParam, registryResult});
+                    log.warn("project.registry fail, registryParam:{},registryResult:{}", new Object[]{newService, registryResult});
                 }
             } catch (Exception e) {
-                log.info("project.registry error, registryParam:{}", registryParam, e);
+                log.error("project.registry error, registryParam:{}", newService, e);
             }
 
         } catch (Exception e) {
@@ -93,7 +100,6 @@ public class ExecutorRegistryThread implements SmartLifecycle {
         callback.run();
     }
 
-
     @Override
     public void stop() {
         if (this.running.compareAndSet(true, false)) {
@@ -104,10 +110,13 @@ public class ExecutorRegistryThread implements SmartLifecycle {
                 var appName = this.properties.getProperty("name");
                 var address = this.properties.getProperty("address");
                 try {
-                    RegistryParam registryParam = new RegistryParam(RegistryConfig.EXECUTOR.name(), appName, address);
-
+                    NewService registryParam = NewService.builder()
+                            .id(RegistryConfig.EXECUTOR.name())
+                            .name(appName)
+                            .url(address)
+                            .build();
                     try {
-                        Result<String> registryResult = client.registryRemove(registryParam);
+                        Result<String> registryResult = client.unRegistry(registryParam);
                         if (registryResult != null
                                 && Result.success().getCode() == registryResult.getCode()) {
                             registryResult = Result.success();

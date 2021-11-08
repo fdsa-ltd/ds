@@ -1,19 +1,18 @@
 package ltd.fdsa.job.admin.controller;
 
-import ltd.fdsa.job.admin.route.ExecutorRouteStrategyEnum;
-import ltd.fdsa.job.admin.thread.JobTriggerPoolHelper;
-import ltd.fdsa.job.admin.trigger.TriggerTypeEnum;
-import ltd.fdsa.job.admin.jpa.entity.JobGroup;
-import ltd.fdsa.job.admin.jpa.entity.SystemUser;
-import ltd.fdsa.job.admin.jpa.service.JobGroupService;
-import ltd.fdsa.job.admin.jpa.service.impl.SystemUserServiceImpl;
 import ltd.fdsa.ds.api.exception.FastDataSwitchException;
 import ltd.fdsa.ds.api.job.cron.CronExpression;
 import ltd.fdsa.ds.api.job.enums.ExecutorBlockStrategyEnum;
 import ltd.fdsa.ds.api.model.Result;
 import ltd.fdsa.ds.api.util.DateUtil;
 import ltd.fdsa.ds.api.util.I18nUtil;
-
+import ltd.fdsa.job.admin.jpa.entity.JobGroup;
+import ltd.fdsa.job.admin.jpa.entity.SystemUser;
+import ltd.fdsa.job.admin.jpa.service.JobGroupService;
+import ltd.fdsa.job.admin.jpa.service.impl.SystemUserServiceImpl;
+import ltd.fdsa.job.admin.route.ExecutorRouteStrategyEnum;
+import ltd.fdsa.job.admin.thread.JobTriggerPoolHelper;
+import ltd.fdsa.job.admin.trigger.TriggerTypeEnum;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +22,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * index controller
@@ -34,11 +35,8 @@ public class JobInfoController {
 
     @Resource
     private JobGroupService JobGroupDao;
-//    @Resource
-//    private JobService JobService;
 
-    public static List<JobGroup> filterJobGroupByRole(
-            HttpServletRequest request, List<JobGroup> jobGroupList_all) {
+    public static List<JobGroup> filterJobGroupByRole(HttpServletRequest request, List<JobGroup> jobGroupList_all) {
         List<JobGroup> jobGroupList = new ArrayList<>();
         if (jobGroupList_all != null && jobGroupList_all.size() > 0) {
             SystemUser loginUser = (SystemUser) request.getAttribute(SystemUserServiceImpl.USER_LOGIN_IDENTITY);
@@ -58,10 +56,7 @@ public class JobInfoController {
     }
 
     @RequestMapping
-    public String index(
-            HttpServletRequest request,
-            Model model,
-            @RequestParam(required = false, defaultValue = "-1") int jobGroup) {
+    public String index(HttpServletRequest request, Model model, @RequestParam(required = false, defaultValue = "-1") int jobGroup) {
 
         // 枚举-字典
         model.addAttribute("ExecutorRouteStrategyEnum", ExecutorRouteStrategyEnum.values()); // 路由策略-列表

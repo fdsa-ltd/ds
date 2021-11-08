@@ -1,14 +1,15 @@
 package ltd.fdsa.ds.api.job.handler.impl;
 
-import ltd.fdsa.ds.api.job.handler.JobHandler;
-import ltd.fdsa.ds.api.model.Result;
-
+import lombok.extern.slf4j.Slf4j;
+import ltd.fdsa.ds.api.model.Record;
+import ltd.fdsa.ds.api.pipeline.Process;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Map;
+import java.util.Arrays;
 
-public class MethodJobHandler implements JobHandler {
+@Slf4j
+public class MethodJobHandler implements Process {
 
     private final Object target;
     private final Method method;
@@ -24,38 +25,43 @@ public class MethodJobHandler implements JobHandler {
 
 
     @Override
-    public Result<Object> execute(Map<String, String> context) {
-        try {
-            return Result.success(method.invoke(target, context.values().toArray()));
-        } catch (IllegalAccessException e) {
-            return Result.error(e);
-        } catch (InvocationTargetException e) {
-            return Result.error(e);
-        }
-    }
-
-    @Override
     public void init() {
         if (initMethod != null) {
             try {
                 initMethod.invoke(target);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                log.error("", e);
             } catch (InvocationTargetException e) {
-                e.printStackTrace();
+                log.error("", e);
             }
         }
     }
 
     @Override
-    public void destroy() {
+    public void execute(Record... records) {
+        Arrays.stream(records)
+                .map(m -> m.columnMap())
+                .forEach(context -> {
+                    try {
+                        method.invoke(target, context.values().toArray());
+                    } catch (IllegalAccessException e) {
+                        log.error("", e);
+                    } catch (InvocationTargetException e) {
+                        log.error("", e);
+                    }
+                });
+
+    }
+
+    @Override
+    public void stop() {
         if (destroyMethod != null) {
             try {
                 destroyMethod.invoke(target);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                log.error("", e);
             } catch (InvocationTargetException e) {
-                e.printStackTrace();
+                log.error("", e);
             }
         }
     }

@@ -2,9 +2,8 @@ package ltd.fdsa.ds.api.container;
 
 import com.google.common.base.Strings;
 import lombok.var;
-import ltd.fdsa.ds.api.props.Configuration;
-import ltd.fdsa.ds.api.constant.Constants;
 import ltd.fdsa.ds.api.pipeline.Pipeline;
+import ltd.fdsa.ds.api.props.Props;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.ProxyFactory;
@@ -14,34 +13,37 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PipelineProxyFactory {
-    // step 1 初始化引擎,扫描配置文件中的插件
-    static final PluginManager pluginManager = PluginManager.getDefaultInstance();
+    final PluginManager pluginManager;
 
-    static {
-
-        pluginManager.scan("./plugins");
+    public PipelineProxyFactory(PluginManager pluginManager) {
+        this.pluginManager = pluginManager;
+        // this.pluginManager.scan("./plugins");
     }
-    public static Pipeline getProxy(Configuration config, Object pipeline) {
+
+
+    public Pipeline getProxy(Props config, Object pipeline) {
+        if (pipeline == null) {
+            throw new IllegalArgumentException();
+        }
         var interceptor = new PipelineInterceptor(config, pipeline);
         return ProxyFactory.getProxy(Pipeline.class, interceptor);
     }
 
-    static class PipelineInterceptor implements MethodInterceptor {
-        private final Configuration config;
+    class PipelineInterceptor implements MethodInterceptor {
+        private final Props context;
         private final Object pipeline;
         private final String name;
-        private final PluginType type;
+
         private final String description;
         protected final AtomicBoolean running = new AtomicBoolean(false);
         protected final List<Pipeline> nextSteps = new LinkedList<>();
 
-        public PipelineInterceptor(Configuration config, Object pipeline) {
-            this.config = config;
+        public PipelineInterceptor(Props config, Object pipeline) {
+            this.context = config;
             this.pipeline = pipeline;
-            this.name = this.config.getString(Constants.JOB_NAME, Constants.JOB_NAME_DEFAULT);
-            this.type = PluginType.valueOf(this.config.getString(Constants.PIPELINE_TYPE, Constants.PIPELINE_TYPE_DEFAULT));
-            this.description = this.config.getString(Constants.JOB_DESCRIPTION, "");
-            var configurations = this.config.getConfigurations(Constants.PIPELINE_NODES);
+            this.name = this.context.getString("name");
+            this.description = this.context.getString("description");
+            var configurations = this.context.getConfigurations("pipelines");
             if (configurations != null && configurations.length > 0) {
                 loadPipelines(configurations);
             }
@@ -53,8 +55,8 @@ public class PipelineProxyFactory {
             var method = methodInvocation.getMethod();
             var arguments = methodInvocation.getArguments();
             switch (method.getName()) {
-                case "config":
-                    return this.config;
+                case "context":
+                    return this.context;
                 case "start":
                     if (this.running.compareAndSet(false, true)) {
                         for (var pipeline : this.nextSteps) {
@@ -82,19 +84,19 @@ public class PipelineProxyFactory {
         }
 
 
-        private void loadPipelines(Configuration[] configurations) {
+        private void loadPipelines(Props[] configurations) {
             for (var configuration : configurations) {
-                var className = configuration.get(Constants.PIPELINE_CLASS_NAME);
+                var className = configuration.get("class");
                 if (Strings.isNullOrEmpty(className)) {
                     continue;
                 }
                 try (ClassLoaderSwapper classLoaderSwapper = ClassLoaderSwapper.createClassLoaderSwapper()) {
                     classLoaderSwapper.newClassLoader(pluginManager.getClassLoader(className));
-                    var pipeline =pluginManager.getInstance(className, Pipeline.class);
+                    var pipeline = getProxy(configuration, pluginManager.getInstance(className, Pipeline.class));
                     if (pipeline == null) {
                         continue;
                     }
-                    configuration.set(Constants.JOB_NAME, this.name + "." + configuration.getString(Constants.JOB_NAME, Constants.JOB_NAME_DEFAULT));
+                    configuration.set("name", this.name + "." + configuration.getString("name"));
                     pipeline.init();
                     this.nextSteps.add(pipeline);
                     classLoaderSwapper.restoreClassLoader();

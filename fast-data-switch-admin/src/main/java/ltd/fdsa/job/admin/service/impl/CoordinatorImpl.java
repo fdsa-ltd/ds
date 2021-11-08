@@ -1,23 +1,23 @@
 package ltd.fdsa.job.admin.service.impl;
 
 
-import ltd.fdsa.job.admin.thread.JobTriggerPoolHelper;
-import ltd.fdsa.job.admin.trigger.TriggerTypeEnum;
+import lombok.extern.slf4j.Slf4j;
+import lombok.var;
+import ltd.fdsa.ds.api.job.coordinator.Coordinator;
+import ltd.fdsa.ds.api.job.enums.HttpCode;
+import ltd.fdsa.ds.api.job.model.HandleCallbackParam;
+import ltd.fdsa.ds.api.model.NewService;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.props.DefaultProps;
+import ltd.fdsa.ds.api.util.I18nUtil;
+import ltd.fdsa.job.admin.context.CoordinatorContext;
 import ltd.fdsa.job.admin.jpa.entity.JobInfo;
 import ltd.fdsa.job.admin.jpa.entity.JobLog;
 import ltd.fdsa.job.admin.jpa.service.JobGroupService;
 import ltd.fdsa.job.admin.jpa.service.JobInfoService;
 import ltd.fdsa.job.admin.jpa.service.JobLogService;
-import ltd.fdsa.job.admin.jpa.service.JobRegistryService;
-import ltd.fdsa.ds.api.job.coordinator.Coordinator;
-import ltd.fdsa.ds.api.job.enums.HttpCode;
-import ltd.fdsa.ds.api.job.handler.JobHandler;
-import ltd.fdsa.ds.api.model.Result;
-import ltd.fdsa.ds.api.util.I18nUtil;
-import ltd.fdsa.ds.api.job.model.HandleCallbackParam;
-import ltd.fdsa.ds.api.job.model.RegistryParam;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ltd.fdsa.job.admin.thread.JobTriggerPoolHelper;
+import ltd.fdsa.job.admin.trigger.TriggerTypeEnum;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -25,29 +25,43 @@ import javax.annotation.Resource;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
+@Slf4j
 public class CoordinatorImpl implements Coordinator {
-    private static Logger logger = LoggerFactory.getLogger(CoordinatorImpl.class);
+
 
     @Resource
     public JobLogService JobLogDao;
     @Resource
     private JobInfoService JobInfoDao;
-    @Resource
-    private JobRegistryService JobRegistryDao;
+
     @Resource
     private JobGroupService JobGroupDao;
+    @Resource
+    private CoordinatorContext context;
+
+    @Override
+    public Result<String> createProcess(Map<String, String> config) {
+        var props = DefaultProps.fromMaps(config);
+        var clazz = props.get("class");
+        var name = props.get("name");
+        var list = context.getExecutorsByProcess(clazz);
+        var size = props.getInt("size", 1);
+        if (size > list.size()) {
+            size = list.size();
+        }
+        for (var i = 0; i < size; i++) {
+            list.get(i).init(0L, config);
+        }
+        return null;
+    }
 
     @Override
     public Result<String> callback(List<HandleCallbackParam> callbackParamList) {
         for (HandleCallbackParam handleCallbackParam : callbackParamList) {
             Result<String> callbackResult = callback(handleCallbackParam);
-            logger.debug(
-                    ">>>>>>>>> JobApiController.callback {}, handleCallbackParam={}, callbackResult={}",
-                    (callbackResult.getCode() == JobHandler.SUCCESS.getCode() ? "success" : "fail"),
-                    handleCallbackParam,
-                    callbackResult);
         }
 
         return Result.success();
@@ -65,7 +79,7 @@ public class CoordinatorImpl implements Coordinator {
 
         // trigger success, to trigger child job
         String callbackMsg = null;
-        if (JobHandler.SUCCESS.getCode() == handleCallbackParam.getExecuteResult().getCode()) {
+        if (handleCallbackParam.getExecuteResult().getCode() == 200) {
             JobInfo JobInfo = JobInfoDao.findById(log.getJobId()).get();
             if (JobInfo != null
                     && JobInfo.getChildJobId() != null
@@ -142,58 +156,36 @@ public class CoordinatorImpl implements Coordinator {
     }
 
     @Override
-    public Result<String> registry(RegistryParam registryParam) {
-
+    public Result<String> registry(NewService newService) {
         // valid
-        if (!StringUtils.hasText(registryParam.getRegistryGroup())
-                || !StringUtils.hasText(registryParam.getRegistryKey())
-                || !StringUtils.hasText(registryParam.getRegistryValue())) {
-            return Result.fail(5000, "Illegal Argument.");
+        if (!StringUtils.hasText(newService.getName())
+                || !StringUtils.hasText(newService.getId())
+                || !StringUtils.hasText(newService.getValue())) {
+            return Result.fail(500, "Illegal Argument.");
         }
-
-//        int ret =
-//                JobRegistryDao.registryUpdate(
-//                        registryParam.getRegistryGroup(),
-//                        registryParam.getRegistryKey(),
-//                        registryParam.getRegistryValue(),
-//                        new Date());
-//        if (ret < 1) {
-//            JobRegistryDao.registrySave(
-//                    registryParam.getRegistryGroup(),
-//                    registryParam.getRegistryKey(),
-//                    registryParam.getRegistryValue(),
-//                    new Date());
-//
-//            // fresh
-//            freshGroupRegistryInfo(registryParam);
-//        }
-        return Result.success();
+        // process
+        if (this.context.registry(newService) != null) {
+            return Result.success();
+        }
+        // return
+        return Result.fail(500, "failed");
     }
 
     @Override
-    public Result<String> registryRemove(RegistryParam registryParam) {
+    public Result<String> unRegistry(NewService newService) {
 
         // valid
-        if (!StringUtils.hasText(registryParam.getRegistryGroup())
-                || !StringUtils.hasText(registryParam.getRegistryKey())
-                || !StringUtils.hasText(registryParam.getRegistryValue())) {
+        if (!StringUtils.hasText(newService.getName())
+                || !StringUtils.hasText(newService.getId())
+                || !StringUtils.hasText(newService.getValue())) {
             return Result.fail(5000, "Illegal Argument.");
         }
-
-//        int ret =
-//                JobRegistryDao.registryDelete(
-//                        registryParam.getRegistryGroup(),
-//                        registryParam.getRegistryKey(),
-//                        registryParam.getRegistryValue());
-//        if (ret > 0) {
-//
-//            // fresh
-//            freshGroupRegistryInfo(registryParam);
-//        }
-        return Result.success();
+        // process
+        if (this.context.unRegistry(newService) != null) {
+            return Result.success();
+        }
+        // return
+        return Result.fail(500, "failed");
     }
 
-    private void freshGroupRegistryInfo(RegistryParam registryParam) {
-        // Under consideration, prevent affecting core tables
-    }
 }

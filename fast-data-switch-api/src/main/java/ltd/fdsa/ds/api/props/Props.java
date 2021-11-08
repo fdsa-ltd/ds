@@ -2,16 +2,16 @@ package ltd.fdsa.ds.api.props;
 
 import lombok.var;
 
-public interface Configuration {
+public interface Props {
     String get(String path);
 
-    Configuration[] getConfigurations(String path);
+    Props[] getConfigurations(String path);
 
-    Configuration getConfiguration(String path);
+    Props getConfiguration(String path);
 
     void set(String path, String value);
 
-    Configuration clone();
+    Props clone();
 
     /**
      * 根据用户提供的json path，寻址String对象，如果对象不存在，返回默认字符串

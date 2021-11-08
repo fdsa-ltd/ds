@@ -1,7 +1,7 @@
 package ltd.fdsa.ds.api.pipeline;
 
 
-import ltd.fdsa.ds.api.props.Configuration;
+import ltd.fdsa.ds.api.props.Props;
 import ltd.fdsa.ds.api.model.Record;
 
 import java.util.Collections;
@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface Pipeline {
-    default Configuration config() {
+
+    default Props context() {
         return null;
     }
 
@@ -21,8 +22,8 @@ public interface Pipeline {
     default void start() {
     }
 
-    // collect
-    void collect(Record... records);
+    // execute
+    void execute(Record... records);
 
     // output
     default Map<String, String> scheme() {

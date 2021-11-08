@@ -26,11 +26,11 @@ public class JdbcReader implements Reader {
     @Override
     public void init() {
         try {
-            this.url = this.config().getString("url");
-            this.driver = this.config().getString("driver");
-            this.user = this.config().getString("username");
-            this.password = this.config().getString("password");
-            this.sql = this.config().getString("sql");
+            this.url = this.context().getString("url");
+            this.driver = this.context().getString("driver");
+            this.user = this.context().getString("username");
+            this.password = this.context().getString("password");
+            this.sql = this.context().getString("sql");
             this.scheme = new HashMap<>(64);
             Class.forName(driver);
             this.conn = DriverManager.getConnection(url, user, password);
@@ -55,10 +55,10 @@ public class JdbcReader implements Reader {
     }
 
     @Override
-    public void collect(Record... records) {
+    public void execute(Record... records) {
         if (this.isRunning()) {
             for (var item : this.nextSteps()) {
-                item.collect(records);
+                item.execute(records);
             }
         }
     }
@@ -85,7 +85,7 @@ public class JdbcReader implements Reader {
             } catch (SQLException e) {
                 log.error("JdbcSourcePipeline.process", e);
             }
-            this.collect(list.toArray(new Record[0]));
+            this.execute(list.toArray(new Record[0]));
         }
     }
 }

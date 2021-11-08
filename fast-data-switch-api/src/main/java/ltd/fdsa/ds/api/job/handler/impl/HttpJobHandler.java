@@ -1,77 +1,80 @@
 package ltd.fdsa.ds.api.job.handler.impl;
 
-import ltd.fdsa.ds.api.job.handler.JobHandler;
 import ltd.fdsa.ds.api.job.log.JobLogger;
-import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.model.Record;
+import ltd.fdsa.ds.api.pipeline.Process;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Map;
+import java.util.Arrays;
 
-public class HttpJobHandler implements JobHandler {
+public class HttpJobHandler implements Process {
 
 
     @Override
-    public Result<Object> execute(Map<String, String> context) {
+    public void execute(Record... records) {
 
-        // request
-        HttpURLConnection connection = null;
-        BufferedReader bufferedReader = null;
-        try {
-            // connection
-            URL realUrl = new URL(context.get("url"));
-            connection = (HttpURLConnection) realUrl.openConnection();
 
-            // connection setting
-            connection.setRequestMethod("GET");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            connection.setUseCaches(false);
-            connection.setReadTimeout(5 * 1000);
-            connection.setConnectTimeout(3 * 1000);
-            connection.setRequestProperty("connection", "Keep-Alive");
-            connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-            connection.setRequestProperty("Accept-Charset", "application/json;charset=UTF-8");
+        Arrays.stream(records).map(record -> record.columnMap().get("cmd").getValue().toString()).forEach(
+                url -> {
+                    // request
+                    HttpURLConnection connection = null;
+                    BufferedReader bufferedReader = null;
+                    try {
+                        // connection
+                        URL realUrl = new URL(url);
+                        connection = (HttpURLConnection) realUrl.openConnection();
 
-            // do connection
-            connection.connect();
+                        // connection setting
+                        connection.setRequestMethod("GET");
+                        connection.setDoOutput(true);
+                        connection.setDoInput(true);
+                        connection.setUseCaches(false);
+                        connection.setReadTimeout(5 * 1000);
+                        connection.setConnectTimeout(3 * 1000);
+                        connection.setRequestProperty("connection", "Keep-Alive");
+                        connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+                        connection.setRequestProperty("Accept-Charset", "application/json;charset=UTF-8");
 
-            // Map<String, List<String>> map = connection.getHeaderFields();
+                        // do connection
+                        connection.connect();
 
-            // valid StatusCode
-            int statusCode = connection.getResponseCode();
-            if (statusCode != 200) {
-                throw new RuntimeException("Http Request StatusCode(" + statusCode + ") Invalid.");
-            }
 
-            // result
-            bufferedReader =
-                    new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-            StringBuilder result = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                result.append(line);
-            }
-            String responseMsg = result.toString();
+                        // valid StatusCode
+                        int statusCode = connection.getResponseCode();
+                        if (statusCode != 200) {
+                            throw new RuntimeException("Http Request StatusCode(" + statusCode + ") Invalid.");
+                        }
 
-            JobLogger.log(responseMsg);
-            return SUCCESS;
-        } catch (Exception e) {
-            JobLogger.log(e);
-            return FAIL;
-        } finally {
-            try {
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-                if (connection != null) {
-                    connection.disconnect();
-                }
-            } catch (Exception e2) {
-                JobLogger.log(e2);
-            }
-        }
+                        // result
+                        bufferedReader =
+                                new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+                        StringBuilder result = new StringBuilder();
+                        String line;
+                        while ((line = bufferedReader.readLine()) != null) {
+                            result.append(line);
+                        }
+                        String responseMsg = result.toString();
+
+                        JobLogger.log(responseMsg);
+
+                    } catch (Exception e) {
+                        JobLogger.log(e);
+
+                    } finally {
+                        try {
+                            if (bufferedReader != null) {
+                                bufferedReader.close();
+                            }
+                            if (connection != null) {
+                                connection.disconnect();
+                            }
+                        } catch (Exception e2) {
+                            JobLogger.log(e2);
+                        }
+                    }
+                });
     }
 }

@@ -9,7 +9,7 @@ import javax.persistence.*;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Table(name = "job_info")
+@Table(name = "t_job")
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 public class JobInfo extends BaseEntity<Integer> {

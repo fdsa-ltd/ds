@@ -13,6 +13,7 @@ import ltd.fdsa.ds.api.job.enums.ResultCode;
 @Data
 //@ApiModel("响应结果")
 public class Result<T> {
+    public final static int OK = 200;
     /**
      * 状态码
      */
@@ -42,7 +43,6 @@ public class Result<T> {
             return new Result<T>(HttpCode.OK.getCode(), HttpCode.OK.getMessage(), data[0]);
         }
         return new Result<T>(HttpCode.OK.getCode(), HttpCode.OK.getMessage(), null);
-
     }
 
     public static <T> Result<T> fail(int code, String message, T... data) {

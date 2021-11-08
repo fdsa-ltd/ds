@@ -1,17 +1,13 @@
 package ltd.fdsa.ds.api.job.handler.impl;
 
-import ltd.fdsa.ds.api.job.handler.JobHandler;
 import ltd.fdsa.ds.api.job.log.JobLogger;
-import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.model.Record;
+import ltd.fdsa.ds.api.pipeline.Process;
 import ltd.fdsa.ds.api.util.ShardingUtil;
 
-
-import java.util.Map;
-
-public class ShardingJobHandler implements JobHandler {
-
+public class ShardingJobHandler implements Process {
     @Override
-    public Result<Object> execute(Map<String, String> context) {
+    public void execute(Record... records) {
         // 分片参数
         ShardingUtil.ShardingVO shardingVO = ShardingUtil.getShardingVo();
         JobLogger.log("分片参数：当前分片序号 = {}, 总分片数 = {}", shardingVO.getIndex(), shardingVO.getTotal());
@@ -24,7 +20,5 @@ public class ShardingJobHandler implements JobHandler {
                 JobLogger.log("第 {} 片, 忽略", i);
             }
         }
-
-        return SUCCESS;
     }
 }

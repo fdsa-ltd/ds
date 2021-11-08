@@ -19,15 +19,15 @@ public class HttpChannel implements Channel {
     @Override
     public void init() {
         // Send Job Config to Cluster
-        var configurations = this.config().getConfigurations("pipelines");
+        var configurations = this.context().getConfigurations("pipelines");
         if (configurations != null && configurations.length > 0) {
             // invoke rpc to init
-            client.post("/api/job/init", RequestBody.create(MediaType.get("application/json"), this.config().toString()));
+            client.post("/api/job/init", RequestBody.create(MediaType.get("application/json"), this.context().toString()));
         }
     }
 
     @Override
-    public void collect(Record... records) {
+    public void execute(Record... records) {
         if (!this.isRunning()) {
             return;
         }

@@ -2,16 +2,11 @@ package ltd.fdsa.ds.api.job.executor;
 
 
 import lombok.extern.slf4j.Slf4j;
-import ltd.fdsa.ds.api.job.coordinator.Coordinator;
-import ltd.fdsa.ds.api.job.handler.JobHandler;
 import ltd.fdsa.ds.api.job.log.JobFileAppender;
 import ltd.fdsa.ds.api.job.thread.JobThread;
 import ltd.fdsa.ds.api.job.thread.TriggerCallbackThread;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.remoting.caucho.HessianServiceExporter;
+import ltd.fdsa.ds.api.pipeline.Process;
 
-import javax.annotation.Resource;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class JobExecutor {
     // ---------------------- job handler repository ----------------------
-    private static ConcurrentMap<String, JobHandler> jobHandlerRepository = new ConcurrentHashMap<String, JobHandler>();
+    private static ConcurrentMap<String, Process> jobProcessRepository = new ConcurrentHashMap<String, Process>();
     // ---------------------- job thread repository ----------------------
     private static ConcurrentMap<Integer, JobThread> jobThreadRepository = new ConcurrentHashMap<Integer, JobThread>();
     private final String appName;
@@ -42,20 +37,18 @@ public class JobExecutor {
         this.logRetentionDays = Integer.parseInt(properties.getProperty("log_days", "7"));
         this.accessToken = properties.getProperty("access_token", "");
     }
-
-
     /**
      * 注册本地Job Handler
      */
-    public static JobHandler registerJobHandler(String name, JobHandler jobHandler) {
-        return jobHandlerRepository.put(name, jobHandler);
+    public static Process registerJobHandler(String name, Process jobHandler) {
+        return jobProcessRepository.put(name, jobHandler);
     }
 
-    public static JobHandler loadJobHandler(String name) {
-        return jobHandlerRepository.get(name);
+    public static Process loadJobHandler(String name) {
+        return jobProcessRepository.get(name);
     }
 
-    public static JobThread startJob(int jobId, JobHandler handler, String... reasons) {
+    public static JobThread startJob(int jobId, Process handler, String... reasons) {
         //如果job已经运行，需要停止运行
         stopJob(jobId, reasons);
         JobThread newJobThread = new JobThread(jobId, handler);
@@ -75,7 +68,6 @@ public class JobExecutor {
         JobThread jobThread = jobThreadRepository.get(jobId);
         return jobThread;
     }
-
 
     public void start() throws Exception {
         // init logpath
@@ -100,7 +92,7 @@ public class JobExecutor {
             }
             jobThreadRepository.clear();
         }
-        jobHandlerRepository.clear();
+        jobProcessRepository.clear();
 
         // destory TriggerCallbackThread
         TriggerCallbackThread.getInstance().toStop();

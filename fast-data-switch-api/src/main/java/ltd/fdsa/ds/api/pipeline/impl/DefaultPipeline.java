@@ -9,7 +9,7 @@ import ltd.fdsa.ds.api.pipeline.Process;
 public class DefaultPipeline implements Process {
 
     @Override
-    public void collect(Record... records) {
+    public void execute(Record... records) {
         if (this.isRunning()) {
             for (var map : records) {
                 StringBuilder sb = new StringBuilder();

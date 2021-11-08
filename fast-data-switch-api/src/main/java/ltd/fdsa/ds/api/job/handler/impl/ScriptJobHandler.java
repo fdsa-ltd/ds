@@ -1,35 +1,33 @@
 package ltd.fdsa.ds.api.job.handler.impl;
 
 import lombok.var;
-import ltd.fdsa.ds.api.job.handler.JobHandler;
 import ltd.fdsa.ds.api.job.log.JobFileAppender;
-import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.model.Record;
+import ltd.fdsa.ds.api.pipeline.Process;
 import ltd.fdsa.ds.api.util.ScriptUtil;
 
-
 import java.io.IOException;
-import java.util.Map;
+import java.util.Arrays;
 
-public class ScriptJobHandler implements JobHandler {
+public class ScriptJobHandler implements Process {
+
 
     @Override
-    public Result<Object> execute(Map<String, String> context)   {
-        // log file
-        String logFileName = JobFileAppender.contextHolder.get();
-        var cmd = context.get("cmd");
-        var scriptFileName = context.get("scriptFileName");
-        var scriptParams = context.get("scriptParams");
-        int exitValue = 0;
-        try {
-            exitValue = ScriptUtil.execToFile(cmd, scriptFileName, logFileName, scriptParams);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void execute(Record... records) {
+        Arrays.stream(records).map(m -> m.columnMap()).forEach(context -> {
 
-        if (exitValue == 0) {
-            return Result.success();
-        } else {
-            return Result.fail(JobHandler.FAIL.getCode(), "script exit value(" + exitValue + ") is failed");
-        }
+            // log file
+            String logFileName = JobFileAppender.contextHolder.get();
+            var cmd = context.get("cmd").getValue().toString();
+            var scriptFileName = context.get("scriptFileName").getValue().toString();
+            var scriptParams = context.get("scriptParams").getValue().toString();
+
+            try {
+                ScriptUtil.execToFile(cmd, scriptFileName, logFileName, scriptParams);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
     }
 }

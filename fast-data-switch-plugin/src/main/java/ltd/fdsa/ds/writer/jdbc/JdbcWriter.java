@@ -25,12 +25,12 @@ public class JdbcWriter implements Writer {
 
     @Override
     public void init() {
-        this.url = this.config().getString("url");
-        this.driver = this.config().getString("driver");
-        this.user = this.config().getString("username");
-        this.password = this.config().getString("password");
-        this.sql = this.config().getString("sql");
-        this.table = this.config().getString("table");
+        this.url = this.context().getString("url");
+        this.driver = this.context().getString("driver");
+        this.user = this.context().getString("username");
+        this.password = this.context().getString("password");
+        this.sql = this.context().getString("sql");
+        this.table = this.context().getString("table");
         try {
             Class.forName(driver);
             this.conn = DriverManager.getConnection(url, user, password);
@@ -44,7 +44,7 @@ public class JdbcWriter implements Writer {
 
 
     @Override
-    public void collect(Record... records) {
+    public void execute(Record... records) {
         if (!this.isRunning()) {
             return;
         }
@@ -72,7 +72,7 @@ public class JdbcWriter implements Writer {
             log.error("JdbcTargetPipeline.executeBatch", se);
         }
         for (var item : this.nextSteps()) {
-            item.collect(records);
+            item.execute(records);
         }
     }
 }

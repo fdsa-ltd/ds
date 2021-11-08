@@ -1,55 +1,48 @@
 package ltd.fdsa.ds.api.job.handler.impl;
 
-import ltd.fdsa.ds.api.job.handler.JobHandler;
 import ltd.fdsa.ds.api.job.log.JobLogger;
-import ltd.fdsa.ds.api.model.Result;
-
+import ltd.fdsa.ds.api.model.Record;
+import ltd.fdsa.ds.api.pipeline.Process;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Map;
+import java.util.Arrays;
 
-public class CommandJobHandler implements JobHandler {
+public class CommandJobHandler implements Process {
+
     @Override
-    public Result<Object> execute(Map<String, String> context) {
-        String command = context.get("cmd");
-        int exitValue = -1;
+    public void execute(Record... records) {
+        Arrays.stream(records).map(record -> record.columnMap().get("cmd").getValue().toString()).forEach(
+                command -> {
+                    BufferedReader bufferedReader = null;
+                    try {
+                        // command process
+                        java.lang.Process process = Runtime.getRuntime().exec(command);
+                        BufferedInputStream bufferedInputStream = new BufferedInputStream(process.getInputStream());
+                        bufferedReader = new BufferedReader(new InputStreamReader(bufferedInputStream));
 
-        BufferedReader bufferedReader = null;
-        try {
-            // command process
-            Process process = Runtime.getRuntime().exec(command);
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(process.getInputStream());
-            bufferedReader = new BufferedReader(new InputStreamReader(bufferedInputStream));
+                        // command log
+                        String line;
+                        while ((line = bufferedReader.readLine()) != null) {
+                            JobLogger.log(line);
+                        }
 
-            // command log
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                JobLogger.log(line);
-            }
-
-            // command exit
-            process.waitFor();
-            exitValue = process.exitValue();
-        } catch (Exception e) {
-            JobLogger.log(e);
-        } finally {
-            if (bufferedReader != null) {
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                        // command exit
+                        process.waitFor();
+                    } catch (Exception e) {
+                        JobLogger.log(e);
+                    } finally {
+                        if (bufferedReader != null) {
+                            try {
+                                bufferedReader.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
                 }
-            }
-        }
-
-        if (exitValue == 0) {
-            return SUCCESS;
-        } else {
-
-            return Result.fail(FAIL.getCode(), "command exit value(" + exitValue + ") is failed");
-        }
+        );
     }
 }

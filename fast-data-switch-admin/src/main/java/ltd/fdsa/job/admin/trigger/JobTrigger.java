@@ -1,20 +1,20 @@
 package ltd.fdsa.job.admin.trigger;
 
+import lombok.var;
 import ltd.fdsa.core.context.ApplicationContextHolder;
-import ltd.fdsa.job.admin.route.ExecutorRouteStrategyEnum;
-import ltd.fdsa.job.admin.scheduler.JobScheduler;
+import ltd.fdsa.ds.api.job.enums.ExecutorBlockStrategyEnum;
+import ltd.fdsa.ds.api.job.executor.Executor;
+import ltd.fdsa.ds.api.job.model.TriggerParam;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.util.I18nUtil;
 import ltd.fdsa.job.admin.jpa.entity.JobGroup;
 import ltd.fdsa.job.admin.jpa.entity.JobInfo;
 import ltd.fdsa.job.admin.jpa.entity.JobLog;
-import ltd.fdsa.ds.api.job.enums.ExecutorBlockStrategyEnum;
-import ltd.fdsa.ds.api.job.executor.Executor;
-import ltd.fdsa.ds.api.model.Result;
-import ltd.fdsa.ds.api.job.model.TriggerParam;
 import ltd.fdsa.job.admin.jpa.service.JobGroupService;
 import ltd.fdsa.job.admin.jpa.service.JobInfoService;
 import ltd.fdsa.job.admin.jpa.service.JobLogService;
-import ltd.fdsa.ds.api.util.I18nUtil;
-
+import ltd.fdsa.job.admin.route.ExecutorRouteStrategyEnum;
+import ltd.fdsa.job.admin.scheduler.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -234,8 +234,11 @@ public class JobTrigger {
         Result<String> runResult = null;
         try {
             Executor executorBiz = JobScheduler.getExecutorClient(address);
-            //todo triggerParam.getExecutorParams()
-            runResult = executorBiz.run(triggerParam.getJobId(), triggerParam.getExecutorHandler(), triggerParam.getExecutorBlockStrategy(), triggerParam.getExecutorTimeout(), null);
+            var config = triggerParam.getExecutorParams();
+            config.put("class", triggerParam.getExecutorHandler());
+            config.put("strategy", triggerParam.getExecutorBlockStrategy());
+            config.put("timeout", triggerParam.getExecutorTimeout() + "");
+            runResult = executorBiz.run(triggerParam.getJobId(), config);
         } catch (Exception ex) {
             runResult = Result.error(ex);
         }

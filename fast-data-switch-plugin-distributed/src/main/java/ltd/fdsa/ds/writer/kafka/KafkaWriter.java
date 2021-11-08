@@ -21,16 +21,16 @@ public class KafkaWriter implements Writer {
 
     @Override
     public void init() {
-        this.topics = Arrays.asList(this.config().get(TOPICS_CONFIG).split(","));
+        this.topics = Arrays.asList(this.context().get(TOPICS_CONFIG).split(","));
         Properties properties = new Properties();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.config().get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG));
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.context().get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG));
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         this.kafkaProducer = new KafkaProducer<String, String>(properties);
     }
 
     @Override
-    public void collect(Record... records) {
+    public void execute(Record... records) {
         if (!this.isRunning()) {
             return;
         }
@@ -42,7 +42,7 @@ public class KafkaWriter implements Writer {
                     });
         }
         for (var item : this.nextSteps()) {
-            item.collect(records);
+            item.execute(records);
         }
     }
 }

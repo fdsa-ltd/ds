@@ -25,22 +25,22 @@ public class KafkaReader implements Reader {
 
     @Override
     public void init() {
-        this.topics = Arrays.asList(this.config().get(TOPICS_CONFIG).split(","));
-        this.duration = Duration.ofMillis(this.config().getLong(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 100));
+        this.topics = Arrays.asList(this.context().get(TOPICS_CONFIG).split(","));
+        this.duration = Duration.ofMillis(this.context().getLong(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 100));
         Properties properties = new Properties();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, this.config().get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG));
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, this.context().get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG));
         //kafka地址，多个地址用逗号分割
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringSerializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, this.config().get(ConsumerConfig.GROUP_ID_CONFIG));
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, this.context().get(ConsumerConfig.GROUP_ID_CONFIG));
         this.kafkaConsumer = new KafkaConsumer<String, String>(properties);
     }
 
     @Override
-    public void collect(Record... records) {
+    public void execute(Record... records) {
         if (this.isRunning()) {
             for (var item : this.nextSteps()) {
-                item.collect(records);
+                item.execute(records);
             }
         }
     }
@@ -61,7 +61,7 @@ public class KafkaReader implements Reader {
                         if (!Strings.isNullOrEmpty(value)) {
                             item.add(new Column("value", value));
                         }
-                        this.collect(item);
+                        this.execute(item);
                     });
         }
     }

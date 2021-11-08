@@ -19,7 +19,7 @@ public class DisruptorChannel implements Channel {
 
     @Override
     public void init() {
-        int bufferSize = this.config().getInt("bufferSize", 1024);
+        int bufferSize = this.context().getInt("bufferSize", 1024);
         // Construct the Disruptor
         this.disruptor = new Disruptor<Record>(Record::new, bufferSize, Executors.defaultThreadFactory());
     }
@@ -33,7 +33,7 @@ public class DisruptorChannel implements Channel {
     }
 
     @Override
-    public void collect(Record... records) {
+    public void execute(Record... records) {
         for (var record : records) {
             this.disruptor.publishEvent(new RecordSender(record));
         }
@@ -46,7 +46,7 @@ public class DisruptorChannel implements Channel {
         @Override
         public void onEvent(Record record, long l, boolean b) throws Exception {
             for (var sink : sinks) {
-                sink.collect(record);
+                sink.execute(record);
             }
         }
     }

@@ -176,7 +176,7 @@ public class JobLogController {
         Result<String> runResult = null;
         try {
             Executor executorBiz = JobScheduler.getExecutorClient(log.getExecutorAddress());
-            runResult = executorBiz.kill(jobInfo.getId());
+            runResult = executorBiz.stop(jobInfo.getId());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             runResult = Result.fail(500, e.getMessage());

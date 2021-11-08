@@ -26,11 +26,11 @@ public class JsonPipeline implements Process {
 
     @Override
     public void init() {
-        this.fields = this.config().get(FIELDS_KEY).split(",");
+        this.fields = this.context().get(FIELDS_KEY).split(",");
     }
 
     @Override
-    public void collect(Record... records) {
+    public void execute(Record... records) {
         // 判断是否在运行
         if (!this.isRunning()) {
             return;
@@ -47,7 +47,7 @@ public class JsonPipeline implements Process {
         }
         // 下沉数据
         for (var item : this.nextSteps()) {
-            item.collect(records);
+            item.execute(records);
         }
     }
 

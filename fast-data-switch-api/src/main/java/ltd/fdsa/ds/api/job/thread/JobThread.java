@@ -1,15 +1,17 @@
 package ltd.fdsa.ds.api.job.thread;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.var;
 import ltd.fdsa.ds.api.job.executor.JobExecutor;
-import ltd.fdsa.ds.api.job.handler.JobHandler;
 import ltd.fdsa.ds.api.job.log.JobFileAppender;
 import ltd.fdsa.ds.api.job.log.JobLogger;
 import ltd.fdsa.ds.api.job.model.HandleCallbackParam;
-import ltd.fdsa.ds.api.model.Result;
 import ltd.fdsa.ds.api.job.model.TriggerParam;
+import ltd.fdsa.ds.api.model.Column;
+import ltd.fdsa.ds.api.model.Record;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.pipeline.Process;
 import ltd.fdsa.ds.api.util.ShardingUtil;
-
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -27,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class JobThread extends Thread {
 
     private int jobId;
-    private JobHandler handler;
+    private Process handler;
 
     //使用消息队列
     private LinkedBlockingQueue<TriggerParam> triggerQueue;
@@ -38,14 +40,14 @@ public class JobThread extends Thread {
 
     private int idleTimes = 0; // idel times
 
-    public JobThread(int jobId, JobHandler handler) {
+    public JobThread(int jobId, Process handler) {
         this.jobId = jobId;
         this.handler = handler;
         this.triggerQueue = new LinkedBlockingQueue<TriggerParam>();
         this.triggerLogIdSet = Collections.synchronizedSet(new HashSet<Long>());
     }
 
-    public JobHandler getHandler() {
+    public Process getHandler() {
         return handler;
     }
 
@@ -108,7 +110,7 @@ public class JobThread extends Thread {
             idleTimes++;
 
             TriggerParam triggerParam = null;
-            Result<Object> executeResult = null;
+
             try {
                 // to check toStop signal, we need cycle, so wo cannot use queue.take(), instand of
                 // poll(timeout)
@@ -135,41 +137,35 @@ public class JobThread extends Thread {
                                             new Callable<Result<Object>>() {
                                                 @Override
                                                 public Result<Object> call() throws Exception {
-                                                    return handler.execute(triggerParamTmp.getExecutorParams());
+                                                    Record record = new Record();
+
+                                                    for (var entry : triggerParamTmp.getExecutorParams().entrySet()) {
+                                                        record.add(new Column(entry.getKey(), entry.getValue()));
+                                                    }
+                                                    handler.execute(record);
+                                                    return Result.success();
                                                 }
                                             });
                             futureThread = new Thread(futureTask);
                             futureThread.start();
-
-                            executeResult = futureTask.get(triggerParam.getExecutorTimeout(), TimeUnit.SECONDS);
+                            futureTask.get(triggerParam.getExecutorTimeout(), TimeUnit.SECONDS);
                         } catch (TimeoutException e) {
 
                             JobLogger.log("<br>----------- project.job execute timeout");
                             JobLogger.log(e);
 
-                            executeResult = Result.fail(JobHandler.FAIL_TIMEOUT.getCode(), "job execute timeout ");
                         } finally {
                             futureThread.interrupt();
                         }
                     } else {
                         // just execute
-                        executeResult = handler.execute(triggerParam.getExecutorParams());
+                        Record record = new Record();
+                        for (var entry : triggerParam.getExecutorParams().entrySet()) {
+                            record.add(new Column(entry.getKey(), entry.getValue()));
+                        }
+                        handler.execute(record);
                     }
 
-                    if (executeResult == null) {
-                        executeResult = JobHandler.FAIL;
-                    } else {
-                        executeResult.setMessage(
-                                (executeResult != null
-                                        && executeResult.getMessage() != null
-                                        && executeResult.getMessage().length() > 50000)
-                                        ? executeResult.getMessage().substring(0, 50000).concat("...")
-                                        : executeResult.getMessage());
-                        executeResult.setData(null); // limit obj size
-                    }
-                    JobLogger.log(
-                            "<br>----------- project.job execute end(finish) -----------<br>----------- Result:"
-                                    + executeResult);
 
                 } else {
                     if (idleTimes > 30) {
@@ -186,7 +182,7 @@ public class JobThread extends Thread {
                 StringWriter stringWriter = new StringWriter();
                 e.printStackTrace(new PrintWriter(stringWriter));
                 String errorMsg = stringWriter.toString();
-                executeResult = Result.fail(500, errorMsg);
+
 
                 JobLogger.log(
                         "<br>----------- JobThread Exception:"
@@ -197,7 +193,7 @@ public class JobThread extends Thread {
                     // callback handler info
                     if (!isRun.get()) {
                         // commonm
-                        HandleCallbackParam p = new HandleCallbackParam(triggerParam.getLogId(), triggerParam.getLogDateTime(), executeResult);
+                        HandleCallbackParam p = new HandleCallbackParam(triggerParam.getLogId(), triggerParam.getLogDateTime(), Result.success());
                         TriggerCallbackThread.pushCallBack(p);
                     } else {
                         // is killed
@@ -225,7 +221,7 @@ public class JobThread extends Thread {
 
         // destroy
         try {
-            handler.destroy();
+            handler.stop();
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
         }

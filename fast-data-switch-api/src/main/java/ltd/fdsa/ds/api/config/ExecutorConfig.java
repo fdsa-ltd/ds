@@ -1,6 +1,7 @@
 package ltd.fdsa.ds.api.config;
 
 import lombok.extern.slf4j.Slf4j;
+import ltd.fdsa.ds.api.container.PluginManager;
 import ltd.fdsa.ds.api.job.coordinator.Coordinator;
 import ltd.fdsa.ds.api.job.executor.Executor;
 import ltd.fdsa.ds.api.job.executor.ExecutorImpl;
@@ -26,8 +27,8 @@ public class ExecutorConfig {
     }
 
     @Bean
-    public ExecutorRegistryThread executorRegistry(Properties properties, Coordinator client, TaskScheduler taskScheduler) {
+    public ExecutorRegistryThread executorRegistry(Properties properties, Coordinator client, TaskScheduler taskScheduler, PluginManager pluginManager) {
         log.info("ConsulWatch Started");
-        return new ExecutorRegistryThread(properties, client, taskScheduler);
+        return new ExecutorRegistryThread(properties, client, taskScheduler, pluginManager);
     }
 }

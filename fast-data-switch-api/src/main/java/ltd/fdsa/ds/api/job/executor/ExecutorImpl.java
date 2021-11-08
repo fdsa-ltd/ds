@@ -1,17 +1,16 @@
 package ltd.fdsa.ds.api.job.executor;
 
+import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.job.model.LogResult;
-import ltd.fdsa.ds.api.model.Result;
-import ltd.fdsa.ds.api.job.model.TriggerParam;
 import ltd.fdsa.ds.api.job.enums.ExecutorBlockStrategyEnum;
-
-import ltd.fdsa.ds.api.job.handler.JobHandler;
 import ltd.fdsa.ds.api.job.log.JobFileAppender;
+import ltd.fdsa.ds.api.job.model.LogResult;
+import ltd.fdsa.ds.api.job.model.TriggerParam;
 import ltd.fdsa.ds.api.job.thread.JobThread;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.api.pipeline.Process;
+import ltd.fdsa.ds.api.props.DefaultProps;
 
 import java.util.Map;
 
@@ -19,9 +18,8 @@ import java.util.Map;
  * 客户端具体实现
  *
  */
+@Slf4j
 public class ExecutorImpl implements Executor {
-    private static Logger logger = LoggerFactory.getLogger(ExecutorImpl.class);
-
     @Override
     public Result<String> beat() {
         return Result.success();
@@ -29,14 +27,11 @@ public class ExecutorImpl implements Executor {
 
     @Override
     public Result<String> idleBeat(int jobId) {
-
-        // isRunningOrHasQueue
         boolean isRunningOrHasQueue = false;
         JobThread jobThread = JobExecutor.loadJobThread(jobId);
         if (jobThread != null && jobThread.isRunningOrHasQueue()) {
             isRunningOrHasQueue = true;
         }
-
         if (isRunningOrHasQueue) {
             return Result.fail(500, "job thread is running or has trigger queue.");
         }
@@ -44,7 +39,7 @@ public class ExecutorImpl implements Executor {
     }
 
     @Override
-    public Result<String> kill(int jobId) {
+    public Result<String> stop(int jobId) {
         // kill handlerThread, and create new one
         JobThread jobThread = JobExecutor.loadJobThread(jobId);
         if (jobThread != null) {
@@ -64,49 +59,43 @@ public class ExecutorImpl implements Executor {
     }
 
     @Override
-    public Result<String> run(int jobId, String handler, String blockStrategy, long timeout, Map<String, String> content) {
+    public Result<String> run(int jobId, Map<String, String> config) {
+        var props = DefaultProps.fromMaps(config);
+        String handler = props.get("class");
+        String blockStrategy = props.get("strategy");
+        long timeout = props.getLong("timeout", Long.MAX_VALUE);
+
+        if (Strings.isNullOrEmpty(handler)) {
+            return Result.fail(404, "no job handler");
+        }
+        // new job handler
+        var newJobHandler = JobExecutor.loadJobHandler(handler);
+        if (newJobHandler == null) {
+            return Result.fail(404, "job handler [" + handler + "] not found.");
+        }
         // load old：jobHandler + jobThread
         JobThread jobThread = JobExecutor.loadJobThread(jobId);
-        JobHandler jobHandler = jobThread != null ? jobThread.getHandler() : null;
+        Process jobHandler = jobThread != null ? jobThread.getHandler() : null;
         String removeOldReason = null;
-
-        // new jobhandler
-        JobHandler newJobHandler = JobExecutor.loadJobHandler(handler);
-
         // valid old jobThread
         if (jobThread != null && jobHandler != newJobHandler) {
             // change handler, need kill old thread
-            removeOldReason = "change jobhandler or glue type, and terminate the old job thread.";
-
+            removeOldReason = "change job handler or glue type, and terminate the old job thread.";
             jobThread = null;
-            jobHandler = null;
-        }
-
-        // valid handler
-        if (jobHandler == null) {
             jobHandler = newJobHandler;
-            if (jobHandler == null) {
-                return Result.fail(500,
-                        "job handler [" + handler + "] not found.");
-            }
         }
-
-
         // executor block strategy
         if (jobThread != null) {
-            ExecutorBlockStrategyEnum blockStrategyEnum =
-                    ExecutorBlockStrategyEnum.match(blockStrategy, null);
+            ExecutorBlockStrategyEnum blockStrategyEnum = ExecutorBlockStrategyEnum.match(blockStrategy, null);
             if (ExecutorBlockStrategyEnum.DISCARD_LATER == blockStrategyEnum) {
                 // discard when running
                 if (jobThread.isRunningOrHasQueue()) {
-                    return Result.fail(500,
-                            "block strategy effect：" + ExecutorBlockStrategyEnum.DISCARD_LATER.getTitle());
+                    return Result.fail(500, "block strategy effect：" + ExecutorBlockStrategyEnum.DISCARD_LATER.getTitle());
                 }
             } else if (ExecutorBlockStrategyEnum.COVER_EARLY == blockStrategyEnum) {
                 // kill running jobThread
                 if (jobThread.isRunningOrHasQueue()) {
-                    removeOldReason =
-                            "block strategy effect：" + ExecutorBlockStrategyEnum.COVER_EARLY.getTitle();
+                    removeOldReason = "block strategy effect：" + ExecutorBlockStrategyEnum.COVER_EARLY.getTitle();
 
                     jobThread = null;
                 }
@@ -119,12 +108,25 @@ public class ExecutorImpl implements Executor {
         if (jobThread == null) {
             jobThread = JobExecutor.startJob(jobId, jobHandler, removeOldReason);
         }
-
         // push data to queue
-        var triggerParam    =new TriggerParam();
+        var triggerParam = new TriggerParam();
         triggerParam.setExecutorHandler(handler);
         triggerParam.setJobId(jobId);
         Result<String> pushResult = jobThread.pushTriggerQueue(triggerParam);
         return pushResult;
+    }
+
+    @Override
+    public Result<String> init(Long processId, Map<String, String> config) {
+        var props = DefaultProps.fromMaps(config);
+        String handler = props.get("class");
+        String blockStrategy = props.get("strategy");
+        long timeout = props.getLong("timeout", Long.MAX_VALUE);
+        return null;
+    }
+
+    @Override
+    public Result<String> start(Long processId) {
+        return null;
     }
 }

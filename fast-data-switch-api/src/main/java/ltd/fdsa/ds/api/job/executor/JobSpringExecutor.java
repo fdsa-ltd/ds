@@ -62,11 +62,10 @@ public class JobSpringExecutor extends JobExecutor implements ApplicationContext
             Object bean = applicationContext.getBean(beanDefinitionName);
             Method[] methods = bean.getClass().getDeclaredMethods();
             for (Method method : methods) {
-                Job Job = AnnotationUtils.findAnnotation(method, Job.class);
-                if (Job != null) {
-
+                Job job = AnnotationUtils.findAnnotation(method, Job.class);
+                if (job != null) {
                     // name
-                    String name = Job.value();
+                    String name = job.value();
                     if (name.trim().length() == 0) {
                         throw new RuntimeException(
                                 MessageFormat.format("job handler name invalid, for[{}.{}].",
@@ -75,7 +74,6 @@ public class JobSpringExecutor extends JobExecutor implements ApplicationContext
                     if (loadJobHandler(name) != null) {
                         throw new RuntimeException(MessageFormat.format(" job handler [{}] naming conflicts.", name));
                     }
-
                     // execute method
                     if (method.getParameterTypes().length != 1 || !method.getReturnType().isAssignableFrom(Result.class)) {
                         throw new RuntimeException(
@@ -93,30 +91,21 @@ public class JobSpringExecutor extends JobExecutor implements ApplicationContext
                     Method initMethod = null;
                     Method destroyMethod = null;
 
-                    if (Job.init().trim().length() > 0) {
+                    if (job.init().trim().length() > 0) {
                         try {
-                            initMethod = bean.getClass().getDeclaredMethod(Job.init());
+                            initMethod = bean.getClass().getDeclaredMethod(job.init());
                             initMethod.setAccessible(true);
                         } catch (NoSuchMethodException e) {
-                            throw new RuntimeException(
-                                    "job handler initMethod invalid, for["
-                                            + bean.getClass()
-                                            + "#"
-                                            + method.getName()
-                                            + "] .");
+                            throw new RuntimeException("job handler initMethod invalid, for[" + bean.getClass() + "#" + method.getName() + "] .");
                         }
                     }
-                    if (Job.destroy().trim().length() > 0) {
+                    if (job.destroy().trim().length() > 0) {
                         try {
-                            destroyMethod = bean.getClass().getDeclaredMethod(Job.destroy());
+                            destroyMethod = bean.getClass().getDeclaredMethod(job.destroy());
                             destroyMethod.setAccessible(true);
                         } catch (NoSuchMethodException e) {
                             throw new RuntimeException(
-                                    "job handler destroyMethod invalid, for["
-                                            + bean.getClass()
-                                            + "#"
-                                            + method.getName()
-                                            + "] .");
+                                    "job handler destroyMethod invalid, for[" + bean.getClass() + "#" + method.getName() + "] .");
                         }
                     }
                     // registry job handler

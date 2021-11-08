@@ -1,12 +1,12 @@
 package ltd.fdsa.job.executor;
 
-import ltd.fdsa.ds.api.job.executor.Executor;
-import ltd.fdsa.ds.api.job.model.LogResult;
-import ltd.fdsa.ds.api.model.Result;
-import ltd.fdsa.ds.api.job.model.TriggerParam;
+import lombok.var;
 import ltd.fdsa.ds.api.job.enums.ExecutorBlockStrategyEnum;
+import ltd.fdsa.ds.api.job.executor.Executor;
 import ltd.fdsa.ds.api.job.executor.JobExecutor;
-
+import ltd.fdsa.ds.api.job.model.LogResult;
+import ltd.fdsa.ds.api.job.model.TriggerParam;
+import ltd.fdsa.ds.api.model.Result;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -70,7 +70,7 @@ public class ExecutorBizImplTest {
         final int jobId = 0;
 
         // Act
-        final Result<String> retval = executorBiz.kill(jobId);
+        final Result<String> retval = executorBiz.stop(jobId);
 
         // Assert result
         Assert.assertNotNull(retval);
@@ -101,7 +101,12 @@ public class ExecutorBizImplTest {
         triggerParam.setLogDateTime(System.currentTimeMillis());
 
         // Act
-        final Result<String> retval = executorBiz.run(triggerParam.getJobId(), triggerParam.getExecutorHandler(), triggerParam.getExecutorBlockStrategy(), triggerParam.getExecutorTimeout(), triggerParam.getExecutorParams());
+        var config = triggerParam.getExecutorParams();
+        config.put("class", triggerParam.getExecutorHandler());
+        config.put("strategy", triggerParam.getExecutorBlockStrategy());
+        config.put("timeout", triggerParam.getExecutorTimeout() + "");
+
+        final Result<String> retval = executorBiz.run(triggerParam.getJobId(), config);
 
         // Assert result
         Assert.assertNotNull(retval);

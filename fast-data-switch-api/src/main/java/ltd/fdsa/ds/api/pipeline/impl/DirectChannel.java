@@ -9,12 +9,12 @@ import ltd.fdsa.ds.api.pipeline.Channel;
 public class DirectChannel implements Channel {
 
     @Override
-    public void collect(Record... records) {
+    public void execute(Record... records) {
         if (!this.isRunning()) {
             return;
         }
         for (var item : this.nextSteps()) {
-            item.collect(records);
+            item.execute(records);
         }
     }
 }

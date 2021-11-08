@@ -1,15 +1,13 @@
 package ltd.fdsa.ds.api.job.thread;
 
+import lombok.extern.slf4j.Slf4j;
 import ltd.fdsa.ds.api.HessianSerializer;
 import ltd.fdsa.ds.api.job.coordinator.Coordinator;
 import ltd.fdsa.ds.api.job.enums.RegistryConfig;
 import ltd.fdsa.ds.api.job.log.JobFileAppender;
-import ltd.fdsa.ds.api.job.log.JobLogger;
 import ltd.fdsa.ds.api.job.model.HandleCallbackParam;
 import ltd.fdsa.ds.api.model.Result;
 import ltd.fdsa.ds.api.util.FileUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -19,8 +17,8 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class TriggerCallbackThread {
-    private static Logger logger = LoggerFactory.getLogger(TriggerCallbackThread.class);
 
     private static TriggerCallbackThread instance = new TriggerCallbackThread();
     private static String failCallbackFilePath =
@@ -47,7 +45,7 @@ public class TriggerCallbackThread {
 
     public static void pushCallBack(HandleCallbackParam callback) {
         getInstance().callBackQueue.add(callback);
-        logger.debug(">>>>>>>>>>> project.job, push callback request, logId:{}", callback.getLogId());
+        log.debug(">>>>>>>>>>> project.job, push callback request, logId:{}", callback.getLogId());
     }
 
     public void start() {
@@ -79,7 +77,7 @@ public class TriggerCallbackThread {
                                         }
                                     } catch (Exception e) {
                                         if (!toStop) {
-                                            logger.error(e.getMessage(), e);
+                                            log.error(e.getMessage(), e);
                                         }
                                     }
                                 }
@@ -94,10 +92,10 @@ public class TriggerCallbackThread {
                                     }
                                 } catch (Exception e) {
                                     if (!toStop) {
-                                        logger.error(e.getMessage(), e);
+                                        log.error(e.getMessage(), e);
                                     }
                                 }
-                                logger.info(">>>>>>>>>>> project.job, executor callback thread destory.");
+                                log.info(">>>>>>>>>>> project.job, executor callback thread destory.");
                             }
                         });
         triggerCallbackThread.setDaemon(true);
@@ -115,18 +113,18 @@ public class TriggerCallbackThread {
                                         retryFailCallbackFile();
                                     } catch (Exception e) {
                                         if (!toStop) {
-                                            logger.error(e.getMessage(), e);
+                                            log.error(e.getMessage(), e);
                                         }
                                     }
                                     try {
                                         TimeUnit.SECONDS.sleep(RegistryConfig.BEAT_TIMEOUT);
                                     } catch (InterruptedException e) {
                                         if (!toStop) {
-                                            logger.error(e.getMessage(), e);
+                                            log.error(e.getMessage(), e);
                                         }
                                     }
                                 }
-                                logger.info(">>>>>>>>>>> project.job, executor retry callback thread destory.");
+                                log.info(">>>>>>>>>>> project.job, executor retry callback thread destory.");
                             }
                         });
         triggerRetryCallbackThread.setDaemon(true);
@@ -141,7 +139,7 @@ public class TriggerCallbackThread {
             try {
                 triggerCallbackThread.join();
             } catch (InterruptedException e) {
-                logger.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
         }
 
@@ -151,7 +149,7 @@ public class TriggerCallbackThread {
             try {
                 triggerRetryCallbackThread.join();
             } catch (InterruptedException e) {
-                logger.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -169,19 +167,19 @@ public class TriggerCallbackThread {
 
         try {
             Result<String> callbackResult = client.callback(callbackParamList);
-                if (callbackResult != null && Result.success().getCode() == callbackResult.getCode()) {
-                    callbackLog(callbackParamList, "<br>----------- project.job job callback finish.");
-                    callbackRet = true;
-                } else {
-                    callbackLog(
-                            callbackParamList,
-                            "<br>----------- project.job job callback fail, callbackResult:" + callbackResult);
-                }
-            } catch (Exception e) {
+            if (callbackResult != null && Result.success().getCode() == callbackResult.getCode()) {
+                callbackLog(callbackParamList, "<br>----------- project.job job callback finish.");
+                callbackRet = true;
+            } else {
                 callbackLog(
                         callbackParamList,
-                        "<br>----------- project.job job callback error, errorMsg:" + e.getMessage());
+                        "<br>----------- project.job job callback fail, callbackResult:" + callbackResult);
             }
+        } catch (Exception e) {
+            callbackLog(
+                    callbackParamList,
+                    "<br>----------- project.job job callback error, errorMsg:" + e.getMessage());
+        }
 
         if (!callbackRet) {
             appendFailCallbackFile(callbackParamList);
@@ -193,11 +191,9 @@ public class TriggerCallbackThread {
      */
     private void callbackLog(List<HandleCallbackParam> callbackParamList, String logContent) {
         for (HandleCallbackParam callbackParam : callbackParamList) {
-            String logFileName =
-                    JobFileAppender.makeLogFileName(
-                            new Date(callbackParam.getLogDateTim()), callbackParam.getLogId());
+            String logFileName = JobFileAppender.makeLogFileName(new Date(callbackParam.getLogDateTim()), callbackParam.getLogId());
             JobFileAppender.contextHolder.set(logFileName);
-            JobLogger.log(logContent);
+            log.info(logContent);
         }
     }
 

@@ -33,7 +33,7 @@ public class DataTypeTest {
     public void TestData() {
 
         StringData data = new StringData("inputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinputinput");
-        var bytes = data.toBytes();
+        var bytes = data.toByteArray();
         var output = data.parse(bytes).getValue();
         Assert.assertEquals("TestData", data.getValue(), output);
     }
@@ -42,7 +42,7 @@ public class DataTypeTest {
     public void TestBoolData() {
         byte input = 1;
         BoolData data = new BoolData(input);
-        var bytes = data.toBytes();
+        var bytes = data.toByteArray();
         var output = data.parse(bytes).getValue();
         Assert.assertTrue("TestBoolData", (boolean) output);
 
@@ -52,7 +52,7 @@ public class DataTypeTest {
     public void TestBoolData2() {
         byte input = 0;
         BoolData data = new BoolData(input);
-        var bytes = data.toBytes();
+        var bytes = data.toByteArray();
         var output = data.parse(bytes).getValue();
         Assert.assertFalse("TestBoolData", (boolean) output);
     }
@@ -62,7 +62,7 @@ public class DataTypeTest {
     public void TestByteData() {
         var input = (byte) (new Random().nextInt() & 0xFF);
         ByteData data = new ByteData(input);
-        var bytes = data.toBytes();
+        var bytes = data.toByteArray();
         var output = data.parse(bytes).getValue();
         Assert.assertEquals("TestByteData", input, output);
     }
@@ -71,7 +71,7 @@ public class DataTypeTest {
     public void TestCharData() {
         var input = (char) (new Random().nextInt() & 0xFFFF);
         CharData data = new CharData(input);
-        var bytes = data.toBytes();
+        var bytes = data.toByteArray();
         var output = data.parse(bytes).getValue();
         Assert.assertEquals("TestCharData", input, output);
     }
@@ -80,7 +80,7 @@ public class DataTypeTest {
     public void TestStringData() {
         var input = "(中方) (new Random().nextInt() & 0xFFFF)";
         StringData data = new StringData(input);
-        var bytes = data.toBytes();
+        var bytes = data.toByteArray();
         var output = data.parse(bytes).getValue();
         log.info(input);
         log.info(output.toString());
@@ -92,7 +92,7 @@ public class DataTypeTest {
     public void TestDoubleData() {
         var input = new Random().nextDouble();
         DoubleData data = new DoubleData(input);
-        var bytes = data.toBytes();
+        var bytes = data.toByteArray();
         var output = data.parse(bytes).getValue();
         Assert.assertEquals("TestIntData", input, output);
     }
@@ -101,7 +101,7 @@ public class DataTypeTest {
     public void TestFloatData() {
         var input = new Random().nextFloat();
         FloatData data = new FloatData(input);
-        var bytes = data.toBytes();
+        var bytes = data.toByteArray();
         var output = data.parse(bytes).getValue();
         Assert.assertEquals("TestFloatData", input, output);
     }
@@ -110,7 +110,7 @@ public class DataTypeTest {
     public void TestLongData() {
         var input = new Random().nextLong();
         LongData data = new LongData(input);
-        var bytes = data.toBytes();
+        var bytes = data.toByteArray();
         var output = data.parse(bytes).getValue();
         Assert.assertEquals("TestLongData", input, output);
     }
@@ -119,7 +119,7 @@ public class DataTypeTest {
     public void TestDateData() {
         var input = new Date();
         DateData data = new DateData(input.getTime());
-        var bytes = data.toBytes();
+        var bytes = data.toByteArray();
         var output = data.parse(bytes).getValue();
         Assert.assertEquals("TestDateData", input, output);
     }

@@ -13,7 +13,7 @@ public class DefaultPipeline implements Process {
         if (this.isRunning()) {
             for (var map : records) {
                 StringBuilder sb = new StringBuilder();
-                for (var entry : map.entrySet()) {
+                for (var entry : map.toNormalMap().entrySet()) {
                     sb.append(entry.getKey());
                     sb.append('=').append('"');
                     sb.append(entry.getValue());

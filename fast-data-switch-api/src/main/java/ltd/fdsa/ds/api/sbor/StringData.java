@@ -35,7 +35,7 @@ public class StringData implements Item {
     }
 
     @Override
-    public byte[] toBytes() {
+    public byte[] toByteArray() {
         ByteBuffer buffer;
         var content = this.data.getBytes(StandardCharsets.UTF_8);
         var length = content.length + 1;

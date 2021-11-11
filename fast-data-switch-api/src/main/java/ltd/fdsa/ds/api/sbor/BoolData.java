@@ -34,7 +34,7 @@ public class BoolData implements Item {
     }
 
     @Override
-    public byte[] toBytes() {
+    public byte[] toByteArray() {
         ByteBuffer buffer = ByteBuffer.allocate(2);
         buffer.put((byte) getType().ordinal());
         buffer.put(this.data);

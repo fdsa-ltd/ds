@@ -14,13 +14,13 @@ public class ScriptJobHandler implements Process {
 
     @Override
     public void execute(Record... records) {
-        Arrays.stream(records).map(m -> m.columnMap()).forEach(context -> {
+        Arrays.stream(records).map(m -> m.toNormalMap()).forEach(context -> {
 
             // log file
             String logFileName = JobFileAppender.contextHolder.get();
-            var cmd = context.get("cmd").getValue().toString();
-            var scriptFileName = context.get("scriptFileName").getValue().toString();
-            var scriptParams = context.get("scriptParams").getValue().toString();
+            var cmd = context.get("cmd").toString();
+            var scriptFileName = context.get("scriptFileName").toString();
+            var scriptParams = context.get("scriptParams").toString();
 
             try {
                 ScriptUtil.execToFile(cmd, scriptFileName, logFileName, scriptParams);

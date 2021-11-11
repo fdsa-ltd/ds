@@ -40,7 +40,7 @@ public class MethodJobHandler implements Process {
     @Override
     public void execute(Record... records) {
         Arrays.stream(records)
-                .map(m -> m.columnMap())
+                .map(m -> m.toNormalMap())
                 .forEach(context -> {
                     try {
                         method.invoke(target, context.values().toArray());

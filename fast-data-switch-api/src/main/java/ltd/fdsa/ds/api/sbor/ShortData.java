@@ -24,7 +24,7 @@ public class ShortData implements Item {
     }
 
     @Override
-    public byte[] toBytes() {
+    public byte[] toByteArray() {
         ByteBuffer buffer = ByteBuffer.allocate(3);
         buffer.put((byte) getType().ordinal());
         buffer.putShort(this.data);

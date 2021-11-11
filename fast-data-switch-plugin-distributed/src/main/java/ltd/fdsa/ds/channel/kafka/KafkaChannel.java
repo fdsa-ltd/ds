@@ -43,7 +43,7 @@ public class KafkaChannel implements Channel {
         }
         // Cluster will return related job Token
         // create clients to manager cluster nodes
-        // then we can remote process call to collect data;
+        // then we can  process call remotely to collect data;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class KafkaChannel implements Channel {
             return;
         }
 
-        Arrays.stream(records).map(item -> new ProducerRecord<String, String>(topic, item.toJson()))
+        Arrays.stream(records).map(item -> new ProducerRecord<String, String>(topic, item.toString()))
                 .forEach(record -> {
                     this.kafkaProducer.send(record);
                 });

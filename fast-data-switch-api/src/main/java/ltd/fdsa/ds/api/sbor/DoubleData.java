@@ -24,7 +24,7 @@ public class DoubleData implements Item {
     }
 
     @Override
-    public byte[] toBytes() {
+    public byte[] toByteArray() {
         ByteBuffer buffer = ByteBuffer.allocate(9);
         buffer.put((byte) getType().ordinal());
         buffer.putDouble(this.data);

@@ -8,7 +8,7 @@ public interface Item {
 
     Item parse(byte[] bytes);
 
-    byte[] toBytes();
+    byte[] toByteArray();
 
     Object getValue();
 

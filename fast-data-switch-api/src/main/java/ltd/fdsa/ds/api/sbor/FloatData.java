@@ -24,7 +24,7 @@ public class FloatData implements Item {
     }
 
     @Override
-    public byte[] toBytes() {
+    public byte[] toByteArray() {
         ByteBuffer buffer = ByteBuffer.allocate(5);
         buffer.put((byte) getType().ordinal());
         buffer.putFloat(this.data);

@@ -36,7 +36,7 @@ public class KafkaWriter implements Writer {
         }
         for (var item : records) {
             this.topics.stream()
-                    .map(topic -> new ProducerRecord<String, String>(topic, item.toJson()))
+                    .map(topic -> new ProducerRecord<String, String>(topic, item.toString()))
                     .forEach(record -> {
                         kafkaProducer.send(record);
                     });

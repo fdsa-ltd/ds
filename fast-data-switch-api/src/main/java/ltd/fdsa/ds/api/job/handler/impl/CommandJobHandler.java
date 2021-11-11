@@ -14,7 +14,7 @@ public class CommandJobHandler implements Process {
 
     @Override
     public void execute(Record... records) {
-        Arrays.stream(records).map(record -> record.columnMap().get("cmd").getValue().toString()).forEach(
+        Arrays.stream(records).map(record -> record.toNormalMap().get("cmd").toString()).forEach(
                 command -> {
                     BufferedReader bufferedReader = null;
                     try {

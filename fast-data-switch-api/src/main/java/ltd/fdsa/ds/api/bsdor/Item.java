@@ -3,8 +3,10 @@ package ltd.fdsa.ds.api.bsdor;
 import com.google.common.base.Strings;
 import lombok.var;
 
-import java.nio.ByteBuffer;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +14,7 @@ import java.util.Map;
  * 自描述数据结构
  * 第一个byte作为类型，根据类型不同: 定长时，直取内容；变长时，取N个bytes作为内容的长度length。再取length个类型的单元作为内容；
  * */
-public interface Item {
+public interface Item<T> {
     static Map createFromByteArray(byte[] input) {
         Map<String, Object> map = new HashMap<String, Object>();
         Integer offset = 0;
@@ -25,37 +27,32 @@ public interface Item {
         return map;
     }
 
-    static byte[] toByteArray(Map<String, Object> map) {
-        ByteBuffer buffer = ByteBuffer.allocate(1);
+    static byte[] toByteArray(Map<String, Item> map) {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         for (var entry : map.entrySet()) {
             var key = entry.getKey();
             if (Strings.isNullOrEmpty(key)) {
-                buffer.put((byte) Type.Empty.value);
+                buffer.write(Type.Empty.value);
             } else {
-                var bytes = key.getBytes(StandardCharsets.UTF_8);
-                var length = bytes.length;
-                if (length >= 63) {
-                    buffer.put((byte) 0B00111111);
-                    length >>= 6;
-                    while (length >= 255) {
-                        buffer.put((byte) 0B11111111);
-                    }
+                try {
+                    buffer.write(new StringItem(key).toByteArray());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                buffer.put((byte) length);
-                buffer.put(bytes);
             }
             var value = entry.getValue();
-            if (value instanceof Number) {
-                var v = ((Number) value).byteValue();
-                if (v > 0) ;
+            try {
+                buffer.write(value.toByteArray());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
-        return "".getBytes(StandardCharsets.UTF_8);
+        return buffer.toByteArray();
     }
 
     byte[] toByteArray();
 
-    Object getValue();
+    T getValue();
 
     Type getType();
 
@@ -80,6 +77,7 @@ public interface Item {
         N64(0B11111111),
         // string
         Empty(0B01000000),
+        S63(0B01111111),
         // false
         False(0B10000000),
         // true
@@ -98,10 +96,31 @@ public interface Item {
         REF(0B10000111),
         Others(0B10001110);
 
-        private final int value;
+        private final short value;
+        private static final Type[] list;
 
-        Type(int input) {
-            this.value = input;
+        static {
+            list = Arrays.stream(Type.values()).sorted().toArray(Type[]::new);
+        }
+
+        public static Type valueOf(Integer value) {
+            return list[value];
+        }
+
+        Type(Integer value) {
+            this.value = value.shortValue();
+        }
+
+        public short getValue() {
+            return value;
+        }
+
+        public int getMainType() {
+            return this.value >> 6;
+        }
+
+        public int getSubType() {
+            return this.value & 0B00111111;
         }
     }
 }

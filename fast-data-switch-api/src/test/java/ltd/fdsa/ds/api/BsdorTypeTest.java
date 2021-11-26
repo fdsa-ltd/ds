@@ -22,6 +22,10 @@ public class BsdorTypeTest {
 
     @Test
     public void TestData() {
+        byte i = -127;
+
+
+
         var ss = Math.pow(2, 64);
         System.out.println(ss);
         var type = 0B11101111;

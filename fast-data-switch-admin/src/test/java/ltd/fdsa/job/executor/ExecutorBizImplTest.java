@@ -1,12 +1,12 @@
 package ltd.fdsa.job.executor;
 
 import lombok.var;
-import ltd.fdsa.ds.api.job.enums.ExecutorBlockStrategyEnum;
-import ltd.fdsa.ds.api.job.executor.Executor;
-import ltd.fdsa.ds.api.job.executor.JobExecutor;
-import ltd.fdsa.ds.api.job.model.LogResult;
-import ltd.fdsa.ds.api.job.model.TriggerParam;
-import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.core.job.enums.ExecutorBlockStrategyEnum;
+import ltd.fdsa.ds.core.job.executor.Executor;
+import ltd.fdsa.ds.core.job.executor.JobExecutor;
+import ltd.fdsa.ds.core.job.model.LogResult;
+import ltd.fdsa.ds.core.job.model.TriggerParam;
+import ltd.fdsa.ds.core.model.Result;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

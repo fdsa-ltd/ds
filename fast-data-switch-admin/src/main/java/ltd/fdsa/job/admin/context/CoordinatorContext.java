@@ -3,8 +3,8 @@ package ltd.fdsa.job.admin.context;
 import com.caucho.hessian.client.HessianProxyFactory;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.job.executor.Executor;
-import ltd.fdsa.ds.api.model.NewService;
+import ltd.fdsa.ds.core.job.executor.Executor;
+import ltd.fdsa.ds.core.model.NewService;
 import org.springframework.stereotype.Component;
 
 import java.net.MalformedURLException;

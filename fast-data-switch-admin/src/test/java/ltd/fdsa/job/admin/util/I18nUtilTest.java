@@ -1,7 +1,7 @@
 package ltd.fdsa.job.admin.util;
 
 import lombok.extern.slf4j.Slf4j;
-import ltd.fdsa.ds.api.util.I18nUtil;
+import ltd.fdsa.ds.core.util.I18nUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -2,8 +2,8 @@ package ltd.fdsa.job.admin.controller;
 
 import lombok.var;
 import ltd.fdsa.job.admin.jpa.service.SystemUserService;
-import ltd.fdsa.ds.api.model.Result;
-import ltd.fdsa.ds.api.util.CookieUtil;
+import ltd.fdsa.ds.core.model.Result;
+import ltd.fdsa.ds.core.util.CookieUtil;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

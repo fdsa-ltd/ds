@@ -2,9 +2,9 @@ package ltd.fdsa.ds.reader.jdbc;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.model.Column;
-import ltd.fdsa.ds.api.model.Record;
-import ltd.fdsa.ds.api.pipeline.Reader;
+import ltd.fdsa.ds.core.model.Column;
+import ltd.fdsa.ds.core.model.Record;
+import ltd.fdsa.ds.core.pipeline.Reader;
 
 import java.sql.*;
 import java.util.ArrayList;

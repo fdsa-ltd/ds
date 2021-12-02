@@ -1,7 +1,7 @@
 package ltd.fdsa.job.admin.route;
 
 import ltd.fdsa.job.admin.route.strategy.*;
-import ltd.fdsa.ds.api.util.I18nUtil;
+import ltd.fdsa.ds.core.util.I18nUtil;
 
 public enum ExecutorRouteStrategyEnum {
     FIRST(I18nUtil.getString("jobconf_route_first"), new ExecutorRouteFirst()),

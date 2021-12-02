@@ -2,8 +2,8 @@ package ltd.fdsa.ds.writer.kafka;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.model.Record;
-import ltd.fdsa.ds.api.pipeline.Writer;
+import ltd.fdsa.ds.core.model.Record;
+import ltd.fdsa.ds.core.pipeline.Writer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;

@@ -2,8 +2,8 @@ package ltd.fdsa.ds.writer.jdbc;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.model.Record;
-import ltd.fdsa.ds.api.pipeline.Writer;
+import ltd.fdsa.ds.core.model.Record;
+import ltd.fdsa.ds.core.pipeline.Writer;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -56,7 +56,7 @@ public class JdbcWriter implements Writer {
         sb.append(")\nvalues\n");
         var values = Arrays.stream(records)
                 .map(record -> {
-                    return "(" + record.entrySet().stream()
+                    return "(" + record.toNormalMap().entrySet().stream()
                             .map(m -> m == null ? "null" : "'" + m.toString() + "'")
                             .collect(Collectors.joining(",")) + ")";
                 }).collect(Collectors.joining(","));

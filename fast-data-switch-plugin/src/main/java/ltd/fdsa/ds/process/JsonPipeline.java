@@ -6,10 +6,10 @@ import com.googlecode.aviator.Expression;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.container.Plugin;
-import ltd.fdsa.ds.api.model.Column;
-import ltd.fdsa.ds.api.model.Record;
-import ltd.fdsa.ds.api.pipeline.Process;
+import ltd.fdsa.ds.core.container.Plugin;
+import ltd.fdsa.ds.core.model.Column;
+import ltd.fdsa.ds.core.model.Record;
+import ltd.fdsa.ds.core.pipeline.Process;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class JsonPipeline implements Process {
         // 解析json内容并将结果放回数据记录
         for (var record : records) {
             for (var item : this.fields) {
-                var value = record.columnMap().get(item).getValue().toString();
+                var value = record.toNormalMap().get(item).toString();
                 var result = this.parserValue(value);
                 for (var entry : result.entrySet()) {
                     record.add(new Column(entry.getKey(), entry.getValue()));

@@ -10,11 +10,11 @@ import com.googlecode.aviator.runtime.type.AviatorRuntimeJavaType;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.container.Plugin;
-import ltd.fdsa.ds.api.model.Column;
-import ltd.fdsa.ds.api.model.Record;
-import ltd.fdsa.ds.api.pipeline.Process;
-import ltd.fdsa.ds.api.util.Utils;
+import ltd.fdsa.ds.core.container.Plugin;
+import ltd.fdsa.ds.core.model.Column;
+import ltd.fdsa.ds.core.model.Record;
+import ltd.fdsa.ds.core.pipeline.Process;
+import ltd.fdsa.ds.core.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,7 +55,7 @@ public class ExpressionPipeline implements Process {
         // 执行表达式计算出新结果并放回数据记录
         for (var record : records) {
             Map<String, Object> env = new HashMap<String, Object>(128);
-            for (var column : record.entrySet()) {
+            for (var column : record.toNormalMap().entrySet()) {
                 env.put(column.getKey(), column.getValue());
             }
             var result = this.expression.execute(env);

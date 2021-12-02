@@ -2,7 +2,7 @@ package ltd.fdsa.job.admin.jpa.service;
 
 import ltd.fdsa.database.service.DataAccessService;
 import ltd.fdsa.job.admin.jpa.entity.SystemUser;
-import ltd.fdsa.ds.api.model.Result;
+import ltd.fdsa.ds.core.model.Result;
 
 
 import javax.servlet.http.HttpServletRequest;

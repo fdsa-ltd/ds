@@ -2,11 +2,11 @@ package ltd.fdsa.job.admin.trigger;
 
 import lombok.var;
 import ltd.fdsa.core.context.ApplicationContextHolder;
-import ltd.fdsa.ds.api.job.enums.ExecutorBlockStrategyEnum;
-import ltd.fdsa.ds.api.job.executor.Executor;
-import ltd.fdsa.ds.api.job.model.TriggerParam;
-import ltd.fdsa.ds.api.model.Result;
-import ltd.fdsa.ds.api.util.I18nUtil;
+import ltd.fdsa.ds.core.job.enums.ExecutorBlockStrategyEnum;
+import ltd.fdsa.ds.core.job.executor.Executor;
+import ltd.fdsa.ds.core.job.model.TriggerParam;
+import ltd.fdsa.ds.core.model.Result;
+import ltd.fdsa.ds.core.util.I18nUtil;
 import ltd.fdsa.job.admin.jpa.entity.JobGroup;
 import ltd.fdsa.job.admin.jpa.entity.JobInfo;
 import ltd.fdsa.job.admin.jpa.entity.JobLog;

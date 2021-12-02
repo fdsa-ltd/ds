@@ -1,6 +1,6 @@
 package ltd.fdsa.job.admin.config;
 
-import ltd.fdsa.ds.api.job.coordinator.Coordinator;
+import ltd.fdsa.ds.core.job.coordinator.Coordinator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.remoting.caucho.HessianServiceExporter;

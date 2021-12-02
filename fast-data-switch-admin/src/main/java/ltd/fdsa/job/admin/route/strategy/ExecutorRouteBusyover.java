@@ -2,10 +2,10 @@ package ltd.fdsa.job.admin.route.strategy;
 
 import ltd.fdsa.job.admin.route.ExecutorRouter;
 import ltd.fdsa.job.admin.scheduler.JobScheduler;
-import ltd.fdsa.ds.api.job.executor.Executor;
-import ltd.fdsa.ds.api.model.Result;
-import ltd.fdsa.ds.api.job.model.TriggerParam;
-import ltd.fdsa.ds.api.util.I18nUtil;
+import ltd.fdsa.ds.core.job.executor.Executor;
+import ltd.fdsa.ds.core.model.Result;
+import ltd.fdsa.ds.core.job.model.TriggerParam;
+import ltd.fdsa.ds.core.util.I18nUtil;
 
 
 import java.util.List;

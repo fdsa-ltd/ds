@@ -4,8 +4,8 @@ package ltd.fdsa.job.admin.controller;
 import ltd.fdsa.job.admin.jpa.entity.JobInfo;
 import ltd.fdsa.job.admin.jpa.entity.JobTask;
 import ltd.fdsa.job.admin.jpa.service.JobInfoService;
-import ltd.fdsa.ds.api.model.Result;
-import ltd.fdsa.ds.api.util.I18nUtil;
+import ltd.fdsa.ds.core.model.Result;
+import ltd.fdsa.ds.core.util.I18nUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

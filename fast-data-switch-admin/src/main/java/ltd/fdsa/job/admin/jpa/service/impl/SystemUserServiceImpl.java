@@ -9,9 +9,9 @@ import ltd.fdsa.job.admin.jpa.entity.SystemUser;
 import ltd.fdsa.job.admin.jpa.repository.reader.SystemUserReader;
 import ltd.fdsa.job.admin.jpa.repository.writer.SystemUserWriter;
 import ltd.fdsa.job.admin.jpa.service.SystemUserService;
-import ltd.fdsa.ds.api.model.Result;
-import ltd.fdsa.ds.api.util.CookieUtil;
-import ltd.fdsa.ds.api.util.I18nUtil;
+import ltd.fdsa.ds.core.model.Result;
+import ltd.fdsa.ds.core.util.CookieUtil;
+import ltd.fdsa.ds.core.util.I18nUtil;
 
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;

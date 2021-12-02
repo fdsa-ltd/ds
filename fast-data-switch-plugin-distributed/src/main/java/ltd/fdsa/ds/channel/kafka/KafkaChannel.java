@@ -2,8 +2,8 @@ package ltd.fdsa.ds.channel.kafka;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.api.model.Record;
-import ltd.fdsa.ds.api.pipeline.Channel;
+import ltd.fdsa.ds.core.model.Record;
+import ltd.fdsa.ds.core.pipeline.Channel;
 import ltd.fdsa.ds.channel.http.HttpClient;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;

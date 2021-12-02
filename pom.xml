@@ -4,7 +4,6 @@
     <groupId>ltd.fdsa</groupId>
     <artifactId>fast-data-switch</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>fast-data-switch</name>
     <description>聚合和父模块，定义依赖包，插件版本，公共配置信息</description>
     <packaging>pom</packaging>
     <parent>
@@ -14,7 +13,7 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <modules>
-        <module>fast-data-switch-api</module>
+        <module>fast-data-switch-core</module>
         <module>fast-data-switch-admin</module>
         <module>fast-data-switch-web</module>
         <module>fast-data-switch-plugin</module>
@@ -71,8 +70,6 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
-
-
     <dependencyManagement>
         <dependencies>
 
@@ -148,4 +145,14 @@
         </dependencies>
     </dependencyManagement>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 </project>

@@ -20,7 +20,6 @@ public class Column  {
         this.value = value;
     }
 
-
     public byte[] toByteArray() {
         try {
             var dataItem = CborObject.createFromJavaObject(this.value).toCborByteArray();

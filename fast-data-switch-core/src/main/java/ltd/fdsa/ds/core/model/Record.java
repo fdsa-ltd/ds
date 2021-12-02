@@ -44,7 +44,6 @@ public class Record {
         return this.columns == null || this.columns.size() <= 0;
     }
 
-
     public Map<String, Object> toNormalMap() {
         return this.columns;
     }

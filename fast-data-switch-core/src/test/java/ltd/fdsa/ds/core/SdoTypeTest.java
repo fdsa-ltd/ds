@@ -4,17 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 @Slf4j
-public class DataTypeTest {
+public class SdoTypeTest {
 
     @Test
-    public void TestData() {
-
-
+    public void testPrint() {
+        System.out.println("test");
     }
-
-    @Test
-    public void TestBoolData() {
-
-    }
-
 }

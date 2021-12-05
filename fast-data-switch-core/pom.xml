@@ -23,7 +23,7 @@
         <dependency>
             <groupId>ltd.fdsa</groupId>
             <artifactId>self-describing-data-object</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.0-RELEASE</version>
         </dependency>
         <dependency>
             <groupId>com.google.iot.cbor</groupId>

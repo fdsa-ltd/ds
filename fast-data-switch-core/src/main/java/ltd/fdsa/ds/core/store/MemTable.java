@@ -14,41 +14,40 @@ import java.util.Map;
  */
 public class MemTable {
     final static int MAX_SIZE = 1024;
-    final static int WAL_SIZE = 1024 * 1024;
-    // memory cache
-    final Map<String, RingBuffer> latestCache;
-    // memory index
-    final TopicIndex topicIndex;
+    // memory buffer cache
+    private final Map<String, RingBuffer> ringBufferMap;
+    // memory topic index
+    private final TopicIndex topicIndex;
 
     public MemTable() {
         this.topicIndex = TopicIndex.loadTopicIndex("topics");
         var topics = this.topicIndex.topics();
-        this.latestCache = new HashMap<>(topics.size());
+        this.ringBufferMap = new HashMap<>(topics.size());
         for (var topic : topics) {
             var first = this.topicIndex.getFirst(topic);
-            this.latestCache.put(topic, new RingBuffer(first.offset + first.size, MAX_SIZE));
+            this.ringBufferMap.put(topic, new RingBuffer(first.offset + first.size, MAX_SIZE));
         }
     }
 
     public boolean put(String key, byte[] data) {
         if (!this.topicIndex.ensureKey(key)) {
-            this.latestCache.put(key, new RingBuffer(-1, MAX_SIZE));
+            this.ringBufferMap.put(key, new RingBuffer(-1, MAX_SIZE));
         }
         var result = WriteAppendLog.getWriteAppendLogs(this.topicIndex).append(data);
         if (result) {
             DataBlock dataBlock = new DataBlock(System.currentTimeMillis(), data);
-            var offset = this.latestCache.get(key).push(dataBlock);
+            var offset = this.ringBufferMap.get(key).push(dataBlock);
             return true;
         }
         return false;
     }
 
     public DataBlock get(String key, long offset) {
-        if (!this.latestCache.containsKey(key)) {
+        if (!this.ringBufferMap.containsKey(key)) {
             return getFromFile(key, offset);
         }
         // 最近的数据
-        var buffer = this.latestCache.get(key);
+        var buffer = this.ringBufferMap.get(key);
         if (offset >= buffer.getOffset() && offset <= buffer.getOffset() + buffer.getSize()) {
             return buffer.pull(offset);
         }

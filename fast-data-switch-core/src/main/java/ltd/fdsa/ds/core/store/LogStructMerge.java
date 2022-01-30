@@ -30,13 +30,19 @@ public class LogStructMerge {
             .expireAfterAccess(Duration.ofMinutes(10))
             .build();
 
-    final FileChannelUtil lsmFile;
-    final byte[] magic;
-    final byte[] version;
-    final String topic;
-    final long offset;
-    final long startTime;
-    final long headerSize;
+    private final FileChannelUtil lsmFile;
+
+    private final byte[] magic;
+
+    private final byte[] version;
+
+    private final String topic;
+
+    private final long offset;
+
+    private final long startTime;
+
+    private final long headerSize;
 
     public LogStructMerge(FileChannel lsmChannel) {
         this.lsmFile = FileChannelUtil.getInstance(lsmChannel);
@@ -78,7 +84,7 @@ public class LogStructMerge {
     }
 
     boolean push(byte[] data) {
-return         push( new DataBlock(data));
+        return push(new DataBlock(data));
     }
 
     boolean push(DataBlock dataBlock) {

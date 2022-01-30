@@ -4,14 +4,17 @@ import lombok.var;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
-/*
 
-ssssssss
-*/
+/**
+ * <p>
+ *
+ * @author zhumingwu
+ * @since 2022/1/30 13:23
+ */
 public class RingBuffer {
-    final DataBlock[] buffer;
-    final int size;
-    final AtomicLong counter;
+    private final DataBlock[] buffer;
+    private final int size;
+    private final AtomicLong counter;
 
     public RingBuffer(long initialValue, int size) {
         if (size > Integer.MAX_VALUE) {

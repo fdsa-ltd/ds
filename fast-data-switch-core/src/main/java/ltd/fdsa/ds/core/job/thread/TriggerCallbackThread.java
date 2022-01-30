@@ -1,13 +1,14 @@
 package ltd.fdsa.ds.core.job.thread;
 
+import com.caucho.hessian.io.SerializerFactory;
 import lombok.extern.slf4j.Slf4j;
-import ltd.fdsa.ds.core.HessianSerializer;
+import ltd.fdsa.ds.core.serializer.HessianSerializer;
 import ltd.fdsa.ds.core.job.coordinator.Coordinator;
 import ltd.fdsa.ds.core.job.enums.RegistryConfig;
 import ltd.fdsa.ds.core.job.log.JobFileAppender;
 import ltd.fdsa.ds.core.job.model.HandleCallbackParam;
 import ltd.fdsa.ds.core.model.Result;
-import ltd.fdsa.ds.core.util.FileUtil;
+import ltd.fdsa.ds.core.util.FileUtils;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -204,7 +205,7 @@ public class TriggerCallbackThread {
         }
 
         // append file
-        byte[] callbackParamList_bytes = new HessianSerializer().serialize(callbackParamList).getBytes(StandardCharsets.UTF_8);
+        byte[] callbackParamList_bytes = HessianSerializer.serialize(callbackParamList).getBytes(StandardCharsets.UTF_8);
 
         File callbackLogFile =
                 new File(failCallbackFileName.replace("{x}", String.valueOf(System.currentTimeMillis())));
@@ -222,7 +223,7 @@ public class TriggerCallbackThread {
                 }
             }
         }
-        FileUtil.writeFileContent(callbackLogFile, callbackParamList_bytes);
+        FileUtils.writeFileContent(callbackLogFile, callbackParamList_bytes);
     }
 
     private void retryFailCallbackFile() {
@@ -243,11 +244,8 @@ public class TriggerCallbackThread {
 
         // load and clear file, retry
         for (File callbackLogFile : callbackLogPath.listFiles()) {
-            byte[] callbackParamList_bytes = FileUtil.readFileContent(callbackLogFile);
-            List<HandleCallbackParam> callbackParamList =
-                    (List<HandleCallbackParam>)
-                            new HessianSerializer().deserialize(new String(callbackParamList_bytes), HandleCallbackParam.class);
-
+            byte[] callbackParamList_bytes = FileUtils.readFileContent(callbackLogFile);
+            List<HandleCallbackParam> callbackParamList = HessianSerializer.deserialize(new String(callbackParamList_bytes), List.class);
             callbackLogFile.delete();
             doCallback(callbackParamList);
         }

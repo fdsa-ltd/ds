@@ -7,10 +7,8 @@ import ltd.fdsa.ds.core.util.FileChannelUtil;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Fast to write message data into wal file
@@ -23,72 +21,69 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 2022/1/27 17:40
  */
 public class WriteAppendLog {
-    private static short WRITE_APPEND_LOG_SIZE = 4;
-    private static WriteAppendLog[] WRITE_APPEND_LOGS = new WriteAppendLog[WRITE_APPEND_LOG_SIZE];
-    private static AtomicInteger CURRENT_WAL = new AtomicInteger(0);
 
-    static {
-        for (int i = 0; i < WRITE_APPEND_LOG_SIZE; i++) {
-            WRITE_APPEND_LOGS[i] = newInstance(MemTable.WAL_SIZE);
-        }
+    private final static int WAL_SIZE = 1024 * 1024;
+    private final static short WRITE_APPEND_LOG_SIZE = 4;
+    private final static FileChannel[] WRITE_APPEND_LOGS = new FileChannel[WRITE_APPEND_LOG_SIZE];
+
+
+    private int index = -1;
+
+    WriteAppendLog() {
     }
 
-    private final AtomicInteger counter = new AtomicInteger(0);
-    private final FileChannel fileChannel;
-    private final int size;
-
-    public WriteAppendLog(FileChannel fileChannel, int size) {
-        this.fileChannel = fileChannel;
-        this.size = size;
-    }
-
-    boolean tooBig() {
-        return this.counter.get() > size;
-    }
-
-    public static WriteAppendLog getWriteAppendLogs(TopicIndex topicIndex) {
-        var writeAppendLog = WRITE_APPEND_LOGS[CURRENT_WAL.get() % WRITE_APPEND_LOG_SIZE];
-        if (writeAppendLog.tooBig()) {
-            writeAppendLog.mergeTo(null);
-            return WRITE_APPEND_LOGS[CURRENT_WAL.incrementAndGet() % WRITE_APPEND_LOG_SIZE];
-        }
-        return writeAppendLog;
-    }
-
-    static WriteAppendLog newInstance(int size) {
-        var path = Paths.get("./", "data", "wal", System.currentTimeMillis() + ".wal");
+    long size() {
         try {
-            if (!Files.exists(path)) {
-                Files.createDirectory(path.getParent());
-            }
-            var fileChannel = FileChannel.open(path, StandardOpenOption.APPEND);
-            return new WriteAppendLog(fileChannel, size);
+            return this.getCurrentFile().size();
         } catch (IOException e) {
-            return null;
+            return -1;
         }
+    }
+
+    private void ensureCapacityInternal(int minCapacity) {
+        if (this.size() < 0 || this.size() + minCapacity > WAL_SIZE) {
+
+        }
+    }
+
+    private void grow() {
+        this.index++;
+        if (this.index >= WRITE_APPEND_LOG_SIZE) {
+            this.index %= WRITE_APPEND_LOG_SIZE;
+        }
+
+        var path = Paths.get("./", "data", "wal", this.index + ".wal");
+        try {
+            WRITE_APPEND_LOGS[this.index] = FileChannel.open(path, StandardOpenOption.CREATE_NEW);
+        } catch (IOException e) {
+        }
+
+    }
+
+    FileChannel getCurrentFile() {
+        return WRITE_APPEND_LOGS[index];
     }
 
 
     public boolean append(byte[] data) {
-        var expect = this.counter.get();
-        if (this.counter.compareAndSet(expect, expect + data.length)) {
-            var crc = CRCUtil.crc32(data);
-            var timestamp = System.currentTimeMillis();
-            var buffer = ByteBuffer.allocate(data.length + 12);
-            buffer.put(crc);
-            buffer.putLong(timestamp);
-            buffer.put(data);
-            try {
-                fileChannel.write(buffer);
-            } catch (IOException e) {
-                return false;
-            }
+        var crc = CRCUtil.crc32(data);
+        var timestamp = System.currentTimeMillis();
+        var buffer = ByteBuffer.allocate(data.length + 12);
+        buffer.put(crc);
+        buffer.putLong(timestamp);
+        buffer.put(data);
+        ensureCapacityInternal(data.length);
+        try {
+            this.getCurrentFile().write(buffer);
+        } catch (IOException e) {
+            return false;
         }
         return false;
     }
 
+    // todo
     boolean mergeTo(TopicIndex topicIndex) {
-        var fileChannelUtil = FileChannelUtil.getInstance(this.fileChannel);
+        var fileChannelUtil = FileChannelUtil.getInstance(this.getCurrentFile());
         var crc = fileChannelUtil.read(4, 0);
         var timestamp = fileChannelUtil.readLong();
         var content = fileChannelUtil.readVarByte();

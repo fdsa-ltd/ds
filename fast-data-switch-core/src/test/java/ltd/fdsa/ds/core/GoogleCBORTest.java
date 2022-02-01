@@ -2,7 +2,10 @@ package ltd.fdsa.ds.core;
 
 import com.google.iot.cbor.*;
 import lombok.extern.slf4j.Slf4j;
+import lombok.var;
 import org.junit.Test;
+
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 public class GoogleCBORTest {
@@ -14,7 +17,6 @@ public class GoogleCBORTest {
                 (byte) 0xa2, 0x61, 0x61, 0x01, 0x61,
                 0x62, (byte) 0x82, 0x02, 0x03};
         CborMap map = CborMap.createFromCborByteArray(cborBytes);
-
         // Prints out the line `toString: 55799({"a":1,"b":[2,3]})`
         System.out.println("toString: " + map.toString());
 
@@ -44,9 +46,13 @@ public class GoogleCBORTest {
         map.put("name", CborTextString.create("zhumingwu"));
         map.put("age", CborInteger.create(18));
         map.put("types", CborArray.createFromJavaObject(new String[]{"男", "富", "帅"}));
-        System.out.println("toString: " + map.toString());
-        System.out.println("toJsonString: " + map.toJsonString());
-        System.out.println("toCborByteArray: " + map.toCborByteArray());
+        System.out.println("toString: " + map.toString().getBytes(StandardCharsets.UTF_8).length);
+        System.out.println("toByteArray: " + map.toCborByteArray().length);
+        var buf = map.toCborByteArray();
+        var len = buf.length;
+        for (int i = 0; i < len; i++) {
+            System.out.println("toCborByteArray: " + buf[i]);
+        }
     }
 
 }

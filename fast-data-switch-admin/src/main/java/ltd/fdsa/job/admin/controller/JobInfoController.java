@@ -69,7 +69,7 @@ public class JobInfoController {
         // filter group
         List<JobGroup> jobGroupList = filterJobGroupByRole(request, jobGroupList_all);
         if (jobGroupList == null || jobGroupList.size() == 0) {
-            throw new FastDataSwitchException(I18nUtil.getString("jobgroup_empty"));
+            throw new FastDataSwitchException(I18nUtil.getInstance("").getString("jobgroup_empty"));
         }
 
         model.addAttribute("JobGroupList", jobGroupList);
@@ -151,7 +151,7 @@ public class JobInfoController {
                 }
             }
         } catch (ParseException e) {
-            return Result.fail(500, I18nUtil.getString("jobinfo_field_cron_invalid"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("jobinfo_field_cron_invalid"));
         }
         return Result.success(result);
     }

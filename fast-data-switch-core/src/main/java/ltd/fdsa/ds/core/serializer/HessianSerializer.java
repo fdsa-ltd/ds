@@ -2,40 +2,40 @@ package ltd.fdsa.ds.core.serializer;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.hessian.io.HessianProtocolException;
-import com.caucho.hessian.io.SerializerFactory;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.core.job.model.HandleCallbackParam;
 
 import java.io.*;
-import java.util.Base64;
 
 @Slf4j
-public class HessianSerializer implements Serializer {
+public class HessianSerializer implements Serializer<Object> {
 
-    private static SerializerFactory SERIALIZER_FACTORY = SerializerFactory.createDefault();
-
-
-    public static String serialize(Object obj) {
+    @Override
+    public void write(DataOutput dataOutput, Object input) throws IOException {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Hessian2Output output = new Hessian2Output(outputStream);
-            output.writeObject(obj);
+            output.writeObject(input);
+            dataOutput.write(outputStream.toByteArray());
             output.close();
-            var result = Base64.getEncoder().encodeToString(outputStream.toByteArray());
-            log.info("serialize:{}", result);
-            return result;
         } catch (IOException e) {
             log.error("serialize failed:", e);
-            return "";
         }
     }
 
-    public static <T> T deserialize(String data, Class<T> clazz) {
-        log.info("deserialize:{}", data);
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(data))) {
-            Hessian2Input input = new Hessian2Input(new BufferedInputStream(inputStream));
-            var result = (T) input.readObject();
+    @Override
+    public Object read(DataInput dataInput) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        try {
+            var b = dataInput.readByte();
+            outputStream.write(b);
+        } catch (IOException e) {
+        }
+
+        try {
+
+            Hessian2Input input = new Hessian2Input(new ByteArrayInputStream(outputStream.toByteArray()));
+            var result = input.readObject();
             input.close();
             return result;
         } catch (IOException e) {
@@ -45,23 +45,22 @@ public class HessianSerializer implements Serializer {
     }
 
     @Override
-    public void write(DataOutput dataOutput, Object input) throws IOException {
-
-
-        try {
-            Hessian2Output output = new Hessian2Output();
+    public byte[] serialize(Object input) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            Hessian2Output output = new Hessian2Output(outputStream);
             output.writeObject(input);
             output.close();
+            return outputStream.toByteArray();
         } catch (IOException e) {
             log.error("serialize failed:", e);
+            return new byte[0];
         }
     }
 
     @Override
-    public Object read(DataInput dataInput) throws IOException {
-
+    public Object deserialize(byte[] data, Class<Object> clazz) {
         try {
-            Hessian2Input input = new Hessian2Input(new ByteArrayInputStream(new byte[0]));
+            Hessian2Input input = new Hessian2Input(new ByteArrayInputStream(data));
             var result = input.readObject();
             input.close();
             return result;

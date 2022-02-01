@@ -8,7 +8,7 @@ import ltd.fdsa.ds.core.job.enums.HttpCode;
 import ltd.fdsa.ds.core.job.model.HandleCallbackParam;
 import ltd.fdsa.ds.core.model.NewService;
 import ltd.fdsa.ds.core.model.Result;
-import ltd.fdsa.ds.core.props.DefaultProps;
+import ltd.fdsa.ds.core.config.DefaultConfiguration;
 import ltd.fdsa.ds.core.util.I18nUtil;
 import ltd.fdsa.job.admin.context.CoordinatorContext;
 import ltd.fdsa.job.admin.jpa.entity.JobInfo;
@@ -44,7 +44,7 @@ public class CoordinatorImpl implements Coordinator {
 
     @Override
     public Result<String> createProcess(Map<String, String> config) {
-        var props = DefaultProps.fromMaps(config);
+        var props = DefaultConfiguration.fromMaps(config);
         var clazz = props.get("class");
         var name = props.get("name");
         var list = context.getExecutorsByProcess(clazz);
@@ -86,7 +86,7 @@ public class CoordinatorImpl implements Coordinator {
                     && JobInfo.getChildJobId().trim().length() > 0) {
                 callbackMsg =
                         "<br><br><span style=\"color:#00c0ef;\" > >>>>>>>>>>>"
-                                + I18nUtil.getString("jobconf_trigger_child_run")
+                                + I18nUtil.getInstance("").getString("jobconf_trigger_child_run")
                                 + "<<<<<<<<<<< </span><br>";
 
                 String[] childJobIds = JobInfo.getChildJobId().split(",");
@@ -105,18 +105,18 @@ public class CoordinatorImpl implements Coordinator {
                         // add msg
                         callbackMsg +=
                                 MessageFormat.format(
-                                        I18nUtil.getString("jobconf_callback_child_msg1"),
+                                        I18nUtil.getInstance("").getString("jobconf_callback_child_msg1"),
                                         (i + 1),
                                         childJobIds.length,
                                         childJobIds[i],
                                         (triggerChildResult.getCode() == HttpCode.OK.getCode()
-                                                ? I18nUtil.getString("system_success")
-                                                : I18nUtil.getString("system_fail")),
+                                                ? I18nUtil.getInstance("").getString("system_success")
+                                                : I18nUtil.getInstance("").getString("system_fail")),
                                         triggerChildResult.getMessage());
                     } else {
                         callbackMsg +=
                                 MessageFormat.format(
-                                        I18nUtil.getString("jobconf_callback_child_msg2"),
+                                        I18nUtil.getInstance("").getString("jobconf_callback_child_msg2"),
                                         (i + 1),
                                         childJobIds.length,
                                         childJobIds[i]);

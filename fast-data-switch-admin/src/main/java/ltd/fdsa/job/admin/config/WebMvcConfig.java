@@ -1,6 +1,7 @@
 package ltd.fdsa.job.admin.config;
 
 
+import ltd.fdsa.ds.core.util.I18nUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.ViewResolver;
@@ -16,11 +17,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Bean
     public ViewResolver viewResolver() {
         FreeMarkerViewResolver resolver = new FreeMarkerViewResolver();
-        resolver.setCache(true);
+        resolver.setCache(false);
         resolver.setPrefix("");
         resolver.setSuffix(".ftl");
+        resolver.getAttributesMap().put("i18n", I18nUtil.getInstance(""));
         resolver.setContentType("text/html; charset=UTF-8");
-        resolver.setExposeContextBeansAsAttributes(true);
         return resolver;
     }
 

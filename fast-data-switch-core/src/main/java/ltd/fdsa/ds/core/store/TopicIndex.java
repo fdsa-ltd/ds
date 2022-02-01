@@ -3,62 +3,93 @@ package ltd.fdsa.ds.core.store;
 import lombok.var;
 import ltd.fdsa.ds.core.util.FileChannelUtil;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+
 /**
  * The map of topic and file id
  * <p>fast to get file id of one topic
  *
  * @author zhumingwu
  * @since 2022/1/27 17:41
- */ 
+ */
 public class TopicIndex {
     private static TopicIndex instance;
     private final Map<String, SortedOffset> fileIndex = new HashMap<>();
-    private final FileChannelUtil file;
 
-    TopicIndex(FileChannel fileChannel) {
-        this.file = FileChannelUtil.getInstance(fileChannel);
-        load();
+    TopicIndex() {
+        var root = new File("./data/lsm/");
+        var files = listAllFiles(root, new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return (name.endsWith("topics.idx"));
+            }
+        });
+        for (var item : files) {
+            FileChannel fileChannel = null;
+            try {
+                fileChannel = FileChannel.open(item.toPath(), StandardOpenOption.READ);
+                load(FileChannelUtil.getInstance(fileChannel));
+            } catch (IOException e) {
+
+            } finally {
+                if (fileChannel != null) {
+                    try {
+                        fileChannel.close();
+                    } catch (IOException e) {
+
+                    }
+                    fileChannel = null;
+                }
+            }
+        }
+        for (var entry : this.fileIndex.values()) {
+            entry.sort();
+        }
     }
 
-    public static TopicIndex loadTopicIndex(String fileName) {
-        if (instance == null) {
-            try {
-                var path = Paths.get("./", "data", "lsm", fileName + ".idx");
-                instance = new TopicIndex(FileChannel.open(path, StandardOpenOption.READ));
-            } catch (IOException e) {
-                return null;
+    private List<File> listAllFiles(File root, FilenameFilter filter) {
+        List<File> list = new LinkedList<>();
+        {
+            for (var file : root.listFiles()) {
+                if (file.isDirectory()) {
+                    list.addAll(listAllFiles(file, filter));
+                }
+                if (filter.accept(file, file.getName())) {
+                    list.add(file);
+                }
             }
+        }
+        return list;
+    }
+
+    public static TopicIndex loadTopicIndex() {
+        if (instance == null) {
+            instance = new TopicIndex();
         }
         return instance;
     }
 
-    private void load() {
+    private void load(FileChannelUtil file){
         while (true) {
             // topic
-            var length = (int) this.file.readVLen();
+            var length = (int) file.readVLen();
             if (length <= 0) {
                 break;
             }
-            var data = this.file.read(length);
+            var data = file.read(length);
             var topic = new String(data);
-            if (!this.fileIndex.containsKey(topic)) {
-                this.fileIndex.put(topic, new SortedOffset());
-            }
-            //
-            var offset = this.file.readVLen();
-            var size = this.file.readVLen();
-            var fileId = this.file.readVLen();
+            this.ensureKey(topic);
+            // offset and file id
+            var offset = file.readVLen();
+            var size = file.readVLen();
+            var fileId = file.readVLen();
             var element = new SortedOffset.OffsetElement(offset, (int) size, fileId);
             this.fileIndex.get(topic).add(element);
-        }
-        for (var entry : this.fileIndex.values()) {
-            entry.sort();
         }
     }
 

@@ -146,6 +146,16 @@ public class TestStorageSerialization {
             }
 
             @Override
+            public byte[] serialize(Point input) {
+                return new byte[0];
+            }
+
+            @Override
+            public Point deserialize(byte[] data, Class<Point> clazz) {
+                return null;
+            }
+
+            @Override
             public int getWeight(Point instance) {
                 return 0;
             }
@@ -173,6 +183,16 @@ public class TestStorageSerialization {
             }
 
             @Override
+            public byte[] serialize(Point[] input) {
+                return new byte[0];
+            }
+
+            @Override
+            public Point[] deserialize(byte[] data, Class<Point[]> clazz) {
+                return new Point[0];
+            }
+
+            @Override
             public int getWeight(Point[] instance) {
                 return 0;
             }
@@ -189,6 +209,16 @@ public class TestStorageSerialization {
             @Override
             public ImplementsA read(DataInput dataInput) throws IOException {
                 return new ImplementsA(dataInput.readInt());
+            }
+
+            @Override
+            public byte[] serialize(ImplementsA input) {
+                return new byte[0];
+            }
+
+            @Override
+            public ImplementsA deserialize(byte[] data, Class<ImplementsA> clazz) {
+                return null;
             }
 
             @Override
@@ -213,6 +243,16 @@ public class TestStorageSerialization {
             @Override
             public A read(DataInput dataInput) throws IOException {
                 return new ImplementsA(dataInput.readInt());
+            }
+
+            @Override
+            public byte[] serialize(A input) {
+                return new byte[0];
+            }
+
+            @Override
+            public A deserialize(byte[] data, Class<A> clazz) {
+                return null;
             }
 
             @Override

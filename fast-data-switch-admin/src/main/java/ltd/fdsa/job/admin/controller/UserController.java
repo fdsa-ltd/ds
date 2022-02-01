@@ -72,20 +72,20 @@ public class UserController {
         // valid username
         if (!StringUtils.hasText(systemUser.getName())) {
             return Result.fail(500,
-                    I18nUtil.getString("system_please_input") + I18nUtil.getString("user_username"));
+                    I18nUtil.getInstance("").getString("system_please_input") + I18nUtil.getInstance("").getString("user_username"));
         }
         systemUser.setName(systemUser.getName().trim());
         if (!(systemUser.getName().length() >= 4 && systemUser.getName().length() <= 20)) {
-            return Result.fail(500, I18nUtil.getString("system_lengh_limit") + "[4-20]");
+            return Result.fail(500, I18nUtil.getInstance("").getString("system_lengh_limit") + "[4-20]");
         }
         // valid password
         if (!StringUtils.hasText(systemUser.getPassword())) {
             return Result.fail(500,
-                    I18nUtil.getString("system_please_input") + I18nUtil.getString("user_password"));
+                    I18nUtil.getInstance("").getString("system_please_input") + I18nUtil.getInstance("").getString("user_password"));
         }
         systemUser.setPassword(systemUser.getPassword().trim());
         if (!(systemUser.getPassword().length() >= 4 && systemUser.getPassword().length() <= 20)) {
-            return Result.fail(500, I18nUtil.getString("system_lengh_limit") + "[4-20]");
+            return Result.fail(500, I18nUtil.getInstance("").getString("system_lengh_limit") + "[4-20]");
         }
         // md5 password
         systemUser.setPassword(DigestUtils.md5DigestAsHex(systemUser.getPassword().getBytes()));
@@ -93,7 +93,7 @@ public class UserController {
         // check repeat
         SystemUser existUser = systemUserService.loadByUserName(systemUser.getName());
         if (existUser != null) {
-            return Result.fail(500, I18nUtil.getString("user_username_repeat"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("user_username_repeat"));
         }
 
         // write
@@ -109,14 +109,14 @@ public class UserController {
         // avoid opt login seft
         SystemUser loginUser = (SystemUser) request.getAttribute(SystemUserService.USER_LOGIN_IDENTITY);
         if (loginUser.getName().equals(systemUser.getName())) {
-            return Result.fail(500, I18nUtil.getString("user_update_loginuser_limit"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("user_update_loginuser_limit"));
         }
 
         // valid password
         if (StringUtils.hasText(systemUser.getPassword())) {
             systemUser.setPassword(systemUser.getPassword().trim());
             if (!(systemUser.getPassword().length() >= 4 && systemUser.getPassword().length() <= 20)) {
-                return Result.fail(500, I18nUtil.getString("system_lengh_limit") + "[4-20]");
+                return Result.fail(500, I18nUtil.getInstance("").getString("system_lengh_limit") + "[4-20]");
             }
             // md5 password
             systemUser.setPassword(DigestUtils.md5DigestAsHex(systemUser.getPassword().getBytes()));
@@ -137,7 +137,7 @@ public class UserController {
         // avoid opt login seft
         SystemUser loginUser = (SystemUser) request.getAttribute(SystemUserServiceImpl.USER_LOGIN_IDENTITY);
         if (loginUser.getId() == id) {
-            return Result.fail(500, I18nUtil.getString("user_update_loginuser_limit"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("user_update_loginuser_limit"));
         }
 
         systemUserService.deleteById(id);
@@ -154,7 +154,7 @@ public class UserController {
         }
         password = password.trim();
         if (!(password.length() >= 4 && password.length() <= 20)) {
-            return Result.fail(500, I18nUtil.getString("system_lengh_limit") + "[4-20]");
+            return Result.fail(500, I18nUtil.getInstance("").getString("system_lengh_limit") + "[4-20]");
         }
 
         // md5 password

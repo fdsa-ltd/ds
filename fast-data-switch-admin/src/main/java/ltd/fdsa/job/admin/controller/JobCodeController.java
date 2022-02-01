@@ -31,7 +31,7 @@ public class JobCodeController {
 //        List<JobLogGlue> jobLogGlues = JobLogGlueDao.findByJobId(jobId);
 
         if (jobInfo == null) {
-            throw new RuntimeException(I18nUtil.getString("jobinfo_glue_jobid_invalid"));
+            throw new RuntimeException(I18nUtil.getInstance("").getString("jobinfo_glue_jobid_invalid"));
         }
 
         model.addAttribute("jobInfo", jobInfo);
@@ -43,14 +43,14 @@ public class JobCodeController {
     public Result<String> save(Model model, int id, String glueSource, String glueRemark) {
         // valid
         if (glueRemark == null) {
-            return Result.fail(500, (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_glue_remark")));
+            return Result.fail(500, (I18nUtil.getInstance("").getString("system_please_input") + I18nUtil.getInstance("").getString("jobinfo_glue_remark")));
         }
         if (glueRemark.length() < 4 || glueRemark.length() > 100) {
-            return Result.fail(500, I18nUtil.getString("jobinfo_glue_remark_limit"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("jobinfo_glue_remark_limit"));
         }
         JobInfo exists_jobInfo = JobInfoDao.findById(id).get();
         if (exists_jobInfo == null) {
-            return Result.fail(500, I18nUtil.getString("jobinfo_glue_jobid_invalid"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("jobinfo_glue_jobid_invalid"));
         }
 
 

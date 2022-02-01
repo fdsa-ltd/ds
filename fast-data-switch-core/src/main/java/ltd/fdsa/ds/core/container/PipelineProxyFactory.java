@@ -3,7 +3,7 @@ package ltd.fdsa.ds.core.container;
 import com.google.common.base.Strings;
 import lombok.var;
 import ltd.fdsa.ds.core.pipeline.Pipeline;
-import ltd.fdsa.ds.core.props.Props;
+import ltd.fdsa.ds.core.config.Configuration;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.ProxyFactory;
@@ -21,7 +21,7 @@ public class PipelineProxyFactory {
     }
 
 
-    public Pipeline getProxy(Props config, Object pipeline) {
+    public Pipeline getProxy(Configuration config, Object pipeline) {
         if (pipeline == null) {
             throw new IllegalArgumentException();
         }
@@ -30,7 +30,7 @@ public class PipelineProxyFactory {
     }
 
     class PipelineInterceptor implements MethodInterceptor {
-        private final Props context;
+        private final Configuration context;
         private final Object pipeline;
         private final String name;
 
@@ -38,7 +38,7 @@ public class PipelineProxyFactory {
         protected final AtomicBoolean running = new AtomicBoolean(false);
         protected final List<Pipeline> nextSteps = new LinkedList<>();
 
-        public PipelineInterceptor(Props config, Object pipeline) {
+        public PipelineInterceptor(Configuration config, Object pipeline) {
             this.context = config;
             this.pipeline = pipeline;
             this.name = this.context.getString("name");
@@ -84,7 +84,7 @@ public class PipelineProxyFactory {
         }
 
 
-        private void loadPipelines(Props[] configurations) {
+        private void loadPipelines(Configuration[] configurations) {
             for (var configuration : configurations) {
                 var className = configuration.get("class");
                 if (Strings.isNullOrEmpty(className)) {

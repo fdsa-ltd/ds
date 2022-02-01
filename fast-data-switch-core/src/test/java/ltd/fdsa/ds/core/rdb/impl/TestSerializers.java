@@ -135,6 +135,16 @@ public class TestSerializers {
     }
 
     @Override
+    public byte[] serialize(Color input) {
+      return new byte[0];
+    }
+
+    @Override
+    public Color deserialize(byte[] data, Class<Color> clazz) {
+      return null;
+    }
+
+    @Override
     public void write(DataOutput output, Color input) {
 
     }
@@ -149,6 +159,16 @@ public class TestSerializers {
 
     @Override
     public Point read(DataInput input) {
+      return null;
+    }
+
+    @Override
+    public byte[] serialize(Point input) {
+      return new byte[0];
+    }
+
+    @Override
+    public Point deserialize(byte[] data, Class<Point> clazz) {
       return null;
     }
 
@@ -171,6 +191,16 @@ public class TestSerializers {
     }
 
     @Override
+    public byte[] serialize(Object input) {
+      return new byte[0];
+    }
+
+    @Override
+    public Object deserialize(byte[] data, Class clazz) {
+      return null;
+    }
+
+    @Override
     public void write(DataOutput output, Object input) {
 
     }
@@ -185,6 +215,16 @@ public class TestSerializers {
 
     @Override
     public Object read(DataInput input) {
+      return null;
+    }
+
+    @Override
+    public byte[] serialize(Object input) {
+      return new byte[0];
+    }
+
+    @Override
+    public Object deserialize(byte[] data, Class<Object> clazz) {
       return null;
     }
 
@@ -211,6 +251,16 @@ public class TestSerializers {
 
     @Override
     public AnInterface read(DataInput input) {
+      return null;
+    }
+
+    @Override
+    public byte[] serialize(AnInterface input) {
+      return new byte[0];
+    }
+
+    @Override
+    public AnInterface deserialize(byte[] data, Class<AnInterface> clazz) {
       return null;
     }
 

@@ -91,7 +91,7 @@ public class WriteAppendLog {
             var topic = new String(content);
             var offsetElement = topicIndex.getFirst(topic);
             var lsm = LogStructMerge.getInstance(offsetElement.position);
-            lsm.push(new DataBlock(timestamp, content));
+            lsm.push(new DataMessage(timestamp, content));
             offsetElement.size++;
         }
         return true;

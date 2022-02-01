@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
-import java.util.concurrent.Callable;
 
 
 /**
@@ -73,21 +72,21 @@ public class LogStructMerge {
         return FILE_HANDLER.getIfPresent(fileId);
     }
 
-    public DataBlock pull(long position) {
+    public DataMessage pull(long position) {
         var crc = this.lsmFile.read(4, position);
         var timeGap = this.lsmFile.readVLen();
         var content = this.lsmFile.readVarByte();
         if (CRCUtil.check(content, crc)) {
-            return new DataBlock(this.startTime + timeGap, content);
+            return new DataMessage(this.startTime + timeGap, content);
         }
         return pull(-1);
     }
 
     boolean push(byte[] data) {
-        return push(new DataBlock(data));
+        return push(new DataMessage(data));
     }
 
-    boolean push(DataBlock dataBlock) {
+    boolean push(DataMessage dataBlock) {
         var crc = CRCUtil.crc32(dataBlock.payload);
         var timeGap = dataBlock.timestamp - this.startTime;
         this.lsmFile.writeByte(crc);

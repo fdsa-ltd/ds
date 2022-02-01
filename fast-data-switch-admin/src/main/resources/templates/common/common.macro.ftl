@@ -12,8 +12,8 @@
 	<link rel="stylesheet" href="${request.contextPath}/static/adminlte/plugins/ekko-lightbox/ekko-lightbox.css">
 	<!-- 主题样式 -->
 	<link rel="stylesheet" href="${request.contextPath}/static/adminlte/dist/css/adminlte.min.css">
-	<#-- i18n -->
-	<#global I18n = I18nUtil.getMultiString()?eval />
+	<#-- i18n
+	<#global I18n = ${i18n.getMultiString()}?eval /> -->
 </#macro>
 
 <#macro commonScript>

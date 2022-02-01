@@ -7,17 +7,17 @@ package ltd.fdsa.ds.core.store;
  * @author zhumingwu
  * @since 2022/1/27 17:41
  */
-public class DataBlock {
+public class DataMessage {
 
     final long timestamp;
     final byte[] payload;
 
-    public DataBlock(long timestamp, byte[] payload) {
+    public DataMessage(long timestamp, byte[] payload) {
         this.timestamp = timestamp;
         this.payload = payload;
     }
 
-    public DataBlock(byte[] payload) {
+    public DataMessage(byte[] payload) {
         this.timestamp = System.currentTimeMillis();
         this.payload = payload;
     }

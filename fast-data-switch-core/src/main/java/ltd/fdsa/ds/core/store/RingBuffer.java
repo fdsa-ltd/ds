@@ -2,7 +2,6 @@ package ltd.fdsa.ds.core.store;
 
 import lombok.var;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -12,7 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @since 2022/1/30 13:23
  */
 public class RingBuffer {
-    private final DataBlock[] buffer;
+    private final DataMessage[] buffer;
     private final int size;
     private final AtomicLong counter;
 
@@ -23,7 +22,7 @@ public class RingBuffer {
 
         this.counter = new AtomicLong(initialValue);
         this.size = size;
-        this.buffer = new DataBlock[size];
+        this.buffer = new DataMessage[size];
     }
 
     public long getOffset() {
@@ -34,14 +33,14 @@ public class RingBuffer {
         return this.size;
     }
 
-    public DataBlock pull(long offset) {
+    public DataMessage pull(long offset) {
         if (offset > this.size) {
             offset %= this.size;
         }
         return this.buffer[(int) offset];
     }
 
-    public long push(DataBlock data) {
+    public long push(DataMessage data) {
         var offset = this.counter.incrementAndGet();
         if (offset > this.size) {
             offset %= this.size;

@@ -77,7 +77,7 @@ public class JobScheduler {
 
     private void initI18n() {
         for (ExecutorBlockStrategyEnum item : ExecutorBlockStrategyEnum.values()) {
-            item.setTitle(I18nUtil.getString("jobconf_block_".concat(item.name())));
+            item.setTitle(I18nUtil.getInstance("").getString("jobconf_block_".concat(item.name())));
         }
     }
 }

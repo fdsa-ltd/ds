@@ -409,6 +409,16 @@ public class TestStoreReader {
         }
 
         @Override
+        public byte[] serialize(Point input) {
+            return new byte[0];
+        }
+
+        @Override
+        public Point deserialize(byte[] data, Class<Point> clazz) {
+            return null;
+        }
+
+        @Override
         public void write(DataOutput output, Point input)
                 throws IOException {
             output.writeInt(input.x);

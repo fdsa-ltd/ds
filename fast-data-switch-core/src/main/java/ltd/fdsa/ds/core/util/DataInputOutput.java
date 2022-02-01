@@ -14,18 +14,14 @@
 
 package ltd.fdsa.ds.core.util;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.*;
 import java.util.Arrays;
 
 
 /**
  * Input/Output utility.
  */
-public final class DataInputOutput implements DataInput, DataOutput, ObjectInput, ObjectOutput {
+public final class DataInputOutput extends OutputStream implements DataInput, DataOutput, ObjectInput, ObjectOutput {
 
   private int pos = 0;
   private int count = 0;

@@ -1,7 +1,7 @@
 package ltd.fdsa.ds.core.model;
 
 import lombok.*;
-import ltd.fdsa.ds.core.props.Props;
+import ltd.fdsa.ds.core.config.Configuration;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -24,7 +24,7 @@ public class NewService  implements Serializable {
     /*
      * 可处理的插件
      * */
-    private Map<String, Props> handles;
+    private Map<String, Configuration> handles;
     private String url;
     private Map<String, String> meta;
 

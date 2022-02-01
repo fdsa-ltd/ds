@@ -49,24 +49,24 @@ public class JobGroupController {
 
         // valid
         if (JobGroup.getName() == null || JobGroup.getName().trim().length() == 0) {
-            return Result.fail(500, (I18nUtil.getString("system_please_input") + "AppName"));
+            return Result.fail(500, (I18nUtil.getInstance("").getString("system_please_input") + "AppName"));
         }
         if (JobGroup.getName().length() < 4 || JobGroup.getName().length() > 64) {
-            return Result.fail(500, I18nUtil.getString("jobgroup_field_appName_length"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("jobgroup_field_appName_length"));
         }
         if (JobGroup.getTitle() == null || JobGroup.getTitle().trim().length() == 0) {
             return Result.fail(500,
-                    (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobgroup_field_title")));
+                    (I18nUtil.getInstance("").getString("system_please_input") + I18nUtil.getInstance("").getString("jobgroup_field_title")));
         }
         if (JobGroup.getType() != 0) {
             if (JobGroup.getAddressList() == null || JobGroup.getAddressList().trim().length() == 0) {
-                return Result.fail(500, I18nUtil.getString("jobgroup_field_addressType_limit"));
+                return Result.fail(500, I18nUtil.getInstance("").getString("jobgroup_field_addressType_limit"));
             }
             String[] addresss = JobGroup.getAddressList().split(",");
             for (String item : addresss) {
                 if (item == null || item.trim().length() == 0) {
                     return Result.fail(
-                            500, I18nUtil.getString("jobgroup_field_registryList_invalid"));
+                            500, I18nUtil.getInstance("").getString("jobgroup_field_registryList_invalid"));
                 }
             }
         }
@@ -80,15 +80,15 @@ public class JobGroupController {
     public Result<String> update(JobGroup JobGroup) {
         // valid
         if (JobGroup.getName() == null || JobGroup.getName().trim().length() == 0) {
-            return Result.fail(500, (I18nUtil.getString("system_please_input") + "AppName"));
+            return Result.fail(500, (I18nUtil.getInstance("").getString("system_please_input") + "AppName"));
         }
         if (JobGroup.getName().length() < 4 || JobGroup.getName().length() > 64) {
-            return Result.fail(500, I18nUtil.getString("jobgroup_field_appName_length"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("jobgroup_field_appName_length"));
         }
         if (JobGroup.getTitle() == null || JobGroup.getTitle().trim().length() == 0) {
             return Result.fail(
                     500,
-                    (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobgroup_field_title")));
+                    (I18nUtil.getInstance("").getString("system_please_input") + I18nUtil.getInstance("").getString("jobgroup_field_title")));
         }
         if (JobGroup.getType() == 0) {
             // 0=自动注册
@@ -106,13 +106,13 @@ public class JobGroupController {
         } else {
             // 1=手动录入
             if (JobGroup.getAddressList() == null || JobGroup.getAddressList().trim().length() == 0) {
-                return Result.fail(500, I18nUtil.getString("jobgroup_field_addressType_limit"));
+                return Result.fail(500, I18nUtil.getInstance("").getString("jobgroup_field_addressType_limit"));
             }
             String[] addresss = JobGroup.getAddressList().split(",");
             for (String item : addresss) {
                 if (item == null || item.trim().length() == 0) {
                     return Result.fail(
-                            500, I18nUtil.getString("jobgroup_field_registryList_invalid"));
+                            500, I18nUtil.getInstance("").getString("jobgroup_field_registryList_invalid"));
                 }
             }
         }

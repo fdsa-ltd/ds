@@ -1,5 +1,5 @@
 
-package ltd.fdsa.ds.core.props;
+package ltd.fdsa.ds.core.config;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.*;
 
 @Slf4j
-public class DefaultProps implements Props {
+public class DefaultConfiguration implements Configuration {
     static final String DOT = ".";
     static final ObjectMapper JM = new ObjectMapper();
     static final YAMLMapper YM = new YAMLMapper();
@@ -24,52 +24,52 @@ public class DefaultProps implements Props {
         JM.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
     }
 
-    public static Props fromProps(String content) {
+    public static Configuration fromProps(String content) {
         try {
             var jsonNode = PM.readTree(content);
             var map = PM.writeValueAsMap(jsonNode);
-            return new DefaultProps(map);
+            return new DefaultConfiguration(map);
         } catch (IOException e) {
             log.error("getPropsConfig failed", e);
         }
         return null;
     }
 
-    public static Props fromJson(String content) {
+    public static Configuration fromJson(String content) {
         try {
             var jsonNode = JM.readTree(content);
             var map = PM.writeValueAsMap(jsonNode);
-            return new DefaultProps(map);
+            return new DefaultConfiguration(map);
         } catch (IOException e) {
             log.error("getJsonConfig failed", e);
         }
         return null;
     }
 
-    public static Props fromYaml(String content) {
+    public static Configuration fromYaml(String content) {
         try {
             var jsonNode = YM.readTree(content);
             var map = PM.writeValueAsMap(jsonNode);
-            return new DefaultProps(map);
+            return new DefaultConfiguration(map);
         } catch (IOException e) {
             log.error("getYamlConfig failed", e);
         }
         return null;
     }
 
-    public static Props fromMaps(Map<String, String> config) {
-        return new DefaultProps(config);
+    public static Configuration fromMaps(Map<String, String> config) {
+        return new DefaultConfiguration(config);
     }
 
     private final Map<String, String> config;
 
-    DefaultProps(Map<String, String> map) {
+    DefaultConfiguration(Map<String, String> map) {
         this.config = map;
     }
 
     @Override
-    public Props[] getConfigurations(String path) {
-        List<Props> result = new LinkedList<>();
+    public Configuration[] getConfigurations(String path) {
+        List<Configuration> result = new LinkedList<>();
         for (var i = 1; i <= 1024; i++) {
             Map<String, String> map = new HashMap<>();
             var key = Strings.isNullOrEmpty(path) ? i + DOT : path + DOT + i + DOT;
@@ -79,16 +79,16 @@ public class DefaultProps implements Props {
                 }
             }
             if (map.size() > 0) {
-                result.add(new DefaultProps(map));
+                result.add(new DefaultConfiguration(map));
             } else {
                 break;
             }
         }
-        return result.toArray(new Props[0]);
+        return result.toArray(new Configuration[0]);
     }
 
     @Override
-    public Props getConfiguration(String path) {
+    public Configuration getConfiguration(String path) {
         if (Strings.isNullOrEmpty(path)) {
             return this;
         }
@@ -100,7 +100,7 @@ public class DefaultProps implements Props {
             }
         }
         if (map.size() > 0) {
-            return new DefaultProps(map);
+            return new DefaultConfiguration(map);
         }
         return null;
     }
@@ -111,12 +111,12 @@ public class DefaultProps implements Props {
     }
 
     @Override
-    public Props clone() {
+    public Configuration clone() {
         Map<String, String> map = new HashMap<>();
         for (var entry : this.config.entrySet()) {
             map.put(entry.getKey(), entry.getValue());
         }
-        return new DefaultProps(map);
+        return new DefaultConfiguration(map);
     }
 
     @Override

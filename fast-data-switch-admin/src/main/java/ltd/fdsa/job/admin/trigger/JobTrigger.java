@@ -141,7 +141,7 @@ public class JobTrigger {
 //                }
 //            }
 //        } else {
-        routeAddressResult = Result.fail(500, I18nUtil.getString("jobconf_trigger_address_empty"));
+        routeAddressResult = Result.fail(500, I18nUtil.getInstance("").getString("jobconf_trigger_address_empty"));
 //        }
 
         // 4、trigger remote executor
@@ -155,30 +155,30 @@ public class JobTrigger {
         // 5、collection trigger info
         StringBuffer triggerMsgSb = new StringBuffer();
         triggerMsgSb
-                .append(I18nUtil.getString("jobconf_trigger_type"))
+                .append(I18nUtil.getInstance("").getString("jobconf_trigger_type"))
                 .append("：")
                 .append(triggerType.getTitle());
         triggerMsgSb
                 .append("<br>")
-                .append(I18nUtil.getString("jobconf_trigger_admin_adress"))
+                .append(I18nUtil.getInstance("").getString("jobconf_trigger_admin_adress"))
                 .append("：")
                 .append(Inet4Address.getLocalHost().getHostAddress());
         triggerMsgSb
                 .append("<br>")
-                .append(I18nUtil.getString("jobconf_trigger_exe_regtype"))
+                .append(I18nUtil.getInstance("").getString("jobconf_trigger_exe_regtype"))
                 .append("：")
                 .append(
                         (group.getType() == 0)
-                                ? I18nUtil.getString("jobgroup_field_addressType_0")
-                                : I18nUtil.getString("jobgroup_field_addressType_1"));
+                                ? I18nUtil.getInstance("").getString("jobgroup_field_addressType_0")
+                                : I18nUtil.getInstance("").getString("jobgroup_field_addressType_1"));
         triggerMsgSb
                 .append("<br>")
-                .append(I18nUtil.getString("jobconf_trigger_exe_regaddress"))
+                .append(I18nUtil.getInstance("").getString("jobconf_trigger_exe_regaddress"))
                 .append("：")
                 .append("");
         triggerMsgSb
                 .append("<br>")
-                .append(I18nUtil.getString("jobinfo_field_executorRouteStrategy"))
+                .append(I18nUtil.getInstance("").getString("jobinfo_field_executorRouteStrategy"))
                 .append("：")
                 .append(executorRouteStrategyEnum.getTitle());
         if (shardingParam != null) {
@@ -186,24 +186,24 @@ public class JobTrigger {
         }
         triggerMsgSb
                 .append("<br>")
-                .append(I18nUtil.getString("jobinfo_field_executorBlockStrategy"))
+                .append(I18nUtil.getInstance("").getString("jobinfo_field_executorBlockStrategy"))
                 .append("：")
                 .append(blockStrategy.getTitle());
         triggerMsgSb
                 .append("<br>")
-                .append(I18nUtil.getString("jobinfo_field_timeout"))
+                .append(I18nUtil.getInstance("").getString("jobinfo_field_timeout"))
                 .append("：")
                 .append(jobInfo.getExecutorTimeout());
         triggerMsgSb
                 .append("<br>")
-                .append(I18nUtil.getString("jobinfo_field_executorFailRetryCount"))
+                .append(I18nUtil.getInstance("").getString("jobinfo_field_executorFailRetryCount"))
                 .append("：")
                 .append(finalFailRetryCount);
 
         triggerMsgSb
                 .append(
                         "<br><br><span style=\"color:#00c0ef;\" > >>>>>>>>>>>"
-                                + I18nUtil.getString("jobconf_trigger_run")
+                                + I18nUtil.getInstance("").getString("jobconf_trigger_run")
                                 + "<<<<<<<<<<< </span><br>")
                 .append(
                         (routeAddressResult != null && routeAddressResult.getMessage() != null)
@@ -243,7 +243,7 @@ public class JobTrigger {
             runResult = Result.error(ex);
         }
 
-        StringBuffer runResultSB = new StringBuffer(I18nUtil.getString("jobconf_trigger_run") + "：");
+        StringBuffer runResultSB = new StringBuffer(I18nUtil.getInstance("").getString("jobconf_trigger_run") + "：");
         runResultSB.append("<br>address：").append(address);
         runResultSB.append("<br>code：").append(runResult.getCode());
         runResultSB.append("<br>msg：").append(runResult.getMessage());

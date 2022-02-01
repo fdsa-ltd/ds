@@ -5,8 +5,8 @@ import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.ds.core.props.DefaultProps;
-import ltd.fdsa.ds.core.props.Props;
+import ltd.fdsa.ds.core.config.DefaultConfiguration;
+import ltd.fdsa.ds.core.config.Configuration;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,10 +15,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Manages the plugins
+ * <p>
+ * isolates class loader to load the plugin jar
+ *
+ * @author Adam
+ * @since 1/2/2022 下午12:01
+ */
 @Slf4j
 public class PluginManager {
     private final Map<String, PluginClassLoader> classLoaderCache = new HashMap<String, PluginClassLoader>();
-    private final Map<String, Props> propsCache = new HashMap<String, Props>();
+    private final Map<String, Configuration> propsCache = new HashMap<String, Configuration>();
 
     final ObjectMapper mapper = new ObjectMapper();
 
@@ -42,7 +50,7 @@ public class PluginManager {
             PluginClassLoader classLoader = new PluginClassLoader(dir);
             try {
                 var content = String.join("\n", Files.readLines(pluginFile, StandardCharsets.UTF_8));
-                var props = DefaultProps.fromJson(content);
+                var props = DefaultConfiguration.fromJson(content);
                 for (var pluginInfo : props.getConfigurations("")) {
                     classLoaderCache.put(pluginInfo.get("className"), classLoader);
                     propsCache.put(pluginInfo.get("className"), pluginInfo);
@@ -66,7 +74,7 @@ public class PluginManager {
         return this.classLoaderCache.get(className);
     }
 
-    public Map<String, Props> getPlugins() {
+    public Map<String, Configuration> getPlugins() {
         return propsCache;
     }
 

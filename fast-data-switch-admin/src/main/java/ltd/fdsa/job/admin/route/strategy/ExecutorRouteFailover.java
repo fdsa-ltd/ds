@@ -28,7 +28,7 @@ public class ExecutorRouteFailover extends ExecutorRouter {
             }
             beatResultSB
                     .append((beatResultSB.length() > 0) ? "<br><br>" : "")
-                    .append(I18nUtil.getString("jobconf_beat") + "：")
+                    .append(I18nUtil.getInstance("").getString("jobconf_beat") + "：")
                     .append("<br>address：")
                     .append(address)
                     .append("<br>code：")

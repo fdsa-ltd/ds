@@ -1,7 +1,7 @@
 package ltd.fdsa.ds.core.pipeline;
 
 
-import ltd.fdsa.ds.core.props.Props;
+import ltd.fdsa.ds.core.config.Configuration;
 import ltd.fdsa.ds.core.model.Record;
 
 import java.util.Collections;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface Pipeline {
 
-    default Props context() {
+    default Configuration context() {
         return null;
     }
 

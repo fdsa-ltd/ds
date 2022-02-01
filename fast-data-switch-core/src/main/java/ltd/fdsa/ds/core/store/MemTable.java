@@ -1,6 +1,7 @@
 package ltd.fdsa.ds.core.store;
 
 import lombok.var;
+import ltd.fdsa.ds.core.config.Configuration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,9 +19,14 @@ public class MemTable {
     private final Map<String, RingBuffer> ringBufferMap;
     // memory topic index
     private final TopicIndex topicIndex;
+    // configuration
+    private final Configuration config;
 
-    public MemTable() {
-        this.topicIndex = TopicIndex.loadTopicIndex("topics");
+    public MemTable(Configuration config) {
+        this.config = config;
+        // load topic index
+        this.topicIndex = TopicIndex.loadTopicIndex();
+        // init ring buffer
         var topics = this.topicIndex.topics();
         this.ringBufferMap = new HashMap<>(topics.size());
         for (var topic : topics) {
@@ -33,16 +39,19 @@ public class MemTable {
         if (!this.topicIndex.ensureKey(key)) {
             this.ringBufferMap.put(key, new RingBuffer(-1, MAX_SIZE));
         }
-        var result = WriteAppendLog.getWriteAppendLogs(this.topicIndex).append(data);
+        WriteAppendLog wal = new WriteAppendLog();
+
+        var result = wal.append(data);
         if (result) {
-            DataBlock dataBlock = new DataBlock(System.currentTimeMillis(), data);
+            var dataBlock = new DataMessage(data);
             var offset = this.ringBufferMap.get(key).push(dataBlock);
             return true;
         }
         return false;
     }
 
-    public DataBlock get(String key, long offset) {
+    public DataMessage get(String key, long offset) {
+
         if (!this.ringBufferMap.containsKey(key)) {
             return getFromFile(key, offset);
         }
@@ -55,7 +64,7 @@ public class MemTable {
         return getFromFile(key, offset);
     }
 
-    DataBlock getFromFile(String key, long offset) {
+    DataMessage getFromFile(String key, long offset) {
         // 读取topic文件
         var offsetElement = this.topicIndex.search(key, offset);
         if (offsetElement == null) {

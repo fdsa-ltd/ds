@@ -27,7 +27,7 @@ public class ExecutorRouteBusyover extends ExecutorRouter {
             }
             idleBeatResultSB
                     .append((idleBeatResultSB.length() > 0) ? "<br><br>" : "")
-                    .append(I18nUtil.getString("jobconf_idleBeat") + "：")
+                    .append(I18nUtil.getInstance("").getString("jobconf_idleBeat") + "：")
                     .append("<br>address：")
                     .append(address)
                     .append("<br>code：")

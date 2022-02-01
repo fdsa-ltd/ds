@@ -90,18 +90,18 @@ public class SystemUserServiceImpl extends BaseJpaService<SystemUser, Integer, S
 
         // param
         if (Strings.isNullOrEmpty(username) || Strings.isNullOrEmpty(password)) {
-            return Result.fail(500, I18nUtil.getString("login_param_empty"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("login_param_empty"));
         }
 
         // valid passowrd
         SystemUser user = this.loadByUserName(username);
         if (user == null) {
-            return Result.fail(500, I18nUtil.getString("login_param_invalid"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("login_param_invalid"));
         }
 
         String passwordMd5 = DigestUtils.md5DigestAsHex((user.getSalt() + password).getBytes());
         if (!passwordMd5.equals(user.getPassword())) {
-            return Result.fail(500, I18nUtil.getString("login_param_invalid"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("login_param_invalid"));
         }
 
         String loginToken = makeToken(user);

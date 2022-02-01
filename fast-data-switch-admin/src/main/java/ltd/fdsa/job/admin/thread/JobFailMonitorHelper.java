@@ -2,16 +2,15 @@ package ltd.fdsa.job.admin.thread;
 
 import lombok.var;
 import ltd.fdsa.core.context.ApplicationContextHolder;
+import ltd.fdsa.ds.core.model.Result;
+import ltd.fdsa.ds.core.util.I18nUtil;
 import ltd.fdsa.job.admin.config.JobAdminConfig;
-import ltd.fdsa.job.admin.trigger.TriggerTypeEnum;
 import ltd.fdsa.job.admin.jpa.entity.JobGroup;
 import ltd.fdsa.job.admin.jpa.entity.JobInfo;
 import ltd.fdsa.job.admin.jpa.entity.JobLog;
 import ltd.fdsa.job.admin.jpa.service.JobGroupService;
 import ltd.fdsa.job.admin.jpa.service.JobLogService;
-import ltd.fdsa.ds.core.model.Result;
-import ltd.fdsa.ds.core.util.I18nUtil;
-
+import ltd.fdsa.job.admin.trigger.TriggerTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -32,25 +31,25 @@ public class JobFailMonitorHelper {
     // email alarm template
     private static final String mailBodyTemplate =
             "<h5>"
-                    + I18nUtil.getString("jobconf_monitor_detail")
+                    + I18nUtil.getInstance("").getString("jobconf_monitor_detail")
                     + "：</span>"
                     + "<table border=\"1\" cellpadding=\"3\" style=\"border-collapse:collapse; width:80%;\" >\n"
                     + "   <thead style=\"font-weight: bold;color: #ffffff;background-color: #ff8c00;\" >"
                     + "      <tr>\n"
                     + "         <td width=\"20%\" >"
-                    + I18nUtil.getString("jobinfo_field_jobgroup")
+                    + I18nUtil.getInstance("").getInstance("").getString("jobinfo_field_jobgroup")
                     + "</td>\n"
                     + "         <td width=\"10%\" >"
-                    + I18nUtil.getString("jobinfo_field_id")
+                    + I18nUtil.getInstance("").getInstance("").getString("jobinfo_field_id")
                     + "</td>\n"
                     + "         <td width=\"20%\" >"
-                    + I18nUtil.getString("jobinfo_field_jobdesc")
+                    + I18nUtil.getInstance("").getInstance("").getString("jobinfo_field_jobdesc")
                     + "</td>\n"
                     + "         <td width=\"10%\" >"
-                    + I18nUtil.getString("jobconf_monitor_alarm_title")
+                    + I18nUtil.getInstance("").getInstance("").getString("jobconf_monitor_alarm_title")
                     + "</td>\n"
                     + "         <td width=\"40%\" >"
-                    + I18nUtil.getString("jobconf_monitor_alarm_content")
+                    + I18nUtil.getInstance("").getString("jobconf_monitor_alarm_content")
                     + "</td>\n"
                     + "      </tr>\n"
                     + "   </thead>\n"
@@ -60,7 +59,7 @@ public class JobFailMonitorHelper {
                     + "         <td>{1}</td>\n"
                     + "         <td>{2}</td>\n"
                     + "         <td>"
-                    + I18nUtil.getString("jobconf_monitor_alarm_type")
+                    + I18nUtil.getInstance("").getString("jobconf_monitor_alarm_type")
                     + "</td>\n"
                     + "         <td>{3}</td>\n"
                     + "      </tr>\n"
@@ -89,7 +88,7 @@ public class JobFailMonitorHelper {
                                 while (!toStop) {
                                     try {
 
-                                        List<Integer> failLogIds = ApplicationContextHolder.getBean(JobLogService.class).findAll().stream().map(m->m.getJobId()).collect(Collectors.toList());
+                                        List<Integer> failLogIds = ApplicationContextHolder.getBean(JobLogService.class).findAll().stream().map(m -> m.getJobId()).collect(Collectors.toList());
                                         if (failLogIds != null && !failLogIds.isEmpty()) {
                                             for (var failLogId : failLogIds) {
 
@@ -115,7 +114,7 @@ public class JobFailMonitorHelper {
                                                             log.getExecutorParam());
                                                     String retryMsg =
                                                             "<br><br><span style=\"color:#F39C12;\" > >>>>>>>>>>>"
-                                                                    + I18nUtil.getString("jobconf_trigger_type_retry")
+                                                                    + I18nUtil.getInstance("").getString("jobconf_trigger_type_retry")
                                                                     + "<<<<<<<<<<< </span><br>";
                                                     log.setTriggerMsg(log.getTriggerMsg() + retryMsg);
                                                     ApplicationContextHolder.getBean(JobLogService.class).update(log);
@@ -200,8 +199,8 @@ public class JobFailMonitorHelper {
             JobGroup group =
                     ApplicationContextHolder.getBean(JobGroupService.class)
                             .findById(info.getGroupId()).get();
-            String personal = I18nUtil.getString("admin_name_full");
-            String title = I18nUtil.getString("jobconf_monitor");
+            String personal = I18nUtil.getInstance("").getString("admin_name_full");
+            String title = I18nUtil.getInstance("").getString("jobconf_monitor");
             String content =
                     MessageFormat.format(
                             mailBodyTemplate,

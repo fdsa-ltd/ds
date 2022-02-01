@@ -10,7 +10,7 @@ import ltd.fdsa.ds.core.job.model.TriggerParam;
 import ltd.fdsa.ds.core.job.thread.JobThread;
 import ltd.fdsa.ds.core.model.Result;
 import ltd.fdsa.ds.core.pipeline.Process;
-import ltd.fdsa.ds.core.props.DefaultProps;
+import ltd.fdsa.ds.core.config.DefaultConfiguration;
 
 import java.util.Map;
 
@@ -60,7 +60,7 @@ public class ExecutorImpl implements Executor {
 
     @Override
     public Result<String> run(int jobId, Map<String, String> config) {
-        var props = DefaultProps.fromMaps(config);
+        var props = DefaultConfiguration.fromMaps(config);
         String handler = props.get("class");
         String blockStrategy = props.get("strategy");
         long timeout = props.getLong("timeout", Long.MAX_VALUE);
@@ -118,7 +118,7 @@ public class ExecutorImpl implements Executor {
 
     @Override
     public Result<String> init(Long processId, Map<String, String> config) {
-        var props = DefaultProps.fromMaps(config);
+        var props = DefaultConfiguration.fromMaps(config);
         String handler = props.get("class");
         String blockStrategy = props.get("strategy");
         long timeout = props.getLong("timeout", Long.MAX_VALUE);

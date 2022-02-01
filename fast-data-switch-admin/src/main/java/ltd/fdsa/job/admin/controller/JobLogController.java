@@ -57,7 +57,7 @@ public class JobLogController {
         // filter group
         List<JobGroup> jobGroupList = JobInfoController.filterJobGroupByRole(request, jobGroupList_all);
         if (jobGroupList == null || jobGroupList.size() == 0) {
-            throw new FastDataSwitchException(I18nUtil.getString("jobgroup_empty"));
+            throw new FastDataSwitchException(I18nUtil.getInstance("").getString("jobgroup_empty"));
         }
 
         model.addAttribute("JobGroupList", jobGroupList);
@@ -67,7 +67,7 @@ public class JobLogController {
             JobInfo jobInfo = JobInfoDao.findById(jobId).get();
             if (jobInfo == null) {
                 throw new RuntimeException(
-                        I18nUtil.getString("jobinfo_field_id") + I18nUtil.getString("system_invalid"));
+                        I18nUtil.getInstance("").getString("jobinfo_field_id") + I18nUtil.getInstance("").getString("system_invalid"));
             }
 
             model.addAttribute("jobInfo", jobInfo);
@@ -124,7 +124,7 @@ public class JobLogController {
         Result<String> logStatue = Result.success();
         JobLog jobLog = JobLogDao.findById(id).get();
         if (jobLog == null) {
-            throw new RuntimeException(I18nUtil.getString("joblog_logid_invalid"));
+            throw new RuntimeException(I18nUtil.getInstance("").getString("joblog_logid_invalid"));
         }
 
         model.addAttribute("triggerCode", jobLog.getTriggerCode());
@@ -166,10 +166,10 @@ public class JobLogController {
         JobLog log = JobLogDao.findById(id).get();
         JobInfo jobInfo = JobInfoDao.findById(log.getJobId()).get();
         if (jobInfo == null) {
-            return Result.fail(500, I18nUtil.getString("jobinfo_glue_jobid_invalid"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("jobinfo_glue_jobid_invalid"));
         }
         if (Result.success().getCode() != log.getTriggerCode()) {
-            return Result.fail(500, I18nUtil.getString("joblog_kill_log_limit"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("joblog_kill_log_limit"));
         }
 
         // request of kill
@@ -185,7 +185,7 @@ public class JobLogController {
         if (Result.success().getCode() == runResult.getCode()) {
             log.setHandleCode(HttpCode.INTERNAL_SERVER_ERROR.getCode());
             log.setHandleMsg(
-                    I18nUtil.getString("joblog_kill_log_byman")
+                    I18nUtil.getInstance("").getString("joblog_kill_log_byman")
                             + ":"
                             + (runResult.getMessage() != null ? runResult.getMessage() : ""));
             log.setHandleTime(new Date());
@@ -221,7 +221,7 @@ public class JobLogController {
         } else if (type == 9) {
             clearBeforeNum = 0; // 清理所有日志数据
         } else {
-            return Result.fail(500, I18nUtil.getString("joblog_clean_type_invalid"));
+            return Result.fail(500, I18nUtil.getInstance("").getString("joblog_clean_type_invalid"));
         }
 
 //        List<Long> logIds = null;

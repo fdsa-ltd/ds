@@ -1,9 +1,9 @@
 package ltd.fdsa.ds.core.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
+import lombok.var;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
@@ -16,29 +16,36 @@ import java.util.Properties;
 /**
  * i18n util
  */
+@Slf4j
 public class I18nUtil {
-    private static Logger logger = LoggerFactory.getLogger(I18nUtil.class);
+    private static final Map<String, I18nUtil> ch = new HashMap<>();
+    private final Properties prop;
 
-    private static Properties prop = null;
-
-    public static Properties loadI18nProp() {
-        if (prop != null) {
-            return prop;
+    public static I18nUtil getInstance(String i18n) {
+        if (Strings.isNullOrEmpty(i18n)) {
+            i18n = "zh-cn";
         }
+        if (ch.containsKey(i18n)) {
+            return ch.get(i18n);
+        }
+        String i18nFile = MessageFormat.format("i18n/message_{0}.properties", i18n);
+
+        // load prop
+
         try {
-            // build i18n prop
-            String i18n = "zh-cn";
-            i18n = (i18n != null && i18n.trim().length() > 0) ? ("_" + i18n) : i18n;
-            String i18nFile = MessageFormat.format("i18n/message{0}.properties", i18n);
+            var p = PropertiesLoaderUtils.loadProperties(new EncodedResource(new ClassPathResource("i18n/message.properties"), "UTF-8"));
+            p.putAll(PropertiesLoaderUtils.loadProperties(new EncodedResource(new ClassPathResource(i18nFile), "UTF-8")));
+            ch.put(i18n, new I18nUtil(p));
 
-            // load prop
-            Resource resource = new ClassPathResource(i18nFile);
-            EncodedResource encodedResource = new EncodedResource(resource, "UTF-8");
-            prop = PropertiesLoaderUtils.loadProperties(encodedResource);
+            return ch.get(i18n);
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            log.error("", e);
+            return new I18nUtil(new Properties());
         }
-        return prop;
+    }
+
+    I18nUtil(Properties prop) {
+        this.prop = prop;
     }
 
     /**
@@ -47,9 +54,10 @@ public class I18nUtil {
      * @param key
      * @return
      */
-    public static String getString(String key) {
-        return loadI18nProp().getProperty(key);
+    public String getString(String key) {
+        return this.prop.getProperty(key);
     }
+
 
     /**
      * get mult val of i18n mult key, as json
@@ -57,10 +65,9 @@ public class I18nUtil {
      * @param keys
      * @return
      */
-    public static String getMultiString(String... keys) {
+    public String getMultiString(String... keys) {
         Map<String, String> map = new HashMap<String, String>();
 
-        Properties prop = loadI18nProp();
         if (keys != null && keys.length > 0) {
             for (String key : keys) {
                 map.put(key, prop.getProperty(key));

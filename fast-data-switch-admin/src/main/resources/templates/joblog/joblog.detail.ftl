@@ -3,7 +3,7 @@
 <head>
     <#import "../common/common.macro.ftl" as netCommon>
     <@netCommon.commonStyle />
-    <title>${I18n.admin_name}</title>
+    <title>${I18n.site_name}</title>
 </head>
 <body class="hold-transition skin-blue layout-top-nav">
 

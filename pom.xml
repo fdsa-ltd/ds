@@ -72,7 +72,6 @@
     </dependencies>
     <dependencyManagement>
         <dependencies>
-
             <!-- data -->
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -144,7 +143,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>

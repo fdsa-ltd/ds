@@ -1,10 +1,9 @@
 package ltd.fdsa.job.admin.controller;
 
 import lombok.var;
-import ltd.fdsa.job.admin.jpa.service.SystemUserService;
 import ltd.fdsa.ds.core.model.Result;
 import ltd.fdsa.ds.core.util.CookieUtil;
-
+import ltd.fdsa.job.admin.jpa.service.SystemUserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +30,6 @@ public class IndexController extends BaseController {
 
 //        Map<String, Object> dashboardMap = JobService.dashboardInfo();
 //        model.addAllAttributes(dashboardMap);
-
         return "index";
     }
 

@@ -7,7 +7,7 @@
   	<link rel="stylesheet" href="${request.contextPath}/static/adminlte/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
   	<!-- daterangepicker -->
   	<link rel="stylesheet" href="${request.contextPath}/static/adminlte/bower_components/bootstrap-daterangepicker/daterangepicker.css">
-    <title>${I18n.admin_name}</title>
+    <title>${I18n.site_name}</title>
 </head>
 <body class="hold-transition skin-blue sidebar-mini <#if cookieMap?exists && cookieMap["Job_adminlte_settings"]?exists && "off" == cookieMap["Job_adminlte_settings"].value >sidebar-collapse</#if> ">
 <div class="wrapper">

@@ -3,7 +3,7 @@
 <head>
   	<#import "./common/common.macro.ftl" as netCommon>
 	<@netCommon.commonStyle />
-	<title>${I18n.admin_name}</title>
+	<title>${I18n.site_name}</title>
 	 
 	<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 </head>
@@ -147,7 +147,6 @@
         myChart.setOption({
             graphic: echarts.util.map(graph.nodes, function (item, dataIndex) {  
                 var tmpPos=myChart.convertToPixel({'seriesIndex': 0},[item.x,item.y]);
-        
                 //使用图形元素组件在节点上划出一个隐形的图形覆盖住节点
                 return {
                     type: 'circle',
@@ -177,7 +176,6 @@
         myChart.setOption({
             graphic: echarts.util.map(graph.nodes, function (item, dataIndex) {
                 var tmpPos=myChart.convertToPixel({'seriesIndex': 0},[item.x,item.y]);
-               
                 return {
                     x: tmpPos[0],
                     y: tmpPos[1]
@@ -195,7 +193,6 @@
     }
 
     </script>
-    
 
 </body>
 </html>

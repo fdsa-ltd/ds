@@ -14,8 +14,8 @@ public class I18nUtilTest {
 
     @Test
     public void test() {
-        log.info(I18nUtil.getInstance("").getString("admin_name"));
-        log.info(I18nUtil.getInstance("").getMultiString("admin_name", "admin_name_full"));
+        log.info(I18nUtil.getInstance("").getString("site_name"));
+        log.info(I18nUtil.getInstance("").getMultiString("site_name", "site_name_full"));
         log.info(I18nUtil.getInstance("").getMultiString());
     }
 }

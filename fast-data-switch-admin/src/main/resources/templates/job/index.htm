@@ -5,7 +5,7 @@
 	<@netCommon.commonStyle />
 	<!-- DataTables -->
   	<link rel="stylesheet" href="${request.contextPath}/static/adminlte/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
-    <title>${I18n.admin_name}</title>
+    <title>${I18n.site_name}</title>
 </head>
 <body class="hold-transition skin-blue sidebar-mini <#if cookieMap?exists && cookieMap["Job_adminlte_settings"]?exists && "off" == cookieMap["Job_adminlte_settings"].value >sidebar-collapse</#if>">
 <div class="wrapper">
@@ -195,7 +195,7 @@
 package ltd.fdsa.job.service.handler;
 
 import ltd.fdsa.job.core.log.JobLogger;
-
+import ltd.fdsa.web.view.Result;
 import ltd.fdsa.job.core.handler.IJobHandler;
 
 public class DemoGlueJobHandler extends IJobHandler {

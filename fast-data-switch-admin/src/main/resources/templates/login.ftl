@@ -5,7 +5,7 @@
 	<@netCommon.commonStyle />
 	<link rel="stylesheet" href="${request.contextPath}/static/adminlte/plugins/iCheck/square/blue.css">
 	<link rel="stylesheet" href="${request.contextPath}/static/adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-	<title>${I18n.admin_name}</title>
+	<title>${I18n.site_name}</title>
 </head>
 <body class="hold-transition login-page">
    <div class="login-box">
@@ -15,7 +15,7 @@
         <a href="/" class="h1"><b>F</b>DSA</a>
       </div>
       <div class="card-body">
-     	<p class="login-box-msg">${I18n.admin_name}</p>
+     	<p class="login-box-msg">${I18n.site_name}</p>
 		<form id="loginForm" method="post">
           <div class="input-group mb-3">
             <input type="username" name="username" class="form-control" placeholder="${I18n.login_username_placeholder}">

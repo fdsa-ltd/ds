@@ -23,7 +23,7 @@ public class I18nUtil {
 
     public static I18nUtil getInstance(String i18n) {
         if (Strings.isNullOrEmpty(i18n)) {
-            i18n = "zh-cn";
+            i18n = "cn";
         }
         if (ch.containsKey(i18n)) {
             return ch.get(i18n);

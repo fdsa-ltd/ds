@@ -15,6 +15,15 @@
 package ltd.fdsa.ds.core.rdb.impl;
 
 
+import ltd.fdsa.ds.core.rdb.api.Configuration;
+import ltd.fdsa.ds.core.rdb.api.StoreReader;
+import ltd.fdsa.ds.core.rdb.api.StoreWriter;
+import ltd.fdsa.ds.core.serializer.Serializer;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.jupiter.api.Test;
+
 import java.awt.*;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -24,15 +33,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import ltd.fdsa.ds.core.rdb.api.Configuration;
-import ltd.fdsa.ds.core.rdb.api.StoreReader;
-import ltd.fdsa.ds.core.rdb.api.StoreWriter;
-import ltd.fdsa.ds.core.serializer.Serializer;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.jupiter.api.Test;
 
 public class TestStoreReader {
 

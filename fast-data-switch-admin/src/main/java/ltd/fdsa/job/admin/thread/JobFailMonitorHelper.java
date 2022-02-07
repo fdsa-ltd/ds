@@ -199,7 +199,7 @@ public class JobFailMonitorHelper {
             JobGroup group =
                     ApplicationContextHolder.getBean(JobGroupService.class)
                             .findById(info.getGroupId()).get();
-            String personal = I18nUtil.getInstance("").getString("admin_name_full");
+            String personal = I18nUtil.getInstance("").getString("site_name_full");
             String title = I18nUtil.getInstance("").getString("jobconf_monitor");
             String content =
                     MessageFormat.format(

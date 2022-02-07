@@ -21,11 +21,6 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>ltd.fdsa</groupId>
-            <artifactId>self-describing-data-object</artifactId>
-            <version>1.0.0-RELEASE</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.iot.cbor</groupId>
             <artifactId>cbor</artifactId>
             <version>0.01.02</version>

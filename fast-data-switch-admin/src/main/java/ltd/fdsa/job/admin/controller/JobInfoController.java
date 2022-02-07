@@ -15,9 +15,7 @@ import ltd.fdsa.job.admin.thread.JobTriggerPoolHelper;
 import ltd.fdsa.job.admin.trigger.TriggerTypeEnum;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -25,12 +23,13 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * index controller
  */
 @Controller
-@RequestMapping("/jobinfo")
+@RequestMapping("job")
 public class JobInfoController {
 
     @Resource
@@ -75,34 +74,21 @@ public class JobInfoController {
         model.addAttribute("JobGroupList", jobGroupList);
         model.addAttribute("jobGroup", jobGroup);
 
-        return "jobinfo/jobinfo.index";
+        return "job/index";
     }
 
-//    @RequestMapping("/pageList")
-//    @ResponseBody
-//    public Map<String, Object> pageList(
-//            @RequestParam(required = false, defaultValue = "0") int start,
-//            @RequestParam(required = false, defaultValue = "10") int length,
-//            int jobGroup,
-//            int triggerStatus,
-//            String jobDesc,
-//            String executorHandler,
-//            String author) {
-//
-//        return JobService.pageList(start, length, jobGroup, triggerStatus, jobDesc, executorHandler, author);
-//    }
+    @RequestMapping(method = RequestMethod.GET, path = "list")
+    public String list(HttpServletRequest request, Model model) {
+        return "job/list";
+    }
 
-//    @RequestMapping("/add")
-//    @ResponseBody
-//    public Result<String> add(JobInfo jobInfo) {
-//        return JobService.add(jobInfo);
-//    }
-//
-//    @RequestMapping("/update")
-//    @ResponseBody
-//    public Result<String> update(JobInfo jobInfo) {
-//        return JobService.update(jobInfo);
-//    }
+
+    @RequestMapping(value = "add", method = RequestMethod.POST, consumes = "application/json")
+    @ResponseBody
+    public Result<Object> add(@RequestBody Map<String, Object> data) {
+        return Result.success(data);
+
+    }
 //
 //    @RequestMapping("/remove")
 //    @ResponseBody

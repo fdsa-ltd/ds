@@ -1,9 +1,9 @@
 spring:
   freemarker:
-    #template-loader-path: classpath:/templates/
-    template-loader-path: file:/Work/java/fast-data/fast-data-switch/fast-data-switch-admin/src/main/resources/templates
+    template-loader-path: classpath:/templates/
+    # template-loader-path: file:/Work/java/fast-data/fast-data-switch/fast-data-switch-admin/src/main/resources/templates
     charset: UTF-8
-    suffix: .ftl
+    suffix: .htm
     request-context-attribute: request
     expose-request-attributes: true
     settings:
@@ -11,7 +11,7 @@ spring:
       template_update_delay: 0
 
   mvc:
-    static-path-pattern: /static/**
+    static-path-pattern: /**
   resources:
     static-locations: classpath:/static/
   application:
@@ -74,6 +74,6 @@ spring:
   mail.properties.mail.smtp.starttls.required: true
   mail.properties.mail.smtp.socketFactory.class: javax.net.ssl.SSLSocketFactory
 ### , access token
-project.job.accessToken: 
+project.job.accessToken:
 ### , i18n (default empty as chinese, "en" as english)
 project.job.i18n:

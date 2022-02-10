@@ -2,8 +2,8 @@ package ltd.fdsa.job.admin.controller;
 
 import lombok.var;
 import ltd.fdsa.ds.core.model.Result;
-import ltd.fdsa.ds.core.util.CookieUtil;
-import ltd.fdsa.job.admin.jpa.service.SystemUserService;
+import ltd.fdsa.job.admin.service.impl.SystemUserService;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 
@@ -44,7 +45,7 @@ public class IndexController extends BaseController {
     @RequestMapping("/login")
 //    @PermissionLimit(limit = false)
     public String toLogin() {
-        if (loginService.checkLogin(request, response) != null) {
+        if (loginService.checkLogin() != null) {
             return "redirect:/";
         }
         return "login";
@@ -56,8 +57,8 @@ public class IndexController extends BaseController {
     public Result<String> doLogin(String username, String password, String remember) {
         var result = loginService.login(username, password);
         if (result.getCode() == 200 || result.getCode() == 0) {
-
-            CookieUtil.set(response, SystemUserService.USER_LOGIN_IDENTITY, result.getData(), "on".equals(remember));
+            var cookie = ResponseCookie.from("UID", result.getData()).httpOnly(true).maxAge(Duration.ofDays(365)).build();
+//            response.addCookie(cookie);
         }
         return result;
     }
@@ -66,7 +67,8 @@ public class IndexController extends BaseController {
     @ResponseBody
 //    @PermissionLimit(limit = false)
     public Result<String> logout() {
-        CookieUtil.remove(request, response, SystemUserService.USER_LOGIN_IDENTITY);
+        var cookie = ResponseCookie.from("UID", "").httpOnly(true).maxAge(Duration.ofDays(-1)).build();
+//        response.addCookie(cookie);
         return Result.success();
     }
 

@@ -1,18 +1,19 @@
 package ltd.fdsa.job.admin.trigger;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import ltd.fdsa.core.context.ApplicationContextHolder;
 import ltd.fdsa.ds.core.job.enums.ExecutorBlockStrategyEnum;
 import ltd.fdsa.ds.core.job.executor.Executor;
 import ltd.fdsa.ds.core.job.model.TriggerParam;
 import ltd.fdsa.ds.core.model.Result;
 import ltd.fdsa.ds.core.util.I18nUtil;
-import ltd.fdsa.job.admin.jpa.entity.JobGroup;
-import ltd.fdsa.job.admin.jpa.entity.JobInfo;
-import ltd.fdsa.job.admin.jpa.entity.JobLog;
-import ltd.fdsa.job.admin.jpa.service.JobGroupService;
-import ltd.fdsa.job.admin.jpa.service.JobInfoService;
-import ltd.fdsa.job.admin.jpa.service.JobLogService;
+import ltd.fdsa.job.admin.context.ApplicationContextHolder;
+import ltd.fdsa.job.admin.entity.JobGroup;
+import ltd.fdsa.job.admin.entity.JobInfo;
+import ltd.fdsa.job.admin.entity.JobLog;
+import ltd.fdsa.job.admin.repository.JobGroupRepository;
+import ltd.fdsa.job.admin.repository.JobInfoRepository;
+import ltd.fdsa.job.admin.repository.JobLogRepository;
 import ltd.fdsa.job.admin.route.ExecutorRouteStrategyEnum;
 import ltd.fdsa.job.admin.scheduler.JobScheduler;
 import org.slf4j.Logger;
@@ -22,8 +23,8 @@ import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.Date;
 
+@Slf4j
 public class JobTrigger {
-    private static Logger logger = LoggerFactory.getLogger(JobTrigger.class);
 
     /**
      * trigger job
@@ -36,9 +37,9 @@ public class JobTrigger {
      */
     public static void trigger(int jobId, TriggerTypeEnum triggerType, int failRetryCount, String executorShardingParam, String executorParam) throws UnknownHostException {
         // load data
-        JobInfo jobInfo = ApplicationContextHolder.getBean(JobInfoService.class).findById(jobId).get();
+        JobInfo jobInfo = ApplicationContextHolder.getBean(JobInfoRepository.class).findById(jobId).get();
         if (jobInfo == null) {
-            logger.warn(">>>>>>>>>>>> trigger fail, jobId invalid，jobId={}", jobId);
+            log.warn(">>>>>>>>>>>> trigger fail, jobId invalid，jobId={}", jobId);
             return;
         }
         if (executorParam != null) {
@@ -46,7 +47,7 @@ public class JobTrigger {
         }
         int finalFailRetryCount =
                 failRetryCount >= 0 ? failRetryCount : jobInfo.getExecutorFailRetryCount();
-        JobGroup group = ApplicationContextHolder.getBean(JobGroupService.class).findById(jobInfo.getGroupId()).get();
+        JobGroup group = ApplicationContextHolder.getBean(JobGroupRepository.class).findById(jobInfo.getGroupId()).get();
 
         // sharding param
         int[] shardingParam = null;
@@ -109,7 +110,7 @@ public class JobTrigger {
         jobLog.setJobGroup(jobInfo.getGroupId());
         jobLog.setJobId(jobInfo.getId());
         jobLog.setTriggerTime(new Date());
-        ApplicationContextHolder.getBean(JobLogService.class).update(jobLog);
+        ApplicationContextHolder.getBean(JobLogRepository.class).save(jobLog);
 
         // 2、init trigger-param
         TriggerParam triggerParam = new TriggerParam();
@@ -220,7 +221,7 @@ public class JobTrigger {
         // jobLog.setTriggerTime();
         jobLog.setTriggerCode(triggerResult.getCode());
         jobLog.setTriggerMsg(triggerMsgSb.toString());
-        ApplicationContextHolder.getBean(JobLogService.class).update(jobLog);
+        ApplicationContextHolder.getBean(JobLogRepository.class).save(jobLog);
     }
 
     /**

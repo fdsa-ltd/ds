@@ -1,9 +1,9 @@
 package ltd.fdsa.job.admin.controller;
 
 
-import ltd.fdsa.job.admin.jpa.entity.JobInfo;
-import ltd.fdsa.job.admin.jpa.entity.JobTask;
-import ltd.fdsa.job.admin.jpa.service.JobInfoService;
+import ltd.fdsa.job.admin.entity.JobInfo;
+import ltd.fdsa.job.admin.entity.JobTask;
+import ltd.fdsa.job.admin.repository.JobInfoRepository;
 import ltd.fdsa.ds.core.model.Result;
 import ltd.fdsa.ds.core.util.I18nUtil;
 
@@ -13,8 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * job code controller
  */
@@ -23,10 +21,10 @@ import javax.servlet.http.HttpServletRequest;
 public class JobCodeController {
 
     @Autowired
-    JobInfoService JobInfoDao;
+    JobInfoRepository JobInfoDao;
 
     @RequestMapping
-    public String index(HttpServletRequest request, Model model, int jobId) {
+    public String index(Model model, int jobId) {
         JobInfo jobInfo = JobInfoDao.findById(jobId).get();
 //        List<JobLogGlue> jobLogGlues = JobLogGlueDao.findByJobId(jobId);
 
@@ -54,7 +52,7 @@ public class JobCodeController {
         }
 
 
-        JobInfoDao.update(exists_jobInfo);
+        JobInfoDao.save(exists_jobInfo);
 
         // log old code
         JobTask JobLogGlue = new JobTask();

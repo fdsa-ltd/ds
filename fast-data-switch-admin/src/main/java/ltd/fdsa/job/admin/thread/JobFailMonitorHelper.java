@@ -1,18 +1,20 @@
 package ltd.fdsa.job.admin.thread;
 
 import lombok.var;
-import ltd.fdsa.core.context.ApplicationContextHolder;
 import ltd.fdsa.ds.core.model.Result;
 import ltd.fdsa.ds.core.util.I18nUtil;
 import ltd.fdsa.job.admin.config.JobAdminConfig;
-import ltd.fdsa.job.admin.jpa.entity.JobGroup;
-import ltd.fdsa.job.admin.jpa.entity.JobInfo;
-import ltd.fdsa.job.admin.jpa.entity.JobLog;
-import ltd.fdsa.job.admin.jpa.service.JobGroupService;
-import ltd.fdsa.job.admin.jpa.service.JobLogService;
+import ltd.fdsa.job.admin.context.ApplicationContextHolder;
+import ltd.fdsa.job.admin.entity.JobGroup;
+import ltd.fdsa.job.admin.entity.JobInfo;
+import ltd.fdsa.job.admin.entity.JobLog;
+import ltd.fdsa.job.admin.repository.JobGroupRepository;
+import ltd.fdsa.job.admin.repository.JobInfoRepository;
+import ltd.fdsa.job.admin.repository.JobLogRepository;
 import ltd.fdsa.job.admin.trigger.TriggerTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
 import javax.mail.internet.MimeMessage;
@@ -88,7 +90,7 @@ public class JobFailMonitorHelper {
                                 while (!toStop) {
                                     try {
 
-                                        List<Integer> failLogIds = ApplicationContextHolder.getBean(JobLogService.class).findAll().stream().map(m -> m.getJobId()).collect(Collectors.toList());
+                                        List<Integer> failLogIds = ApplicationContextHolder.getBean(JobLogRepository.class).findAll().stream().map(m -> m.getJobId()).collect(Collectors.toList());
                                         if (failLogIds != null && !failLogIds.isEmpty()) {
                                             for (var failLogId : failLogIds) {
 
@@ -98,10 +100,9 @@ public class JobFailMonitorHelper {
 //                                                if (lockRet < 1) {
 //                                                    continue;
 //                                                }
-                                                JobLog log = ApplicationContextHolder.getBean(JobLogService.class).findById(failLogId).get();
+                                                JobLog log = ApplicationContextHolder.getBean(JobLogRepository.class).findById(failLogId).get();
                                                 JobInfo info =
-                                                        ApplicationContextHolder.getBean(JobAdminConfig.class)
-                                                                .getJobInfoDao()
+                                                        ApplicationContextHolder.getBean(JobInfoRepository.class)
                                                                 .findById(log.getJobId()).get();
 
                                                 // 1、fail retry monitor
@@ -117,7 +118,7 @@ public class JobFailMonitorHelper {
                                                                     + I18nUtil.getInstance("").getString("jobconf_trigger_type_retry")
                                                                     + "<<<<<<<<<<< </span><br>";
                                                     log.setTriggerMsg(log.getTriggerMsg() + retryMsg);
-                                                    ApplicationContextHolder.getBean(JobLogService.class).update(log);
+                                                    ApplicationContextHolder.getBean(JobLogRepository.class).save(log);
                                                 }
 
                                                 // 2、fail alarm monitor
@@ -197,7 +198,7 @@ public class JobFailMonitorHelper {
 
             // email info
             JobGroup group =
-                    ApplicationContextHolder.getBean(JobGroupService.class)
+                    ApplicationContextHolder.getBean(JobGroupRepository.class)
                             .findById(info.getGroupId()).get();
             String personal = I18nUtil.getInstance("").getString("site_name_full");
             String title = I18nUtil.getInstance("").getString("jobconf_monitor");
@@ -215,7 +216,7 @@ public class JobFailMonitorHelper {
                 // make mail
                 try {
                     MimeMessage mimeMessage =
-                            ApplicationContextHolder.getBean(JobAdminConfig.class).getMailSender().createMimeMessage();
+                            ApplicationContextHolder.getBean(JavaMailSender.class).createMimeMessage();
 
                     MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
                     helper.setFrom(ApplicationContextHolder.getBean(JobAdminConfig.class).getEmailUserName(), personal);
@@ -223,7 +224,7 @@ public class JobFailMonitorHelper {
                     helper.setSubject(title);
                     helper.setText(content, true);
 
-                    ApplicationContextHolder.getBean(JobAdminConfig.class).getMailSender().send(mimeMessage);
+                    ApplicationContextHolder.getBean(JavaMailSender.class).send(mimeMessage);
                 } catch (Exception e) {
 
                     alarmResult = false;

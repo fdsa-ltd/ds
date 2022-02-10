@@ -1,7 +1,6 @@
 package ltd.fdsa.job.admin.config;
 
 import lombok.extern.slf4j.Slf4j;
-import ltd.fdsa.core.util.NamingUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -32,7 +31,7 @@ public class RedisConfig {
     public static class Receiver {
 
         public void receiveMessage(String message) {
-            NamingUtils.formatLog(log,"Received <" + message + ">");
+            log.info("Received <" + message + ">");
         }
     }
 }

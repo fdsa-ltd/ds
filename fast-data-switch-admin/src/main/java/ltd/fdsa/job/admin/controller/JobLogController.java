@@ -1,12 +1,14 @@
 package ltd.fdsa.job.admin.controller;
 
+import ltd.fdsa.job.admin.entity.SystemUser;
+import ltd.fdsa.job.admin.repository.JobGroupRepository;
+import ltd.fdsa.job.admin.repository.JobInfoRepository;
+import ltd.fdsa.job.admin.repository.JobLogRepository;
 import ltd.fdsa.job.admin.scheduler.JobScheduler;
-import ltd.fdsa.job.admin.jpa.entity.JobGroup;
-import ltd.fdsa.job.admin.jpa.entity.JobInfo;
-import ltd.fdsa.job.admin.jpa.entity.JobLog;
-import ltd.fdsa.job.admin.jpa.service.JobGroupService;
-import ltd.fdsa.job.admin.jpa.service.JobInfoService;
-import ltd.fdsa.job.admin.jpa.service.JobLogService;
+import ltd.fdsa.job.admin.entity.JobGroup;
+import ltd.fdsa.job.admin.entity.JobInfo;
+import ltd.fdsa.job.admin.entity.JobLog;
+
 import ltd.fdsa.ds.core.exception.FastDataSwitchException;
 import ltd.fdsa.ds.core.job.enums.HttpCode;
 import ltd.fdsa.ds.core.job.executor.Executor;
@@ -15,6 +17,7 @@ import ltd.fdsa.ds.core.model.Result;
 import ltd.fdsa.ds.core.util.DateUtil;
 import ltd.fdsa.ds.core.util.I18nUtil;
 
+import ltd.fdsa.job.admin.service.impl.SystemUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -24,11 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -39,23 +38,43 @@ import java.util.stream.Collectors;
 public class JobLogController {
     private static Logger logger = LoggerFactory.getLogger(JobLogController.class);
     @Resource
-    public JobInfoService JobInfoDao;
+    private JobGroupRepository jobGroupService;
+
     @Resource
-    public JobLogService JobLogDao;
+    public JobInfoRepository JobInfoDao;
     @Resource
-    private JobGroupService JobGroupDao;
+    public JobLogRepository jobLogRepository;
+
+    @Resource
+    private SystemUserService userService;
+
+    List<JobGroup> filterJobGroupByRole(List<JobGroup> jobGroupList_all) {
+        List<JobGroup> jobGroupList = new ArrayList<>();
+        if (jobGroupList_all != null && jobGroupList_all.size() > 0) {
+            SystemUser loginUser = this.userService.checkLogin();
+            if (loginUser.getType() == 1) {
+                jobGroupList = jobGroupList_all;
+            } else {
+                List<String> groupIdStrs = new ArrayList<>();
+
+                for (JobGroup groupItem : jobGroupList_all) {
+                    if (groupIdStrs.contains(String.valueOf(groupItem.getId()))) {
+                        jobGroupList.add(groupItem);
+                    }
+                }
+            }
+        }
+        return jobGroupList;
+    }
 
     @RequestMapping
-    public String index(
-            HttpServletRequest request,
-            Model model,
-            @RequestParam(required = false, defaultValue = "0") Integer jobId) {
+    public String index(Model model, @RequestParam(required = false, defaultValue = "0") Integer jobId) {
 
         // 执行器列表
-        List<JobGroup> jobGroupList_all = JobGroupDao.findAll();
+        List<JobGroup> jobGroupList_all = this.jobGroupService.findAll();
 
         // filter group
-        List<JobGroup> jobGroupList = JobInfoController.filterJobGroupByRole(request, jobGroupList_all);
+        List<JobGroup> jobGroupList = filterJobGroupByRole(jobGroupList_all);
         if (jobGroupList == null || jobGroupList.size() == 0) {
             throw new FastDataSwitchException(I18nUtil.getInstance("").getString("jobgroup_empty"));
         }
@@ -85,7 +104,7 @@ public class JobLogController {
 
     @RequestMapping("/pageList")
     @ResponseBody
-    public Map<String, Object> pageList(HttpServletRequest request, @RequestParam(required = false, defaultValue = "0") int start, @RequestParam(required = false, defaultValue = "10") int length,
+    public Map<String, Object> pageList(@RequestParam(required = false, defaultValue = "0") int start, @RequestParam(required = false, defaultValue = "10") int length,
                                         int jobGroup,
                                         int jobId,
                                         int logStatus,
@@ -122,7 +141,7 @@ public class JobLogController {
 
         // base check
         Result<String> logStatue = Result.success();
-        JobLog jobLog = JobLogDao.findById(id).get();
+        JobLog jobLog = jobLogRepository.findById(id).get();
         if (jobLog == null) {
             throw new RuntimeException(I18nUtil.getInstance("").getString("joblog_logid_invalid"));
         }
@@ -146,7 +165,7 @@ public class JobLogController {
             // is end
             if (logResult.getData() != null
                     && logResult.getData().getFromLineNum() > logResult.getData().getToLineNum()) {
-                JobLog jobLog = JobLogDao.findById(logId).get();
+                JobLog jobLog = jobLogRepository.findById(logId).get();
                 if (jobLog.getHandleCode() > 0) {
                     logResult.getData().setEnd(true);
                 }
@@ -163,7 +182,7 @@ public class JobLogController {
     @ResponseBody
     public Result<String> logKill(int id) {
         // base check
-        JobLog log = JobLogDao.findById(id).get();
+        JobLog log = jobLogRepository.findById(id).get();
         JobInfo jobInfo = JobInfoDao.findById(log.getJobId()).get();
         if (jobInfo == null) {
             return Result.fail(500, I18nUtil.getInstance("").getString("jobinfo_glue_jobid_invalid"));
@@ -189,7 +208,7 @@ public class JobLogController {
                             + ":"
                             + (runResult.getMessage() != null ? runResult.getMessage() : ""));
             log.setHandleTime(new Date());
-            JobLogDao.update(log);
+            jobLogRepository.save(log);
             return Result.success(runResult.getMessage());
         } else {
             return Result.fail(500, runResult.getMessage());

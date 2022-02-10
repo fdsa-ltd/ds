@@ -1,14 +1,13 @@
 package ltd.fdsa.job.admin.controller;
 
 import ltd.fdsa.job.admin.annotation.PermissionLimit;
-import ltd.fdsa.job.admin.jpa.entity.JobGroup;
-import ltd.fdsa.job.admin.jpa.entity.SystemUser;
-import ltd.fdsa.job.admin.jpa.service.JobGroupService;
-import ltd.fdsa.job.admin.jpa.service.SystemUserService;
-import ltd.fdsa.job.admin.jpa.service.impl.SystemUserServiceImpl;
+import ltd.fdsa.job.admin.entity.JobGroup;
+import ltd.fdsa.job.admin.entity.SystemUser;
 import ltd.fdsa.ds.core.model.Result;
 import ltd.fdsa.ds.core.util.I18nUtil;
 
+import ltd.fdsa.job.admin.repository.JobGroupRepository;
+import ltd.fdsa.job.admin.service.impl.SystemUserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.DigestUtils;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,14 +28,14 @@ public class UserController {
     @Resource
     private SystemUserService systemUserService;
     @Resource
-    private JobGroupService JobGroupDao;
+    private JobGroupRepository jobGroupRepository;
 
     @RequestMapping
     @PermissionLimit(adminuser = true)
     public String index(Model model) {
 
         // 执行器列表
-        List<JobGroup> groupList = JobGroupDao.findAll();
+        List<JobGroup> groupList = jobGroupRepository.findAll();
         model.addAttribute("groupList", groupList);
 
         return "user/user.index";
@@ -104,10 +102,10 @@ public class UserController {
     @RequestMapping("/update")
     @ResponseBody
     @PermissionLimit(adminuser = true)
-    public Result<String> update(HttpServletRequest request, SystemUser systemUser) {
+    public Result<String> update(  SystemUser systemUser) {
 
         // avoid opt login seft
-        SystemUser loginUser = (SystemUser) request.getAttribute(SystemUserService.USER_LOGIN_IDENTITY);
+        SystemUser loginUser = this.systemUserService.checkLogin();
         if (loginUser.getName().equals(systemUser.getName())) {
             return Result.fail(500, I18nUtil.getInstance("").getString("user_update_loginuser_limit"));
         }
@@ -132,10 +130,11 @@ public class UserController {
     @RequestMapping("/remove")
     @ResponseBody
     @PermissionLimit(adminuser = true)
-    public Result<String> remove(HttpServletRequest request, int id) {
+    public Result<String> remove( int id) {
 
         // avoid opt login seft
-        SystemUser loginUser = (SystemUser) request.getAttribute(SystemUserServiceImpl.USER_LOGIN_IDENTITY);
+        SystemUser loginUser =  this.systemUserService.checkLogin();
+
         if (loginUser.getId() == id) {
             return Result.fail(500, I18nUtil.getInstance("").getString("user_update_loginuser_limit"));
         }
@@ -146,7 +145,7 @@ public class UserController {
 
     @RequestMapping("/updatePwd")
     @ResponseBody
-    public Result<String> updatePwd(HttpServletRequest request, String password) {
+    public Result<String> updatePwd(  String password) {
 
         // valid password
         if (password == null || password.trim().length() == 0) {
@@ -161,7 +160,7 @@ public class UserController {
         String md5Password = DigestUtils.md5DigestAsHex(password.getBytes());
 
         // update pwd
-        SystemUser loginUser = (SystemUser) request.getAttribute(SystemUserService.USER_LOGIN_IDENTITY);
+        SystemUser loginUser =this.systemUserService.checkLogin();
 
         // do write
         SystemUser existUser = systemUserService.loadByUserName(loginUser.getName());

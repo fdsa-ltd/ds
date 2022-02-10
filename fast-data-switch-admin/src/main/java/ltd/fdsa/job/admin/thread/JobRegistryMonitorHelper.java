@@ -1,11 +1,14 @@
 package ltd.fdsa.job.admin.thread;
 
 import lombok.var;
-import ltd.fdsa.core.context.ApplicationContextHolder;
 import ltd.fdsa.job.admin.config.JobAdminConfig;
-import ltd.fdsa.job.admin.jpa.entity.JobGroup;
-import ltd.fdsa.job.admin.jpa.entity.JobRegistry;
+import ltd.fdsa.job.admin.context.ApplicationContextHolder;
+import ltd.fdsa.job.admin.entity.JobGroup;
+import ltd.fdsa.job.admin.entity.JobRegistry;
 import ltd.fdsa.ds.core.job.enums.RegistryConfig;
+import ltd.fdsa.job.admin.repository.JobGroupRepository;
+import ltd.fdsa.job.admin.repository.JobRegistryRepository;
+import ltd.fdsa.job.admin.service.impl.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,16 +39,15 @@ public class JobRegistryMonitorHelper {
                                     try {
                                         // auto registry group
                                         List<JobGroup> groupList =
-                                                ApplicationContextHolder.getBean(JobAdminConfig.class).getJobGroupDao().findByAddressType(0);
+                                                ApplicationContextHolder.getBean(JobService.class).findByAddressList(0);
                                         if (groupList != null && !groupList.isEmpty()) {
 
                                             // remove dead address (admin/executor)
                                             List<Integer> ids =
-                                                    ApplicationContextHolder.getBean(JobAdminConfig.class)
-                                                            .getJobRegistryDao()
+                                                    ApplicationContextHolder.getBean(JobService.class)
                                                             .findDead(RegistryConfig.DEAD_TIMEOUT, new Date());
                                             if (ids != null && ids.size() > 0) {
-                                                var dao = ApplicationContextHolder.getBean(JobAdminConfig.class).getJobRegistryDao();
+                                                var dao = ApplicationContextHolder.getBean(JobRegistryRepository.class);
                                                 for (var i : ids) {
                                                     dao.deleteById(i);
                                                 }
@@ -55,8 +57,7 @@ public class JobRegistryMonitorHelper {
                                             HashMap<String, List<String>> appAddressMap =
                                                     new HashMap<String, List<String>>();
                                             List<JobRegistry> list =
-                                                    ApplicationContextHolder.getBean(JobAdminConfig.class)
-                                                            .getJobRegistryDao()
+                                                    ApplicationContextHolder.getBean(JobService.class)
                                                             .findAll(RegistryConfig.DEAD_TIMEOUT, new Date());
                                             if (list != null) {
                                                 for (JobRegistry item : list) {
@@ -90,7 +91,7 @@ public class JobRegistryMonitorHelper {
                                                     addressListStr = addressListStr.substring(0, addressListStr.length() - 1);
                                                 }
                                                 group.setAddressList(addressListStr);
-                                                ApplicationContextHolder.getBean(JobAdminConfig.class).getJobGroupDao().update(group);
+                                                ApplicationContextHolder.getBean(JobGroupRepository.class).save(group);
                                             }
                                         }
                                     } catch (Exception e) {

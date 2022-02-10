@@ -1,7 +1,7 @@
 package ltd.fdsa.job.admin.config;
 
+import ltd.fdsa.job.admin.repository.*;
 import ltd.fdsa.job.admin.scheduler.JobScheduler;
-import ltd.fdsa.job.admin.jpa.service.*;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,25 +25,6 @@ public class JobAdminConfig implements InitializingBean, DisposableBean {
     private String accessToken;
     @Value("${spring.mail.username}")
     private String emailUserName;
-
-
-    @Resource
-    private JobLogService JobLogDao;
-    @Resource
-    private JobInfoService JobInfoDao;
-    @Resource
-    private JobRegistryService JobRegistryDao;
-
-    // dao, service
-    @Resource
-    private JobGroupService JobGroupDao;
-    @Resource
-    private JobLogReportService  JobLogReportDao;
-    @Resource
-    private JavaMailSender mailSender;
-    @Resource
-    private DataSource dataSource;
-
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -69,31 +50,5 @@ public class JobAdminConfig implements InitializingBean, DisposableBean {
         return emailUserName;
     }
 
-    public JobLogService getJobLogDao() {
-        return JobLogDao;
-    }
 
-    public JobInfoService getJobInfoDao() {
-        return JobInfoDao;
-    }
-
-    public JobRegistryService getJobRegistryDao() {
-        return JobRegistryDao;
-    }
-
-    public JobGroupService getJobGroupDao() {
-        return JobGroupDao;
-    }
-
-    public JobLogReportService getJobLogReportDao() {
-        return JobLogReportDao;
-    }
-
-    public JavaMailSender getMailSender() {
-        return mailSender;
-    }
-
-    public DataSource getDataSource() {
-        return dataSource;
-    }
 }

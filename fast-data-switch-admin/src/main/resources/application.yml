@@ -1,3 +1,6 @@
+server:
+  port: 8081
+
 spring:
   freemarker:
     template-loader-path: classpath:/templates/
@@ -17,7 +20,6 @@ spring:
   application:
     name: gateway
 
-
   profiles:
     active: dev
   redis.hostName: 115.28.92.178
@@ -29,29 +31,36 @@ spring:
   redis.pool.minIdle: 0
   redis.timeout: 0
   jpa:
-    database-platform: org.hibernate.dialect.SQLiteDialect
     generate-ddl: true
     show-sql: false
-
+    database: mysql
+    hibernate.ddl-auto: update #指定为update，每次启动项目检测表结构有变化的时候会新增字段，表不存在时会
+#    properties.hibernate.dialect: org.hibernate.dialect.MySQL5Dialect # 使用JPA
+#    database-platform: org.hibernate.dialect.SQLiteDialect
+#    database-platform: org.hibernate.dialect.MySQL5Dialect
+    hibernate:
+      naming:
+        #指定jpa的自动表生成策略，驼峰自动映射为下划线格式
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        #physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   datasource:
-    master:
-      type: com.alibaba.druid.pool.DruidDataSource
-      driver-class-name: org.sqlite.JDBC
-      url: ${database.master.url}
-      username: ${database.master.username}
-      password: ${database.master.password}
-      maxActive: 20
-      maxWait: 10000
-      max-wait: 10000
-      min-idle: 5
-      initial-size: 5
-      filters: stat,slf4j
-      timeBetweenLogStatsMillis: 5000
-      druid:
-        maxWait: 60000
-        filter:
-          stat:
-            enabled: true
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: org.sqlite.JDBC
+    url: ${database.master.url}
+    username: ${database.master.username}
+    password: ${database.master.password}
+    maxActive: 20
+    maxWait: 10000
+    max-wait: 10000
+    min-idle: 5
+    initial-size: 5
+    filters: stat,slf4j
+    timeBetweenLogStatsMillis: 5000
+    druid:
+      maxWait: 60000
+      filter:
+        stat:
+          enabled: true
   cloud:
     consul:
       host: 10.168.4.14

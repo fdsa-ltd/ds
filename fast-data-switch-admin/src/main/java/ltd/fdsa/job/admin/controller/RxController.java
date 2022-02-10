@@ -1,12 +1,17 @@
 package ltd.fdsa.job.admin.controller;
 
+import ltd.fdsa.ds.core.job.coordinator.Coordinator;
 import ltd.fdsa.job.admin.annotation.PermissionLimit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.remoting.caucho.HessianServiceExporter;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 @RestController
 public class RxController {
@@ -14,7 +19,19 @@ public class RxController {
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private RedisTemplate redisTemplate;
+    @Resource
+    private Coordinator coordinator;
 
+
+    @RequestMapping("/coordinator")
+    @ResponseBody
+    public HessianServiceExporter exportHelloHessian()
+    {
+        HessianServiceExporter exporter = new HessianServiceExporter();
+        exporter.setService(coordinator);
+        exporter.setServiceInterface(Coordinator.class);
+        return exporter;
+    }
     @RequestMapping("/uid")
     @ResponseBody
     @PermissionLimit(limit = false)

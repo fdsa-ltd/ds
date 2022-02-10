@@ -11,11 +11,11 @@ import ltd.fdsa.ds.core.model.Result;
 import ltd.fdsa.ds.core.config.DefaultConfiguration;
 import ltd.fdsa.ds.core.util.I18nUtil;
 import ltd.fdsa.job.admin.context.CoordinatorContext;
-import ltd.fdsa.job.admin.jpa.entity.JobInfo;
-import ltd.fdsa.job.admin.jpa.entity.JobLog;
-import ltd.fdsa.job.admin.jpa.service.JobGroupService;
-import ltd.fdsa.job.admin.jpa.service.JobInfoService;
-import ltd.fdsa.job.admin.jpa.service.JobLogService;
+import ltd.fdsa.job.admin.entity.JobInfo;
+import ltd.fdsa.job.admin.entity.JobLog;
+import ltd.fdsa.job.admin.repository.JobGroupRepository;
+import ltd.fdsa.job.admin.repository.JobInfoRepository;
+import ltd.fdsa.job.admin.repository.JobLogRepository;
 import ltd.fdsa.job.admin.thread.JobTriggerPoolHelper;
 import ltd.fdsa.job.admin.trigger.TriggerTypeEnum;
 import org.springframework.stereotype.Service;
@@ -33,12 +33,12 @@ public class CoordinatorImpl implements Coordinator {
 
 
     @Resource
-    public JobLogService JobLogDao;
+    public JobLogRepository jobLogRepository;
     @Resource
-    private JobInfoService JobInfoDao;
+    private JobInfoRepository JobInfoDao;
 
     @Resource
-    private JobGroupService JobGroupDao;
+    private JobGroupRepository JobGroupDao;
     @Resource
     private CoordinatorContext context;
 
@@ -69,7 +69,7 @@ public class CoordinatorImpl implements Coordinator {
 
     private Result<String> callback(HandleCallbackParam handleCallbackParam) {
         // valid log item
-        JobLog log = JobLogDao.findById(handleCallbackParam.getLogId()).get();
+        JobLog log = jobLogRepository.findById(handleCallbackParam.getLogId()).get();
         if (log == null) {
             return Result.fail(5000, "log item not found.");
         }
@@ -141,7 +141,7 @@ public class CoordinatorImpl implements Coordinator {
         log.setHandleTime(new Date());
         log.setHandleCode(handleCallbackParam.getExecuteResult().getCode());
         log.setHandleMsg(handleMsg.toString());
-        JobLogDao.update(log);
+        jobLogRepository.save(log);
 
         return Result.success();
     }

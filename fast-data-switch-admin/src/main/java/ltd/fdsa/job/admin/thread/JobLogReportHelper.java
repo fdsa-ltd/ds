@@ -1,8 +1,7 @@
 package ltd.fdsa.job.admin.thread;
 
-import ltd.fdsa.core.context.ApplicationContextHolder;
-import ltd.fdsa.job.admin.config.JobAdminConfig;
-import ltd.fdsa.job.admin.jpa.entity.JobLogReport;
+import lombok.extern.slf4j.Slf4j;
+import ltd.fdsa.job.admin.entity.JobLogReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,8 +13,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * job log report helper
  */
+@Slf4j
 public class JobLogReportHelper {
-    private static Logger logger = LoggerFactory.getLogger(JobLogReportHelper.class);
+
 
     private static JobLogReportHelper instance = new JobLogReportHelper();
     private Thread logrThread;
@@ -142,7 +142,7 @@ public class JobLogReportHelper {
                                         TimeUnit.MINUTES.sleep(1);
                                     } catch (Exception e) {
                                         if (!toStop) {
-                                            logger.error(e.getMessage(), e);
+                                            log.error(e.getMessage(), e);
                                         }
                                     }
                                 }
@@ -159,7 +159,7 @@ public class JobLogReportHelper {
         try {
             logrThread.join();
         } catch (InterruptedException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 }

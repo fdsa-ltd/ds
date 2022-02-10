@@ -1,8 +1,8 @@
 package ltd.fdsa.job.admin.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import ltd.fdsa.job.admin.jpa.entity.JobInfo;
-import ltd.fdsa.job.admin.jpa.service.JobInfoService;
+import ltd.fdsa.job.admin.entity.JobInfo;
+import ltd.fdsa.job.admin.repository.JobInfoRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +16,7 @@ import javax.annotation.Resource;
 public class JobInfoDaoTest {
 
     @Resource
-    private JobInfoService JobInfoDao;
+    private JobInfoRepository jobInfoRepository;
 
     @Test
     public void pageList() {
@@ -44,9 +44,9 @@ public class JobInfoDaoTest {
 
         info.setChildJobId("1");
 
-  JobInfoDao.update(info);
+        jobInfoRepository.save(info);
 
-        JobInfo info2 = JobInfoDao.findById(info.getId()).get();
+        JobInfo info2 = jobInfoRepository.findById(info.getId()).get();
         info2.setCronExpression("jobCron2");
         info2.setRemark("desc2");
         info2.setAuthor("setAuthor2");

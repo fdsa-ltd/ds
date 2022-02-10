@@ -1,7 +1,7 @@
 package ltd.fdsa.job.admin.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import ltd.fdsa.job.admin.jpa.service.JobRegistryService;
+import ltd.fdsa.job.admin.repository.JobRegistryRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,10 +15,10 @@ import javax.annotation.Resource;
 public class JobRegistryDaoTest {
 
     @Resource
-    private JobRegistryService JobRegistryDao;
+    private JobRegistryRepository jobRegistryRepository;
 
     @Test
     public void test() {
-        JobRegistryDao.deleteById(1);
+        jobRegistryRepository.deleteById(1);
     }
 }

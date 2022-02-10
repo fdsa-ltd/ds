@@ -1,8 +1,9 @@
 package ltd.fdsa.job.admin.dao;
 
 import lombok.var;
-import ltd.fdsa.job.admin.jpa.entity.JobGroup;
-import ltd.fdsa.job.admin.jpa.service.JobGroupService;
+import ltd.fdsa.job.admin.entity.JobGroup;
+import ltd.fdsa.job.admin.repository.JobGroupRepository;
+import ltd.fdsa.job.admin.service.impl.JobService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,13 +17,15 @@ import java.util.List;
 public class JobGroupDaoTest {
 
     @Resource
-    private JobGroupService JobGroupDao;
+    private JobGroupRepository jobGroupRepository;
+    @Resource
+    private JobService jobService;
 
     @Test
     public void test() {
-        List<JobGroup> list = JobGroupDao.findAll();
+        List<JobGroup> list = jobGroupRepository.findAll();
 
-        List<JobGroup> list2 = JobGroupDao.findByAddressType(0);
+        List<JobGroup> list2 = jobService.findByAddressList(0);
 
         JobGroup group = new JobGroup();
         group.setName("setAppName");
@@ -31,17 +34,17 @@ public class JobGroupDaoTest {
         group.setType((byte) 0);
         group.setAddressList("setAddressList");
 
-        var ret = JobGroupDao.update(group);
+        var ret = jobGroupRepository.save(group);
 
-        JobGroup group2 = JobGroupDao.findById(group.getId()).get();
+        JobGroup group2 = jobGroupRepository.findById(group.getId()).get();
         group2.setName("setAppName2");
         group2.setTitle("setTitle2");
 
         group2.setType((byte) 2);
         group2.setAddressList("setAddressList2");
 
-        var  ret2 = JobGroupDao.update(group2);
+        var  ret2 = jobGroupRepository.save(group2);
 
-         JobGroupDao.deleteById(group.getId());
+         jobGroupRepository.deleteById(group.getId());
     }
 }

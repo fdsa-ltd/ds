@@ -1,7 +1,7 @@
 package ltd.fdsa.job.admin.dao;
 
-import ltd.fdsa.job.admin.jpa.entity.JobLog;
-import ltd.fdsa.job.admin.jpa.service.JobLogService;
+import ltd.fdsa.job.admin.entity.JobLog;
+import ltd.fdsa.job.admin.repository.JobLogRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +15,7 @@ import java.util.Date;
 public class JobLogDaoTest {
 
     @Resource
-    private JobLogService JobLogDao;
+    private JobLogRepository jobLogRepository;
 
     @Test
     public void test() {
@@ -25,8 +25,8 @@ public class JobLogDaoTest {
         JobLog log = new JobLog();
         log.setJobGroup(1);
         log.setJobId(1);
-        JobLogDao.update(log);
-        JobLog dto = JobLogDao.findById(log.getId()).get();
+        jobLogRepository.save(log);
+        JobLog dto = jobLogRepository.findById(log.getId()).get();
 
         log.setTriggerTime(new Date());
         log.setTriggerCode(1);

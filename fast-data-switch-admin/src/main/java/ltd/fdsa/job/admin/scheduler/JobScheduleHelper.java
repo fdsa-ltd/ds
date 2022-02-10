@@ -1,10 +1,10 @@
 package ltd.fdsa.job.admin.scheduler;
 
-import ltd.fdsa.core.context.ApplicationContextHolder;
+import ltd.fdsa.job.admin.context.ApplicationContextHolder;
+import ltd.fdsa.job.admin.repository.JobInfoRepository;
 import ltd.fdsa.job.admin.thread.JobTriggerPoolHelper;
 import ltd.fdsa.job.admin.trigger.TriggerTypeEnum;
-import ltd.fdsa.job.admin.jpa.entity.JobInfo;
-import ltd.fdsa.job.admin.jpa.service.JobInfoService;
+import ltd.fdsa.job.admin.entity.JobInfo;
 import ltd.fdsa.ds.core.job.cron.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +75,7 @@ public class JobScheduleHelper {
                                         // tx start
                                         // 1、pre read
                                         long nowTime = System.currentTimeMillis();
-                                        List<JobInfo> scheduleList = ApplicationContextHolder.getBean(JobInfoService.class).findAll();
+                                        List<JobInfo> scheduleList = ApplicationContextHolder.getBean(JobInfoRepository.class).findAll();
                                         if (scheduleList != null && scheduleList.size() > 0) {
                                             // 2、push time-ring
                                             for (JobInfo jobInfo : scheduleList) {
@@ -127,7 +127,7 @@ public class JobScheduleHelper {
 
                                             // 3、update trigger info
                                             for (JobInfo jobInfo : scheduleList) {
-                                                ApplicationContextHolder.getBean(JobInfoService.class).update(jobInfo);
+                                                ApplicationContextHolder.getBean(JobInfoRepository.class).save(jobInfo);
                                             }
 
                                         } else {

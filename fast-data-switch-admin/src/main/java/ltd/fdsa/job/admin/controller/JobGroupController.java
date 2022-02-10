@@ -2,11 +2,11 @@ package ltd.fdsa.job.admin.controller;
 
 
 import lombok.var;
-import ltd.fdsa.job.admin.jpa.entity.JobGroup;
-import ltd.fdsa.job.admin.jpa.entity.JobRegistry;
-import ltd.fdsa.job.admin.jpa.service.JobGroupService;
-import ltd.fdsa.job.admin.jpa.service.JobInfoService;
-import ltd.fdsa.job.admin.jpa.service.JobRegistryService;
+import ltd.fdsa.job.admin.entity.JobGroup;
+import ltd.fdsa.job.admin.entity.JobRegistry;
+import ltd.fdsa.job.admin.repository.JobGroupRepository;
+import ltd.fdsa.job.admin.repository.JobInfoRepository;
+import ltd.fdsa.job.admin.repository.JobRegistryRepository;
 import ltd.fdsa.ds.core.job.enums.RegistryConfig;
 import ltd.fdsa.ds.core.model.Result;
 import ltd.fdsa.ds.core.util.I18nUtil;
@@ -27,17 +27,17 @@ import java.util.*;
 public class JobGroupController {
 
     @Resource
-    public JobInfoService JobInfoDao;
+    public JobInfoRepository JobInfoDao;
     @Resource
-    public JobGroupService JobGroupDao;
+    public JobGroupRepository jobGroupRepository;
     @Resource
-    private JobRegistryService JobRegistryDao;
+    private JobRegistryRepository JobRegistryDao;
 
     @RequestMapping
     public String index(Model model) {
 
         // job group (executor)
-        List<JobGroup> list = JobGroupDao.findAll();
+        List<JobGroup> list = jobGroupRepository.findAll();
 
         model.addAttribute("list", list);
         return "jobgroup/jobgroup.index";
@@ -71,7 +71,7 @@ public class JobGroupController {
             }
         }
 
-        var ret = JobGroupDao.update(JobGroup);
+        var ret = jobGroupRepository.save(JobGroup);
         return (ret != null) ? Result.success() : Result.fail(500, "error");
     }
 
@@ -108,8 +108,8 @@ public class JobGroupController {
             if (JobGroup.getAddressList() == null || JobGroup.getAddressList().trim().length() == 0) {
                 return Result.fail(500, I18nUtil.getInstance("").getString("jobgroup_field_addressType_limit"));
             }
-            String[] addresss = JobGroup.getAddressList().split(",");
-            for (String item : addresss) {
+            String[] address = JobGroup.getAddressList().split(",");
+            for (String item : address) {
                 if (item == null || item.trim().length() == 0) {
                     return Result.fail(
                             500, I18nUtil.getInstance("").getString("jobgroup_field_registryList_invalid"));
@@ -117,7 +117,7 @@ public class JobGroupController {
             }
         }
 
-        var ret = JobGroupDao.update(JobGroup);
+        var ret = jobGroupRepository.save(JobGroup);
         return (ret != null) ? Result.success() : Result.fail(500, "error");
     }
 
@@ -147,14 +147,14 @@ public class JobGroupController {
     @ResponseBody
     public Result<String> remove(int id) {
 
-        JobGroupDao.deleteById(id);
+        jobGroupRepository.deleteById(id);
         return Result.success();
     }
 
     @RequestMapping("/loadById")
     @ResponseBody
     public Result<JobGroup> loadById(int id) {
-        JobGroup jobGroup = JobGroupDao.findById(id).get();
+        JobGroup jobGroup = jobGroupRepository.findById(id).get();
         if (jobGroup == null) {
             return Result.fail(500, "error");
         }

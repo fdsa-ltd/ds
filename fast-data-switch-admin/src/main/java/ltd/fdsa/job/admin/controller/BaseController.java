@@ -1,28 +1,24 @@
 package ltd.fdsa.job.admin.controller;
 
+import ltd.fdsa.job.admin.config.WebMvcConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+ 
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class BaseController {
-    @Autowired
-    protected HttpServletRequest request;
-
-    @Autowired
-    protected HttpServletResponse response;
+ 
 
     protected String getUserId() {
-        return this.request.getHeader("X-USERID");
+        return WebMvcConfig.getRequest().block().getRequest().getHeaders().getFirst("X-USERID");
     }
 
     protected String[] getUserRoles() {
-        return this.request.getHeader("X-USER-ROLES").split(",");
+        return WebMvcConfig.getRequest().block().getRequest().getHeaders().getFirst("X-USER-ROLES").split(",");
     }
 
     @InitBinder

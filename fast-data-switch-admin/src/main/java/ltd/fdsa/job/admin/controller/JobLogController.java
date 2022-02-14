@@ -1,6 +1,6 @@
 package ltd.fdsa.job.admin.controller;
 
-import ltd.fdsa.job.admin.entity.SystemUser;
+import ltd.fdsa.job.admin.entity.User;
 import ltd.fdsa.job.admin.repository.JobGroupRepository;
 import ltd.fdsa.job.admin.repository.JobInfoRepository;
 import ltd.fdsa.job.admin.repository.JobLogRepository;
@@ -51,7 +51,7 @@ public class JobLogController {
     List<JobGroup> filterJobGroupByRole(List<JobGroup> jobGroupList_all) {
         List<JobGroup> jobGroupList = new ArrayList<>();
         if (jobGroupList_all != null && jobGroupList_all.size() > 0) {
-            SystemUser loginUser = this.userService.checkLogin();
+            User loginUser = this.userService.checkLogin();
             if (loginUser.getType() == 1) {
                 jobGroupList = jobGroupList_all;
             } else {

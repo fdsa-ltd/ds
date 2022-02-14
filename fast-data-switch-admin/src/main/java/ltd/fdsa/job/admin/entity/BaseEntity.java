@@ -83,22 +83,22 @@ public class BaseEntity<ID> {
          * 正常状态码
          */
 
-        OK((byte) 1, "正常"),
+        OK(1, "正常"),
         /**
          * 冻结状态码
          */
-        FREEZE((byte) 2, "冻结"),
+        FREEZE(2, "冻结"),
 
         /**
          * 删除状态码
          */
-        DELETE((byte) 3, "删除");
+        DELETE(4, "删除");
 
-        private Byte code;
+        private int code;
 
         private String message;
 
-        Status(Byte code, String message) {
+        Status(int code, String message) {
             this.code = code;
             this.message = message;
         }

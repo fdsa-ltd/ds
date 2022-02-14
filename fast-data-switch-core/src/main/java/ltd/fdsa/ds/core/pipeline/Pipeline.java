@@ -25,11 +25,6 @@ public interface Pipeline {
     // execute
     void execute(Record... records);
 
-    // output
-    default Map<String, String> scheme() {
-        return Collections.emptyMap();
-    }
-
     default List<Pipeline> nextSteps() {
         return Collections.emptyList();
     }

@@ -7,7 +7,7 @@ import ltd.fdsa.ds.core.model.Result;
 import ltd.fdsa.ds.core.util.DateUtil;
 import ltd.fdsa.ds.core.util.I18nUtil;
 import ltd.fdsa.job.admin.entity.JobGroup;
-import ltd.fdsa.job.admin.entity.SystemUser;
+import ltd.fdsa.job.admin.entity.User;
 import ltd.fdsa.job.admin.repository.JobGroupRepository;
 import ltd.fdsa.job.admin.route.ExecutorRouteStrategyEnum;
 import ltd.fdsa.job.admin.service.impl.SystemUserService;
@@ -41,7 +41,7 @@ public class JobInfoController extends BaseController {
     List<JobGroup> filterJobGroupByRole(List<JobGroup> jobGroupList_all) {
         List<JobGroup> jobGroupList = new ArrayList<>();
         if (jobGroupList_all != null && jobGroupList_all.size() > 0) {
-            SystemUser loginUser = this.userService.checkLogin();
+            User loginUser = this.userService.checkLogin();
             if (loginUser.getType() == 1) {
                 jobGroupList = jobGroupList_all;
             } else {

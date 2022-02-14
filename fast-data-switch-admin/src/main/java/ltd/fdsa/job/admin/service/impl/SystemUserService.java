@@ -7,22 +7,16 @@ import ltd.fdsa.ds.core.util.HashUtils;
 import ltd.fdsa.ds.core.util.I18nUtil;
 import ltd.fdsa.job.admin.config.WebMvcConfig;
 import ltd.fdsa.job.admin.entity.BaseEntity;
-import ltd.fdsa.job.admin.entity.SystemUser;
+import ltd.fdsa.job.admin.entity.User;
 import ltd.fdsa.job.admin.repository.SystemUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.util.UriComponentsBuilder;
 
 
 import javax.annotation.Resource;
-import java.net.HttpCookie;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -36,8 +30,8 @@ public class SystemUserService {
     private SystemUserRepository reader;
 
 
-    public SystemUser loadByUserName(String username) {
-        var userQuery = new SystemUser();
+    public User loadByUserName(String username) {
+        var userQuery = new User();
         userQuery.setName(username);
         userQuery.setStatus(BaseEntity.Status.OK);
         var example = Example.of(userQuery);
@@ -48,7 +42,7 @@ public class SystemUserService {
         return result.get();
     }
 
-    private String makeToken(SystemUser systemUser) {
+    private String makeToken(User systemUser) {
         var version = "v1";
         var id = Base64Utils.encodeToString(systemUser.getId().toString().getBytes(StandardCharsets.UTF_8));
         var kv = Base64Utils.encodeToString(MessageFormat.format("name:{0},email:{1}", systemUser.getName(), systemUser.getEmail()).getBytes(StandardCharsets.UTF_8));
@@ -58,7 +52,7 @@ public class SystemUserService {
         return token;
     }
 
-    private SystemUser parseToken(String token) {
+    private User parseToken(String token) {
         if (Strings.isNullOrEmpty(token)) {
             return null;
         }
@@ -81,7 +75,7 @@ public class SystemUserService {
         }
         var data = new LinkedHashMap<String, String>();
 
-        var user = new SystemUser();
+        var user = new User();
         user.setName(data.getOrDefault("name", ""));
         user.setEmail(data.getOrDefault("email", ""));
         return user;
@@ -95,7 +89,7 @@ public class SystemUserService {
         }
 
         // valid passowrd
-        SystemUser user = this.loadByUserName(username);
+        User user = this.loadByUserName(username);
         if (user == null) {
             return Result.fail(500, I18nUtil.getInstance("").getString("login_param_invalid"));
         }
@@ -109,7 +103,7 @@ public class SystemUserService {
         return Result.success(loginToken);
     }
 
-    public SystemUser checkLogin() {
+    public User checkLogin() {
         String token = getTokenFromCookie();
         if (Strings.isNullOrEmpty(token)) {
             token = getTokenFromHeader();
@@ -120,7 +114,7 @@ public class SystemUserService {
         if (Strings.isNullOrEmpty(token)) {
             return null;
         }
-        SystemUser user = parseToken(token);
+        User user = parseToken(token);
         return user;
     }
 
@@ -145,7 +139,7 @@ public class SystemUserService {
         return WebMvcConfig.getRequest().block().getRequest().getQueryParams().getFirst("access_token");
     }
 
-    public void update(SystemUser systemUser) {
+    public void update(User systemUser) {
         this.reader.save(systemUser);
     }
 

@@ -11,13 +11,24 @@ import java.nio.ByteBuffer;
 
 @Data
 @Slf4j
-public class Column  {
+public class Column {
     private final String key;
     private final Object value;
 
-    public Column(String key, Object value) {
+    private final Type type;
+
+    Column(String key, Object value, Type type) {
         this.key = key;
         this.value = value;
+        this.type = type;
+    }
+
+    public Column(String key, Integer value) {
+        this(key, value, Type.Number);
+    }
+
+    public Column(String key, String value) {
+        this(key, value, Type.String);
     }
 
     public byte[] toByteArray() {
@@ -32,5 +43,9 @@ public class Column  {
             log.error("cbor conversion exception", e);
             return new byte[0];
         }
+    }
+
+    public enum Type {
+        String, Object, Array, Number, Bool,
     }
 }

@@ -63,10 +63,6 @@ public class JdbcReader implements Reader {
         }
     }
 
-    @Override
-    public Map<String, String> scheme() {
-        return this.scheme;
-    }
 
     @Override
     public void start() {
@@ -77,7 +73,7 @@ public class JdbcReader implements Reader {
                 while (rs.next()) {
                     Record record = new Record();
                     for (var key : this.scheme.keySet()) {
-                        record.add(new Column(key, rs.getObject(key)));
+                        record.add(key, rs.getObject(key));
                     }
                     list.add(record);
                 }

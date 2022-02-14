@@ -2,7 +2,7 @@ package ltd.fdsa.job.admin.controller;
 
 import ltd.fdsa.job.admin.annotation.PermissionLimit;
 import ltd.fdsa.job.admin.entity.JobGroup;
-import ltd.fdsa.job.admin.entity.SystemUser;
+import ltd.fdsa.job.admin.entity.User;
 import ltd.fdsa.ds.core.model.Result;
 import ltd.fdsa.ds.core.util.I18nUtil;
 
@@ -65,7 +65,7 @@ public class UserController {
     @RequestMapping("/add")
     @ResponseBody
     @PermissionLimit(adminuser = true)
-    public Result<String> add(SystemUser systemUser) {
+    public Result<String> add(User systemUser) {
 
         // valid username
         if (!StringUtils.hasText(systemUser.getName())) {
@@ -89,7 +89,7 @@ public class UserController {
         systemUser.setPassword(DigestUtils.md5DigestAsHex(systemUser.getPassword().getBytes()));
 
         // check repeat
-        SystemUser existUser = systemUserService.loadByUserName(systemUser.getName());
+        User existUser = systemUserService.loadByUserName(systemUser.getName());
         if (existUser != null) {
             return Result.fail(500, I18nUtil.getInstance("").getString("user_username_repeat"));
         }
@@ -102,10 +102,10 @@ public class UserController {
     @RequestMapping("/update")
     @ResponseBody
     @PermissionLimit(adminuser = true)
-    public Result<String> update(  SystemUser systemUser) {
+    public Result<String> update(  User systemUser) {
 
         // avoid opt login seft
-        SystemUser loginUser = this.systemUserService.checkLogin();
+        User loginUser = this.systemUserService.checkLogin();
         if (loginUser.getName().equals(systemUser.getName())) {
             return Result.fail(500, I18nUtil.getInstance("").getString("user_update_loginuser_limit"));
         }
@@ -133,7 +133,7 @@ public class UserController {
     public Result<String> remove( int id) {
 
         // avoid opt login seft
-        SystemUser loginUser =  this.systemUserService.checkLogin();
+        User loginUser =  this.systemUserService.checkLogin();
 
         if (loginUser.getId() == id) {
             return Result.fail(500, I18nUtil.getInstance("").getString("user_update_loginuser_limit"));
@@ -160,10 +160,10 @@ public class UserController {
         String md5Password = DigestUtils.md5DigestAsHex(password.getBytes());
 
         // update pwd
-        SystemUser loginUser =this.systemUserService.checkLogin();
+        User loginUser =this.systemUserService.checkLogin();
 
         // do write
-        SystemUser existUser = systemUserService.loadByUserName(loginUser.getName());
+        User existUser = systemUserService.loadByUserName(loginUser.getName());
         existUser.setPassword(md5Password);
         systemUserService.update(existUser);
 

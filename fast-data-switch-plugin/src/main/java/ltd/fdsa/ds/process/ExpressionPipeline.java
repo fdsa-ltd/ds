@@ -63,7 +63,7 @@ public class ExpressionPipeline implements Process {
             {
                 this.field = Utils.getName(env.keySet());
             }
-            record.add(new Column(this.field, result));
+            record.add(this.field, result);
         }
         // 下沉数据
         for (var item : this.nextSteps()) {

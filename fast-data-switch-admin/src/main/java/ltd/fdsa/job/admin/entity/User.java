@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Table(name = "t_user")
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-public class SystemUser extends BaseEntity<Integer> {
+public class User extends BaseEntity<Integer> {
     @Id
     @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.AUTO)

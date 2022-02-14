@@ -36,6 +36,14 @@ public class Record {
         return true;
     }
 
+    public boolean add(String key, Object value) {
+        if (value instanceof String) {
+            this.columns.put(key, new Column(key, value.toString()));
+            return true;
+        }
+        return false;
+    }
+
     public int size() {
         return this.columns.size();
     }

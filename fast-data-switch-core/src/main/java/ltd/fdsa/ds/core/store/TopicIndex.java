@@ -1,5 +1,9 @@
 package ltd.fdsa.ds.core.store;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.sun.corba.se.impl.ior.OldJIDLObjectKeyTemplate;
+import lombok.val;
 import lombok.var;
 import ltd.fdsa.ds.core.util.FileChannelUtil;
 
@@ -7,7 +11,10 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.Duration;
 import java.util.*;
 
 /**
@@ -18,108 +25,63 @@ import java.util.*;
  * @since 2022/1/27 17:41
  */
 public class TopicIndex {
-    private static TopicIndex instance;
-    private final Map<String, SortedOffset> fileIndex = new HashMap<>();
+    private static Cache<String, TopicIndex> FILE_HANDLER = CacheBuilder.newBuilder().maximumSize(1024)
+            .expireAfterAccess(Duration.ofMinutes(10))
+            .build();
+    private static Map<String, Object> topics = new HashMap<>();
+    private final SortedOffset offsets;
 
-    TopicIndex() {
-        var root = new File("./data/lsm/");
-        var files = listAllFiles(root, new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return (name.endsWith("topics.idx"));
-            }
-        });
-        for (var item : files) {
-            FileChannel fileChannel = null;
-            try {
-                fileChannel = FileChannel.open(item.toPath(), StandardOpenOption.READ);
-                load(FileChannelUtil.getInstance(fileChannel));
-            } catch (IOException e) {
-
-            } finally {
-                if (fileChannel != null) {
-                    try {
-                        fileChannel.close();
-                    } catch (IOException e) {
-
-                    }
-                    fileChannel = null;
-                }
-            }
-        }
-        for (var entry : this.fileIndex.values()) {
-            entry.sort();
-        }
+    private TopicIndex(SortedOffset offsets) {
+        this.offsets = offsets;
     }
 
-    private List<File> listAllFiles(File root, FilenameFilter filter) {
-        List<File> list = new LinkedList<>();
-        {
-            for (var file : root.listFiles()) {
-                if (file.isDirectory()) {
-                    list.addAll(listAllFiles(file, filter));
-                }
-                if (filter.accept(file, file.getName())) {
-                    list.add(file);
-                }
-            }
-        }
-        return list;
+
+    public SortedOffset.OffsetElement getFirst() {
+        return this.offsets.get(0);
     }
 
-    public static TopicIndex loadTopicIndex() {
-        if (instance == null) {
-            instance = new TopicIndex();
-        }
-        return instance;
-    }
-
-    private void load(FileChannelUtil file){
-        while (true) {
-            // topic
-            var length = (int) file.readVLen();
-            if (length <= 0) {
-                break;
-            }
-            var data = file.read(length);
-            var topic = new String(data);
-            this.ensureKey(topic);
-            // offset and file id
-            var offset = file.readVLen();
-            var size = file.readVLen();
-            var fileId = file.readVLen();
-            var element = new SortedOffset.OffsetElement(offset, (int) size, fileId);
-            this.fileIndex.get(topic).add(element);
-        }
-    }
-
-    public SortedOffset.OffsetElement getFirst(String topic) {
-        if (!this.fileIndex.containsKey(topic)) {
-            return null;
-        }
-        return this.fileIndex.get(topic).get(0);
-    }
-
-    public SortedOffset.OffsetElement search(String topic, long offset) {
-        if (!this.fileIndex.containsKey(topic)) {
-            return null;
-        }
-        var index = this.fileIndex.get(topic).search(offset);
+    public SortedOffset.OffsetElement search(long offset) {
+        var index = this.offsets.search(offset);
         if (index >= 0) {
-            return this.fileIndex.get(topic).get(index);
+            return this.offsets.get(index);
         }
         return null;
     }
 
     public Set<String> topics() {
-        return this.fileIndex.keySet();
+        return topics.keySet();
     }
 
-    public boolean ensureKey(String key) {
-        if (this.fileIndex.containsKey(key)) {
-            return true;
+    public static TopicIndex loadTopic(String key) {
+        if (FILE_HANDLER.getIfPresent(key) == null) {
+            var path = Paths.get("./", "data", "index", key + ".index");
+            try {
+                if (!Files.exists(path)) {
+                    Files.createFile(path);
+                }
+                var fileChannel = FileChannel.open(path, StandardOpenOption.READ);
+
+                SortedOffset map = new SortedOffset();
+                while (true) {
+                    // offset and file id
+                    var offset = FileChannelUtil.readVLen(fileChannel);
+                    if (offset <= 0) {
+                        break;
+                    }
+                    var size = FileChannelUtil.readVLen(fileChannel);
+                    var fileId = FileChannelUtil.readVLen(fileChannel);
+                    var position = FileChannelUtil.readVLen(fileChannel);
+                    var element = new SortedOffset.OffsetElement(offset, (int) size, fileId, position);
+                    map.add(element);
+                }
+                map.sort();
+                fileChannel.close();
+                FILE_HANDLER.put(key, new TopicIndex(map));
+            } catch (IOException e) {
+                return null;
+            }
         }
-        this.fileIndex.put(key, new SortedOffset());
-        return false;
+        return FILE_HANDLER.getIfPresent(key);
+
     }
 }

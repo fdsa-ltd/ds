@@ -18,9 +18,9 @@
         <module>fast-data-switch-web</module>
         <module>fast-data-switch-plugin</module>
         <module>fast-data-switch-plugin-distributed</module>
-        <module>kafka-stream-demo</module>
-        <module>kafka-connect-transform</module>
-        <module>kafka-connect-jdbc</module>
+<!--        <module>kafka-stream-demo</module>-->
+<!--        <module>kafka-connect-transform</module>-->
+<!--        <module>kafka-connect-jdbc</module>-->
     </modules>
     <properties>
         <project.version>1.0.0-SNAPSHOT</project.version>

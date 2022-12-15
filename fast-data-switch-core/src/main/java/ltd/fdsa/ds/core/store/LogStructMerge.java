@@ -2,9 +2,14 @@ package ltd.fdsa.ds.core.store;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.iot.cbor.CborMap;
+import com.google.iot.cbor.CborParseException;
 import lombok.var;
 import ltd.fdsa.ds.core.util.CRCUtil;
 import ltd.fdsa.ds.core.util.FileChannelUtil;
+import ltd.fdsa.ds.core.util.VIntUtil;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -12,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
+import java.util.HashMap;
 
 
 /**
@@ -26,44 +32,52 @@ import java.time.Duration;
 public class LogStructMerge {
 
     static Cache<Long, LogStructMerge> FILE_HANDLER = CacheBuilder.newBuilder().maximumSize(1024)
-            .expireAfterAccess(Duration.ofMinutes(10))
+            .expireAfterAccess(Duration.ofMinutes(10)).removalListener(new RemovalListener<Long, LogStructMerge>() {
+                @Override
+                public void onRemoval(RemovalNotification<Long, LogStructMerge> removalNotification) {
+                    var fileId = removalNotification.getKey();
+                    var lsm = removalNotification.getValue();
+                    lsm.close();
+                }
+            })
             .build();
 
-    private final FileChannelUtil lsmFile;
-
-    private final byte[] magic;
-
-    private final byte[] version;
-
+    private final FileChannel lsmFile;
     private final String topic;
-
+    private final byte version;
+    private final byte status;
+    private final int schema;
     private final long offset;
+    private final long start;
+    private int size;
+    private int end;
 
-    private final long startTime;
+    public LogStructMerge(FileChannel lsmChannel, String topic) throws IOException {
+        this.topic = topic;
+        this.lsmFile = lsmChannel;
+        byte[] header = new byte[0];
 
-    private final long headerSize;
+        header = FileChannelUtil.read(this.lsmFile, 2);
 
-    public LogStructMerge(FileChannel lsmChannel) {
-        this.lsmFile = FileChannelUtil.getInstance(lsmChannel);
-        this.magic = this.lsmFile.read(4, 0);
-        this.version = this.lsmFile.read(4);
-        var data = this.lsmFile.readVarByte();
-        this.topic = new String(data);
-        this.offset = this.lsmFile.readLong();
-        this.startTime = this.lsmFile.readLong();
-        this.headerSize = this.lsmFile.position();
+        this.version = header[0];
+        this.status = header[1];
+        this.offset = FileChannelUtil.readLong(this.lsmFile);
+        this.start = FileChannelUtil.readLong(this.lsmFile);
+        this.schema = FileChannelUtil.readInt(this.lsmFile);
+        FileChannelUtil.newPosition(this.lsmFile, -8);
+        this.size = FileChannelUtil.readInt(this.lsmFile);
+        this.end = FileChannelUtil.readInt(this.lsmFile);
     }
 
-
-    public static LogStructMerge getInstance(long fileId) {
+    public static LogStructMerge getInstance(String topic, long fileId) {
         if (FILE_HANDLER.getIfPresent(fileId) == null) {
-            var path = Paths.get("./", "data", "lsm", fileId + ".lsm");
+            var path = Paths.get("./", "data", "lsm", topic, fileId + ".lsm");
             try {
                 if (!Files.exists(path)) {
                     return null;
                 }
                 var fileChannel = FileChannel.open(path, StandardOpenOption.READ);
-                FILE_HANDLER.put(fileId, new LogStructMerge(fileChannel));
+                FILE_HANDLER.put(fileId, new LogStructMerge(fileChannel, topic));
             } catch (IOException e) {
                 return null;
             }
@@ -72,41 +86,78 @@ public class LogStructMerge {
         return FILE_HANDLER.getIfPresent(fileId);
     }
 
-    public DataMessage pull(long position) {
-        var crc = this.lsmFile.read(4, position);
-        var timeGap = this.lsmFile.readVLen();
-        var content = this.lsmFile.readVarByte();
-        if (CRCUtil.check(content, crc)) {
-            return new DataMessage(this.startTime + timeGap, content);
+    public EventMessage read(long position, Long offsetExcept) {
+        try {
+            FileChannelUtil.newPosition(this.lsmFile, position);
+            var offset = FileChannelUtil.readVLen(this.lsmFile);
+            if (offset <= 0) {
+                return null;
+            }
+            var status = FileChannelUtil.read(this.lsmFile, 1)[0];
+            switch (status) {
+                case -1:
+                    var size = FileChannelUtil.readVLen(this.lsmFile);
+//                FileChannelUtil.newPosition(this.lsmFile, this.lsmFile.position() +size);
+                    return read(this.lsmFile.position() + size, offsetExcept);
+            }
+            var size = FileChannelUtil.readVLen(this.lsmFile);
+            var crc = FileChannelUtil.readInt(this.lsmFile);
+            var timestamp = FileChannelUtil.readVLen(this.lsmFile) + this.start;
+            var header = new HashMap<String, String>();
+            try {
+                var map = CborMap.createFromCborByteArray(FileChannelUtil.readVarByte(this.lsmFile));
+                for (var entry : map.entrySet()) {
+                    header.put(entry.getKey().toString(), entry.getValue().toString());
+                }
+            } catch (CborParseException e) {
+
+            }
+            var content = FileChannelUtil.readVarByte(this.lsmFile);
+            if (CRCUtil.crc32(content).check(crc)) {
+                return new EventMessage(this.topic, content, timestamp, header);
+            }
+        } catch (IOException e) {
+
         }
-        return pull(-1);
+        return null;
     }
 
-    boolean push(byte[] data) {
-        return push(new DataMessage(data));
+    public boolean write(EventMessage message, long offset) {
+        var offsetDelta = VIntUtil.vintEncode(offset - this.offset);
+        var tsDelta = VIntUtil.vintEncode(message.getTimestamp() - this.start);
+        var header = message.getHeader().toCborByteArray();
+        var headerLength = VIntUtil.vintEncode(header.length);
+        var payload = message.getPayload();
+        var payloadLength = VIntUtil.vintEncode(payload.length);
+        var length = header.length + payload.length + 20;
+        var crc = CRCUtil.crc32(offsetDelta);
+        crc.update(tsDelta);
+        crc.update(header);
+        crc.update(payload);
+        try {
+            FileChannelUtil.newPosition(this.lsmFile, -8);
+            FileChannelUtil.writeVarByte(this.lsmFile, offsetDelta);
+            FileChannelUtil.writeByte(this.lsmFile, new byte[]{1});
+            FileChannelUtil.writeVLen(this.lsmFile, length);
+            FileChannelUtil.writeByte(this.lsmFile, crc.getBytes());
+            FileChannelUtil.writeVarByte(this.lsmFile, tsDelta);
+            FileChannelUtil.writeVarByte(this.lsmFile, header);
+            FileChannelUtil.writeVarByte(this.lsmFile, payload);
+            this.size++;
+            this.end = (int) (message.getTimestamp() - this.start);
+            FileChannelUtil.writeInt(this.lsmFile, this.size);
+            FileChannelUtil.writeInt(this.lsmFile, this.end);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
-    boolean push(DataMessage dataBlock) {
-        var crc = CRCUtil.crc32(dataBlock.payload);
-        var timeGap = dataBlock.timestamp - this.startTime;
-        this.lsmFile.writeByte(crc);
-        this.lsmFile.writeVLen(timeGap);
-        this.lsmFile.writeVarByte(dataBlock.payload);
-        return true;
-    }
-
-    boolean mergeTo(long fileId) {
-//        var crc = fileChannelUtil.read(4, 0);
-//        var timestamp = fileChannelUtil.readLong();
-//        var content = fileChannelUtil.readVarByte();
-//        var lsm = LogStructMerge.getInstance(fileId);
-//        if (CRCUtil.check(content, crc)) {
-//            var topic = new String(content);
-//            var offsetElement = topicIndex.getFirst(topic);
-//            var lsm = LogStructMerge.getInstance(offsetElement.position);
-//            lsm.push(content, timestamp);
-//            offsetElement.size++;
-//        }
-        return true;
+    public void close() {
+        try {
+            this.lsmFile.close();
+        } catch (IOException e) {
+//            throw new RuntimeException(e);
+        }
     }
 }

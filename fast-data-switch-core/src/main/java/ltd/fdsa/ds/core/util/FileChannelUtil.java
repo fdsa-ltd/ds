@@ -13,95 +13,72 @@ import java.util.Arrays;
  * file tool
  */
 public class FileChannelUtil {
-
-    private final FileChannel fileChannel;
-
-    FileChannelUtil(FileChannel fileChannel) {
-        this.fileChannel = fileChannel;
-    }
-
-    public static FileChannelUtil getInstance(FileChannel fileChannel) {
-        return new FileChannelUtil(fileChannel);
-    }
-
-    private void newPosition(long position) {
+    public static void newPosition(FileChannel fileChannel, long position) throws IOException {
         if (position >= 0) {
-            try {
-                this.fileChannel.position(position);
-            } catch (IOException e) {
-            }
+            fileChannel.position(position);
+        } else {
+            position += fileChannel.size();
+            fileChannel.position(position);
         }
     }
 
-    public long position() {
-        try {
-            return this.fileChannel.position();
-        } catch (IOException e) {
-            return -1;
-        }
+    public static boolean writeVLen(FileChannel fileChannel, long length) throws IOException {
+        var data = VIntUtil.vintEncode(length);
+        return writeByte(fileChannel, data);
     }
 
-    public byte[] readVarByte() {
-        return readVarByte(-1);
-    }
-
-    public boolean writeVLen(long length) {
-        return this.writeVLen(length, -1);
-    }
-
-    public boolean writeVLen(long length, long position) {
-        var data = this.vintEncode(length);
-        return this.writeByte(data, position);
-    }
-
-    public boolean writeVarByte(byte[] data) {
-        return this.writeVarByte(data, -1);
-    }
-
-    public boolean writeVarByte(byte[] data, long position) {
-        this.newPosition(position);
-        var length = vintEncode(data.length);
-        this.writeByte(length);
-        this.writeByte(data);
+    public static boolean writeVarByte(FileChannel fileChannel, byte[] data) throws IOException {
+        var length = VIntUtil.vintEncode(data.length);
+        writeByte(fileChannel, length);
+        writeByte(fileChannel, data);
         return true;
     }
 
-    public boolean writeByte(byte[] data) {
-        return writeByte(data, -1);
-    }
 
-    public boolean writeByte(byte[] data, long position) {
-        this.newPosition(position);
-        var byteBuffer = ByteBuffer.allocate(data.length);
-        byteBuffer.put(data);
-        try {
-            this.fileChannel.write(byteBuffer);
-            return true;
-        } catch (IOException e) {
+    public static boolean writeByte(FileChannel fileChannel, byte[] data) throws IOException {
+        if (data.length == 0) {
             return false;
         }
+        var byteBuffer = ByteBuffer.allocate(data.length);
+        byteBuffer.put(data);
+        fileChannel.write(byteBuffer);
+        return true;
     }
 
-    public byte[] readVarByte(long position) {
-        var length = (int) this.readVLen(position);
-        return this.read(length);
+    public static boolean writeLong(FileChannel fileChannel, long data) throws IOException {
+        var byteBuffer = ByteBuffer.allocate(Long.BYTES);
+        byteBuffer.putLong(data);
+        fileChannel.write(byteBuffer);
+        return true;
     }
 
-    public long readVLen() {
-        return this.readVLen(-1);
+    public static boolean writeInt(FileChannel fileChannel, int data) throws IOException {
+        var byteBuffer = ByteBuffer.allocate(Integer.BYTES);
+        byteBuffer.putInt(data);
+        fileChannel.write(byteBuffer);
+        return true;
     }
 
-    public long readVLen(long position) {
-        this.newPosition(position);
 
-        byte b = this.read(1)[0];
-        if (b >= 0) {
-            return b;
+    public static byte[] readVarByte(FileChannel fileChannel) throws IOException {
+        var length = readVLen(fileChannel);
+        if (length <= 0) {
+            return new byte[0];
+        }
+        return read(fileChannel, (int) length);
+    }
+
+
+    public static long readVLen(FileChannel fileChannel) throws IOException {
+
+        byte b = read(fileChannel, 1)[0];
+        if (b <= 0) {
+            return 0;
         }
         long i = b & 0x7F;
         var c = 1;
         while (c < 10) {
-            b = this.read(1)[0];
+            b = read(fileChannel, 1)[0];
             i |= (long) (b & 0x7F) << (7 * c);
             if (b >= 0) {
                 return i;
@@ -111,62 +88,32 @@ public class FileChannelUtil {
         return 0;
     }
 
-    byte[] vintEncode(long i) {
-        try (ByteArrayOutputStream s = new ByteArrayOutputStream();) {
-            while ((i & ~0x7F) != 0) {
-                s.write((int) ((i & 0x7F) | 0x80));
-                i >>>= 7;
-            }
-            s.write((int) i);
-
-            return s.toByteArray();
-        } catch (Exception ex) {
-            return new byte[0];
+    public static int readInt(FileChannel fileChannel) throws IOException {
+        var byteBuffer = ByteBuffer.allocate(4);
+        var read = fileChannel.read(byteBuffer);
+        if (read != 4) {
+            throw new IOException();
         }
+        return byteBuffer.getInt();
     }
 
-    public int readInt() {
-        return readInt(-1);
-    }
-
-    public int readInt(long position) {
-        this.newPosition(position);
-        try {
-            var byteBuffer = ByteBuffer.allocate(4);
-            this.fileChannel.read(byteBuffer);
-            return byteBuffer.getInt();
-        } catch (IOException e) {
-            return -1;
+    public static long readLong(FileChannel fileChannel) throws IOException {
+        var byteBuffer = ByteBuffer.allocate(8);
+        var read = fileChannel.read(byteBuffer);
+        if (read != 8) {
+            throw new IOException();
         }
+        return byteBuffer.getLong();
+
     }
 
-    public long readLong() {
-        return readLong(-1);
-    }
+    public static byte[] read(FileChannel fileChannel, int size) throws IOException {
 
-    public long readLong(long position) {
-        this.newPosition(position);
-        try {
-            var byteBuffer = ByteBuffer.allocate(8);
-            this.fileChannel.read(byteBuffer);
-            return byteBuffer.getLong();
-        } catch (IOException e) {
-            return -1;
+        var byteBuffer = ByteBuffer.allocate(size);
+        var read = fileChannel.read(byteBuffer);
+        if (read != size) {
+            throw new IOException();
         }
-    }
-
-    public byte[] read(int size) {
-        return this.read(size, -1);
-    }
-
-    public byte[] read(int size, long position) {
-        this.newPosition(position);
-        try {
-            var byteBuffer = ByteBuffer.allocate(size);
-            this.fileChannel.read(byteBuffer);
-            return byteBuffer.array();
-        } catch (IOException e) {
-            return new byte[0];
-        }
+        return byteBuffer.array();
     }
 }

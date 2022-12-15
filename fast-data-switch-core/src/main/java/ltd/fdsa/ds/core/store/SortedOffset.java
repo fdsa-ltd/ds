@@ -193,12 +193,15 @@ public class SortedOffset {
 
     public static class OffsetElement implements Comparable<Long> {
         final long offset;
-        int size;
-        long position;
+        final int size;
 
-        public OffsetElement(long offset, int size, long position) {
+        final long fileId;
+        final long position;
+
+        public OffsetElement(long offset, int size, long fileId, long position) {
             this.offset = offset;
             this.size = size;
+            this.fileId = fileId;
             this.position = position;
         }
 

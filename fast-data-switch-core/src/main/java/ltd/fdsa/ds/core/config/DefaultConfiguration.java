@@ -142,7 +142,7 @@ public class DefaultConfiguration implements Configuration {
         }
     }
 
-    public String toYaml() throws JsonProcessingException {
+    public String toYaml() {
         try {
             var jsonNode = PM.readTree(this.toString());
             return YM.writeValueAsString(jsonNode);

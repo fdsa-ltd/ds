@@ -5,7 +5,7 @@
     <description>fast data switch admin is a web ui for admin data switch job</description>
     <packaging>jar</packaging>
     <parent>
-        <groupId>ltd.fdsa</groupId>
+        <groupId>cn.zhumingwu</groupId>
         <artifactId>fast-data-switch</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -69,7 +69,7 @@
             <artifactId>fastjson</artifactId>
         </dependency>
         <dependency>
-            <groupId>ltd.fdsa</groupId>
+            <groupId>cn.zhumingwu</groupId>
             <artifactId>fast-data-switch-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>

@@ -3,7 +3,7 @@
   "description": "a simple job for demo",
   "pipelines": [
     {
-      "class": "ltd.fdsa.switcher.core.implement.JdbcSourcePipeline",
+      "class": "cn.zhumingwu.switcher.core.implement.JdbcSourcePipeline",
       "description": "read data",
       "driver": "com.mysql.cj.jdbc.Driver",
       "url": "jdbc:mysql://127.0.0.1:3306/dev?useSSL=false&characterEncoding=UTF-8",
@@ -14,13 +14,13 @@
       "remarks": "other settings",
       "pipelines": [
         {
-          "class": "ltd.fdsa.switcher.core.implement.ExpressionPipeline",
+          "class": "cn.zhumingwu.switcher.core.implement.ExpressionPipeline",
           "description": "transfer data",
           "expression": "id=db.id; first_name=string.split(db.name,' ')[0]; last_name=string.split(db.name,' ')[1]; age=1;remark='test'",
           "remarks": "other settings",
           "pipelines": [
             {
-              "class": "ltd.fdsa.switcher.core.implement.JdbcTargetPipeline",
+              "class": "cn.zhumingwu.switcher.core.implement.JdbcTargetPipeline",
               "description": "write data",
               "driver": "com.mysql.cj.jdbc.Driver",
               "url": "jdbc:mysql://127.0.0.1:3306/dev?useSSL=false&characterEncoding=UTF-8",
@@ -34,7 +34,7 @@
         },
         {
           "type": "disruptor",
-          "class": "ltd.fdsa.switcher.core.implement.DefaultPipeline",
+          "class": "cn.zhumingwu.switcher.core.implement.DefaultPipeline",
           "description": "nothing to do",
           "remarks": "other settings"
         }

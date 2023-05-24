@@ -1,4 +1,4 @@
-package ltd.fdsa.kafka.stream.entity;
+package cn.zhumingwu.kafka.stream.entity;
 
 import lombok.Data;
 

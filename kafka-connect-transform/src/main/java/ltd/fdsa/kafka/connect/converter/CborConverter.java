@@ -1,4 +1,4 @@
-package ltd.fdsa.kafka.connect.converter;
+package cn.zhumingwu.kafka.connect.converter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

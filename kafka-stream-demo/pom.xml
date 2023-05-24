@@ -6,7 +6,7 @@
     <description>kafka stream 数据处理</description>
     <packaging>jar</packaging>
     <parent>
-        <groupId>ltd.fdsa</groupId>
+        <groupId>cn.zhumingwu</groupId>
         <artifactId>fast-data-switch</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>

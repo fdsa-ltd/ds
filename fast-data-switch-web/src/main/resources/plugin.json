@@ -1,7 +1,7 @@
 {
   "name": "demo",
   "type": "reader|writer",
-  "className": "ltd.fdsa.plugin.abc",
+  "className": "cn.zhumingwu.plugin.abc",
   "jarPath": "file://wwww.ddd.com",
   "db": {
     "name": "sql",

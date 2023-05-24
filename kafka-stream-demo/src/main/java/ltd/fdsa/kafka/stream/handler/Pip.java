@@ -1,4 +1,4 @@
-package ltd.fdsa.kafka.stream.handler;
+package cn.zhumingwu.kafka.stream.handler;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;

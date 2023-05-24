@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ltd.fdsa.kafka.connect.transform.common;
+package cn.zhumingwu.kafka.connect.transform.common;
 
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Decimal;

@@ -3,7 +3,7 @@
     "name": "JdbcSource",
     "description": "描述信息",
     "type": "reader",
-    "className": "ltd.fdsa.plugin.JdbcSource",
+    "className": "cn.zhumingwu.plugin.JdbcSource",
     "url": "http://www.fdsa.ltd",
     "developer": "zhumingwu@126.com",
     "shareWith": [
@@ -35,7 +35,7 @@
     "name": "AviatorExpression",
     "description": "描述信息",
     "type": "pipeline",
-    "className": "ltd.fdsa.plugin.ExpressionPipeline",
+    "className": "cn.zhumingwu.plugin.ExpressionPipeline",
     "url": "http://www.fdsa.ltd",
     "developer": "zhumingwu@126.com",
     "shareWith": [],
@@ -51,7 +51,7 @@
     "name": "JdbcReader",
     "description": "描述信息",
     "type": "reader",
-    "className": "ltd.fdsa.plugin.JdbcReader",
+    "className": "cn.zhumingwu.plugin.JdbcReader",
     "url": "http://www.fdsa.ltd",
     "developer": "zhumingwu@126.com",
     "shareWith": [

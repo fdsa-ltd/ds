@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ltd.fdsa.kafka.connect.transform;
+package cn.zhumingwu.kafka.connect.transform;
 
 import com.google.common.base.Strings;
 import lombok.var;

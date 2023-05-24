@@ -2,7 +2,7 @@
   {
     "name": "jdbcreader",
     "type": "reader",
-    "className": "ltd.fdsa.fds.plugin.jdbc.implement.JDBCSource",
+    "className": "cn.zhumingwu.fds.plugin.jdbc.implement.JDBCSource",
     "db": {
       "name": "jdbc_datasource",
       "url": "the url of db",
@@ -20,7 +20,7 @@
   {
     "name": "jdbcwriter",
     "type": "writer",
-    "className": "ltd.fdsa.fds.plugin.jdbc.implement.JDBCTarget",
+    "className": "cn.zhumingwu.fds.plugin.jdbc.implement.JDBCTarget",
     "db": {
       "name": "jdbc_datasource",
       "url": "the url of db",
@@ -38,7 +38,7 @@
   {
     "name": "expression",
     "type": "pipeline",
-    "className": "ltd.fdsa.fds.plugin.jdbc.implement.ExpressionPipeLine",
+    "className": "cn.zhumingwu.fds.plugin.jdbc.implement.ExpressionPipeLine",
     "config": {
       "expression": "使用 col = db.xx 重新输出字段"
     }

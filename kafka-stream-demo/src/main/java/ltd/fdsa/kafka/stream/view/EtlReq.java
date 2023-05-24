@@ -1,4 +1,4 @@
-package ltd.fdsa.kafka.stream.view;
+package cn.zhumingwu.kafka.stream.view;
 
 import lombok.Data;
 

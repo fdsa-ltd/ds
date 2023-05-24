@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ltd.fdsa.kafka.connect.transform;
+package cn.zhumingwu.kafka.connect.transform;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.googlecode.aviator.AviatorEvaluator;

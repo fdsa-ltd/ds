@@ -1,4 +1,4 @@
-package ltd.fdsa.kafka.stream.util;
+package cn.zhumingwu.kafka.stream.util;
 
 import com.alibaba.fastjson.JSON;
 import org.springframework.http.*;

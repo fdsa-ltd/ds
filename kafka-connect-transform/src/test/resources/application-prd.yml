@@ -18,8 +18,8 @@ project:
   swagger:
     enabled: true
     basePackages:
-      - ltd.fdsa.demo.controller
-      - ltd.fdsa
+      - cn.zhumingwu.demo.controller
+      - cn.zhumingwu
     api-info:
       title: swagger api
       description: 优雅的restful风格

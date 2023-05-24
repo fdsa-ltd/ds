@@ -1,4 +1,4 @@
-package ltd.fdsa.kafka.stream.handler;
+package cn.zhumingwu.kafka.stream.handler;
 
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.IJobHandler;

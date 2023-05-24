@@ -43,7 +43,7 @@ project:
   swagger:
     enabled: true
     basePackages:
-      - ltd.fdsa
+      - cn.zhumingwu
     api-info:
       title: swagger api
       description: 优雅的restful风格

@@ -1,4 +1,4 @@
-package ltd.fdsa.kafka.stream.properties;
+package cn.zhumingwu.kafka.stream.properties;
 
 
 import lombok.Data;

@@ -11,7 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 #end
-import ltd.fdsa.database.model.entity.BaseEntity;
+import cn.zhumingwu.database.model.entity.BaseEntity;
 
 /**
  * <p>

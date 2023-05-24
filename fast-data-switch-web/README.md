@@ -75,7 +75,7 @@
 1. pom 引用
 ```xml
  <dependency>
-     <groupId>ltd.fdsa</groupId>
+     <groupId>cn.zhumingwu</groupId>
      <artifactId>fast-job</artifactId>
      <version>${fast-job.version}</version>
  </dependency>

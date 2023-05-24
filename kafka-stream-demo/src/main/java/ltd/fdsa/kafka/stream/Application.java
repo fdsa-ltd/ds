@@ -1,4 +1,4 @@
-package ltd.fdsa.kafka.stream;
+package cn.zhumingwu.kafka.stream;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;

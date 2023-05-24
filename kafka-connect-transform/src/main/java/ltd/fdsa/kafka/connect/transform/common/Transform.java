@@ -1,4 +1,4 @@
-package ltd.fdsa.kafka.connect.transform.common;
+package cn.zhumingwu.kafka.connect.transform.common;
 
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.ConnectRecord;

@@ -12,11 +12,11 @@
 ## 协调者
 - 服务发现:
 
-执行者会周期性自动注册自己持有的Job Handles，协调者会及时发现这样服务。
+协调者通过服务中心获取所有提供任务处理者（JobHandler)，以ServiceName.HandlerName作为主键，保存ServiceList。
 
 - 触发策略：
 
-提供丰富的任务触发策略，包括：Cron触发、固定间隔触发、固定延时触发、API（事件）触发、人工触发、父子任务触发；
+提供丰富的任务触发策略，包括：自动触发（Cron、固定间隔触发、固定延时触发）、事件触发（API触发、父子任务触发）；
 
 - 过期策略：
 
@@ -37,13 +37,13 @@
 
 - 服务注册：
 
-执行者会周期性自动注册自己持有的Job Handles，协调者会及时发现这样服务。
+执行者主动向服务中心注册服务，在MataData中以JobHandler.{Name}作为主键，Description作为内容。表达自己可以提供的任务处理者清单。
 
 - 阻塞策略：
 
 调度过于密集执行器来不及处理时的处理策略，策略包括：单机串行（默认）、丢弃后续调度、覆盖之前调度；
 
-- 异常处理：
+## 异常处理
 
 
 超时  - 支持自定义任务超时时间，任务运行超时将会主动中断任务；
@@ -56,9 +56,14 @@
 
 
 
-# 定时、延时任务服务
+# 接口定义
 
+## 执行者
 
+- start(jobId, jobConfig) -> taskId 基于任务开始一个工作，返回工作的唯一编号
+- stat(type,paramters) -> info 根据不同类型，查看统计信息，可以是任务日志可执行者的信息
+- stop(taskId) -> bool 强制停止一个任务
+- 
 
 ## 内置任务类型
 
@@ -71,7 +76,7 @@
 1. pom 引用
 ```xml
  <dependency>
-     <groupId>ltd.fdsa</groupId>
+     <groupId>cn.zhumingwu</groupId>
      <artifactId>fast-job</artifactId>
      <version>${fast-job.version}</version>
  </dependency>

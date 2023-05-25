@@ -4,7 +4,7 @@ package cn.zhumingwu.dataswitch.core.job.handler;
 /**
  * job handler
  *
- * @author
+ * @author zhumingwu
  */
 public abstract class IJobHandler {
 
@@ -12,7 +12,7 @@ public abstract class IJobHandler {
     /**
      * execute handler, invoked when executor receives a scheduling request
      *
-     * @throws Exception
+     * @throws Exception 可能中断
      */
     public abstract void execute() throws Exception;
 

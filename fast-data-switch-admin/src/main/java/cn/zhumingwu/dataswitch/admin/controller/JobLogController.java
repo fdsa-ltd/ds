@@ -157,15 +157,15 @@ public class JobLogController {
     @RequestMapping("/logDetailCat")
     @ResponseBody
     public Result<LogResult> logDetailCat(
-            String executorAddress, long triggerTime, int logId, String fromLineNum) {
+            String executorAddress, long triggerTime, Long logId, Long fromLineNum) {
         try {
             Executor executorBiz = JobScheduler.getExecutorClient(executorAddress);
-            Result<LogResult> logResult = executorBiz.log(logId, fromLineNum);
+            Result<LogResult> logResult = executorBiz.stat(logId, fromLineNum);
 
             // is end
             if (logResult.getData() != null
                     && logResult.getData().getFromLineNum() > logResult.getData().getToLineNum()) {
-                JobLog jobLog = jobLogRepository.findById(logId).get();
+                JobLog jobLog = jobLogRepository.findById(logId.intValue()).get();
                 if (jobLog.getHandleCode() > 0) {
                     logResult.getData().setEnd(true);
                 }
@@ -195,7 +195,7 @@ public class JobLogController {
         Result<String> runResult = null;
         try {
             Executor executorBiz = JobScheduler.getExecutorClient(log.getExecutorAddress());
-            runResult = executorBiz.stop(jobInfo.getId());
+            runResult = executorBiz.stop(  jobInfo.getId() ,0L);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             runResult = Result.fail(500, e.getMessage());

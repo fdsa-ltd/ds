@@ -33,9 +33,9 @@ public class JobTrigger {
      * @param executorShardingParam
      * @param executorParam         null: use job param not null: cover job param
      */
-    public static void trigger(int jobId, TriggerTypeEnum triggerType, int failRetryCount, String executorShardingParam, String executorParam) throws UnknownHostException {
+    public static void trigger(Long jobId, TriggerTypeEnum triggerType, int failRetryCount, String executorShardingParam, String executorParam) throws UnknownHostException {
         // load data
-        JobInfo jobInfo = ApplicationContextHolder.getBean(JobInfoRepository.class).findById(jobId).get();
+        JobInfo jobInfo = ApplicationContextHolder.getBean(JobInfoRepository.class).findById(jobId.intValue()).get();
         if (jobInfo == null) {
             log.warn(">>>>>>>>>>>> trigger fail, jobId invalid，jobId={}", jobId);
             return;
@@ -45,7 +45,7 @@ public class JobTrigger {
         }
         int finalFailRetryCount =
                 failRetryCount >= 0 ? failRetryCount : jobInfo.getExecutorFailRetryCount();
-        JobGroup group = ApplicationContextHolder.getBean(JobGroupRepository.class).findById(jobInfo.getGroupId()).get();
+        JobGroup group = ApplicationContextHolder.getBean(JobGroupRepository.class).findById(jobInfo.getGroupId().intValue()).get();
 
         // sharding param
         int[] shardingParam = null;
@@ -105,8 +105,8 @@ public class JobTrigger {
 
         // 1、save log-id
         JobLog jobLog = new JobLog();
-        jobLog.setJobGroup(jobInfo.getGroupId());
-        jobLog.setJobId(jobInfo.getId());
+        jobLog.setJobGroup(jobInfo.getGroupId().intValue());
+        jobLog.setJobId(jobInfo.getId().intValue());
         jobLog.setTriggerTime(new Date());
         ApplicationContextHolder.getBean(JobLogRepository.class).save(jobLog);
 
@@ -117,7 +117,7 @@ public class JobTrigger {
 //todo        triggerParam.setExecutorParams( jobInfo.getExecutorParam());
         triggerParam.setExecutorBlockStrategy(jobInfo.getExecutorBlockStrategy());
         triggerParam.setExecutorTimeout(jobInfo.getExecutorTimeout());
-        triggerParam.setLogId(jobLog.getId());
+        triggerParam.setLogId(jobLog.getId().longValue());
         triggerParam.setLogDateTime(jobLog.getTriggerTime().getTime());
         triggerParam.setBroadcastIndex(index);
         triggerParam.setBroadcastTotal(total);
@@ -144,7 +144,7 @@ public class JobTrigger {
 //        }
 
         // 4、trigger remote executor
-        Result<String> triggerResult = null;
+        Result<Long> triggerResult = null;
         if (address != null) {
             triggerResult = runExecutor(triggerParam, address);
         } else {
@@ -229,15 +229,15 @@ public class JobTrigger {
      * @param address
      * @return
      */
-    public static Result<String> runExecutor(TriggerParam triggerParam, String address) {
-        Result<String> runResult = null;
+    public static Result<Long> runExecutor(TriggerParam triggerParam, String address) {
+        Result<Long> runResult = null;
         try {
             Executor executorBiz = JobScheduler.getExecutorClient(address);
             var config = triggerParam.getExecutorParams();
             config.put("class", triggerParam.getExecutorHandler());
             config.put("strategy", triggerParam.getExecutorBlockStrategy());
             config.put("timeout", triggerParam.getExecutorTimeout() + "");
-            runResult = executorBiz.run(triggerParam.getJobId(), config);
+            runResult = executorBiz.start( triggerParam.getJobId() , config);
         } catch (Exception ex) {
             runResult = Result.error(ex);
         }

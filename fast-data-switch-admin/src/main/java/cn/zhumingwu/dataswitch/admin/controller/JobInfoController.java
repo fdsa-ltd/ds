@@ -114,7 +114,7 @@ public class JobInfoController extends BaseController {
     @RequestMapping("/trigger")
     @ResponseBody
     // @PermissionLimit(limit = false)
-    public Result<String> triggerJob(int id, String executorParam) {
+    public Result<String> triggerJob(Long id, String executorParam) {
         // force cover job param
         if (executorParam == null) {
             executorParam = "";

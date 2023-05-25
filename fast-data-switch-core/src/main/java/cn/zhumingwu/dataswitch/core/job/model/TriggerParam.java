@@ -11,14 +11,14 @@ import java.util.Map;
 public class TriggerParam implements Serializable {
     private static final long serialVersionUID = 42L;
 
-    private int jobId;
+    private Long jobId;
 
     private String executorHandler;
     private Map<String,String> executorParams;
     private String executorBlockStrategy;
     private int executorTimeout;
 
-    private int logId;
+    private Long logId;
     private long logDateTime;
     private int broadcastIndex;
     private int broadcastTotal;

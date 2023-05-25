@@ -108,7 +108,7 @@ public class JobFailMonitorHelper {
                                                 // 1、fail retry monitor
                                                 if (log.getExecutorFailRetryCount() > 0) {
                                                     JobTriggerPoolHelper.trigger(
-                                                            log.getJobId(),
+                                                            log.getJobId().longValue(),
                                                             TriggerTypeEnum.RETRY,
                                                             (log.getExecutorFailRetryCount() - 1),
                                                             log.getExecutorShardingParam(),
@@ -199,7 +199,7 @@ public class JobFailMonitorHelper {
             // email info
             JobGroup group =
                     ApplicationContextHolder.getBean(JobGroupRepository.class)
-                            .findById(info.getGroupId()).get();
+                            .findById(info.getGroupId().intValue()).get();
             String personal = I18nUtil.getInstance("").getString("site_name_full");
             String title = I18nUtil.getInstance("").getString("jobconf_monitor");
             String content =

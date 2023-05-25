@@ -6,6 +6,7 @@ import cn.zhumingwu.dataswitch.admin.thread.JobTriggerPoolHelper;
 import cn.zhumingwu.dataswitch.admin.trigger.TriggerTypeEnum;
 import cn.zhumingwu.dataswitch.admin.entity.JobInfo;
 import cn.zhumingwu.dataswitch.core.job.cron.CronExpression;
+import lombok.var;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,7 @@ public class JobScheduleHelper {
     public static final long PRE_READ_MS = 5000; // pre read
     private static Logger logger = LoggerFactory.getLogger(JobScheduleHelper.class);
     private static JobScheduleHelper instance = new JobScheduleHelper();
-    private static volatile Map<Integer, List<Integer>> ringData = new ConcurrentHashMap<>();
+    private static volatile Map<Long, List<Long>> ringData = new ConcurrentHashMap<>();
     private Thread scheduleThread;
     private Thread ringThread;
     private volatile boolean scheduleThreadToStop = false;
@@ -102,7 +103,7 @@ public class JobScheduleHelper {
                                                             && nowTime + PRE_READ_MS > jobInfo.getTriggerNextTime()) {
 
                                                         // 1、make ring second
-                                                        int ringSecond = (int) ((jobInfo.getTriggerNextTime() / 1000) % 60);
+                                                        Long ringSecond = (Long   ) ((jobInfo.getTriggerNextTime() / 1000) % 60);
 
                                                         // 2、push time ring
                                                         pushTimeRing(ringSecond, jobInfo.getId());
@@ -115,7 +116,7 @@ public class JobScheduleHelper {
                                                     // 2.3、trigger-pre-read：time-ring trigger && make next-trigger-time
 
                                                     // 1、make ring second
-                                                    int ringSecond = (int) ((jobInfo.getTriggerNextTime() / 1000) % 60);
+                                                    Long ringSecond = (Long) ((jobInfo.getTriggerNextTime() / 1000) % 60);
 
                                                     // 2、push time ring
                                                     pushTimeRing(ringSecond, jobInfo.getId());
@@ -217,11 +218,11 @@ public class JobScheduleHelper {
 
                                     try {
                                         // second data
-                                        List<Integer> ringItemData = new ArrayList<>();
+                                        List<Long> ringItemData = new ArrayList<>();
                                         int nowSecond =
                                                 Calendar.getInstance().get(Calendar.SECOND); // 避免处理耗时太长，跨过刻度，向前校验一个刻度；
                                         for (int i = 0; i < 2; i++) {
-                                            List<Integer> tmpData = ringData.remove((nowSecond + 60 - i) % 60);
+                                            List<Long> tmpData = ringData.remove((nowSecond + 60 - i) % 60);
                                             if (tmpData != null) {
                                                 ringItemData.addAll(tmpData);
                                             }
@@ -230,7 +231,7 @@ public class JobScheduleHelper {
                                         // ring trigger
                                         if (ringItemData.size() > 0) {
                                             // do trigger
-                                            for (int jobId : ringItemData) {
+                                            for (Long jobId : ringItemData) {
                                                 // do trigger
                                                 JobTriggerPoolHelper.trigger(jobId, TriggerTypeEnum.CRON, -1, null, null);
                                             }
@@ -269,11 +270,11 @@ public class JobScheduleHelper {
         }
     }
 
-    private void pushTimeRing(int ringSecond, int jobId) {
+    private void pushTimeRing(Long ringSecond, Long jobId) {
         // push async ring
-        List<Integer> ringItemData = ringData.get(ringSecond);
+        List<Long> ringItemData = ringData.get(ringSecond);
         if (ringItemData == null) {
-            ringItemData = new ArrayList<Integer>();
+            ringItemData = new ArrayList<Long>();
             ringData.put(ringSecond, ringItemData);
         }
         ringItemData.add(jobId);
@@ -301,8 +302,8 @@ public class JobScheduleHelper {
         // if has ring data
         boolean hasRingData = false;
         if (!ringData.isEmpty()) {
-            for (int second : ringData.keySet()) {
-                List<Integer> tmpData = ringData.get(second);
+            for (var second : ringData.keySet()) {
+                List<Long> tmpData = ringData.get(second);
                 if (tmpData != null && tmpData.size() > 0) {
                     hasRingData = true;
                     break;

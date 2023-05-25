@@ -42,7 +42,7 @@ public class ExecutorBizImplTest {
     @Test
     public void beat() {
         // Act
-        final Result<String> retval = executorBiz.beat();
+        final Result<String> retval = executorBiz.stat();
 
         // Assert result
         Assert.assertNotNull(retval);
@@ -56,7 +56,7 @@ public class ExecutorBizImplTest {
         final int jobId = 0;
 
         // Act
-        final Result<String> retval = executorBiz.idleBeat(jobId);
+        final Result<String> retval = executorBiz.stat(jobId);
 
         // Assert result
         Assert.assertNotNull(retval);
@@ -83,7 +83,7 @@ public class ExecutorBizImplTest {
     public void log() {
         final int logId = 0;
         // Act
-        final Result<LogResult> retval = executorBiz.log(logId, "0");
+        final Result<LogResult> retval = executorBiz.stat(logId, "0");
 
         // Assert result
         Assert.assertNotNull(retval);
@@ -106,7 +106,7 @@ public class ExecutorBizImplTest {
         config.put("strategy", triggerParam.getExecutorBlockStrategy());
         config.put("timeout", triggerParam.getExecutorTimeout() + "");
 
-        final Result<String> retval = executorBiz.run(triggerParam.getJobId(), config);
+        final Result<String> retval = executorBiz.start(triggerParam.getJobId(), config);
 
         // Assert result
         Assert.assertNotNull(retval);

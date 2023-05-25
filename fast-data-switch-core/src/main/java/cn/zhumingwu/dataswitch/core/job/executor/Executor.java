@@ -3,51 +3,49 @@ package cn.zhumingwu.dataswitch.core.job.executor;
 import cn.zhumingwu.dataswitch.core.job.model.LogResult;
 import cn.zhumingwu.dataswitch.core.model.Result;
 
+import java.util.List;
 import java.util.Map;
 
 public interface Executor {
     /**
-     * coordinators send head beat
+     * coordinators send a job run to executor
      *
-     * @return
+     * @return task id
      */
-    Result<String> beat();
-
-    /**
-     * idle beat for job
-     *
-     * @param jobId
-     * @return
-     */
-    Result<String> idleBeat(int jobId);
+    Result<Long> start(Long jobId, Map<String, String> config);
 
     /**
      * coordinators send stop to executor
      *
-     * @param jobId
-     * @return
+     * @param jobId  全局唯一的具体任务编号
+     * @param taskId 全局唯一的具体任务处理编号
+     * @return 成功或失败
      */
-    Result<String> stop(int jobId);
+    Result<String> stop(Long jobId, Long taskId);
+
+    /**
+     * coordinator send head beat to executors, then executor provides cpu and memory info
+     *
+     * @return map for cpu and memory info
+     */
+    Result<Map<String, String>> stat();
+
+    /**
+     * coordinator send head beat to executors, then executor provides task info for the job
+     *
+     * @param taskId 全局唯一的具体任务处理编号
+     * @return map for task info
+     */
+    Result<Map<String, String>> stat(Long taskId);
+
 
     /**
      * coordinators get job's log
      *
-     * @param jobId
-     * @param lastVersion
-     * @return
+     * @param taskId      全局唯一的具体任务处理编号
+     * @param lastVersion 日志最后编号
+     * @return LogResult
      */
-    Result<LogResult> log(int jobId, String lastVersion);
-
-    /**
-     * coordinators send a job run to executor
-     *
-     * @return
-     */
-    Result<String> run(int jobId, Map<String, String> config);
-
-    Result<String> init(Long processId, Map<String, String> config);
-
-    Result<String> start(Long processId);
-
+    Result<LogResult> stat(Long taskId, Long lastVersion);
 
 }

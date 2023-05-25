@@ -1,5 +1,6 @@
 package cn.zhumingwu.dataswitch.core.job.executor;
 
+import cn.zhumingwu.dataswitch.core.job.handler.IJobHandler;
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
@@ -12,54 +13,16 @@ import cn.zhumingwu.dataswitch.core.model.Result;
 import cn.zhumingwu.dataswitch.core.pipeline.Process;
 import cn.zhumingwu.dataswitch.core.config.DefaultConfiguration;
 
+import java.util.List;
 import java.util.Map;
 
 /**
  * 客户端具体实现
- *
  */
 @Slf4j
 public class ExecutorImpl implements Executor {
     @Override
-    public Result<String> beat() {
-        return Result.success();
-    }
-
-    @Override
-    public Result<String> idleBeat(int jobId) {
-        boolean isRunningOrHasQueue = false;
-        JobThread jobThread = JobExecutor.loadJobThread(jobId);
-        if (jobThread != null && jobThread.isRunningOrHasQueue()) {
-            isRunningOrHasQueue = true;
-        }
-        if (isRunningOrHasQueue) {
-            return Result.fail(500, "job thread is running or has trigger queue.");
-        }
-        return Result.success();
-    }
-
-    @Override
-    public Result<String> stop(int jobId) {
-        // kill handlerThread, and create new one
-        JobThread jobThread = JobExecutor.loadJobThread(jobId);
-        if (jobThread != null) {
-            JobExecutor.stopJob(jobId, "scheduling center kill job.");
-            return Result.success();
-        }
-
-        return Result.success("job thread already killed.");
-    }
-
-    @Override
-    public Result<LogResult> log(int jobId, String lastVersion) {
-        String logFileName = JobFileAppender.getLogFile(jobId);
-
-        LogResult logResult = JobFileAppender.readLog(logFileName, Integer.parseInt(lastVersion));
-        return Result.success(logResult);
-    }
-
-    @Override
-    public Result<String> run(int jobId, Map<String, String> config) {
+    public Result<Long> start(Long jobId, Map<String, String> config) {
         var props = DefaultConfiguration.fromMaps(config);
         String handler = props.get("class");
         String blockStrategy = props.get("strategy");
@@ -75,7 +38,7 @@ public class ExecutorImpl implements Executor {
         }
         // load old：jobHandler + jobThread
         JobThread jobThread = JobExecutor.loadJobThread(jobId);
-        Process jobHandler = jobThread != null ? jobThread.getHandler() : null;
+        IJobHandler jobHandler = jobThread != null ? jobThread.getHandler() : null;
         String removeOldReason = null;
         // valid old jobThread
         if (jobThread != null && jobHandler != newJobHandler) {
@@ -112,21 +75,43 @@ public class ExecutorImpl implements Executor {
         var triggerParam = new TriggerParam();
         triggerParam.setExecutorHandler(handler);
         triggerParam.setJobId(jobId);
-        Result<String> pushResult = jobThread.pushTriggerQueue(triggerParam);
-        return pushResult;
+        return jobThread.pushTriggerQueue(triggerParam);
     }
 
     @Override
-    public Result<String> init(Long processId, Map<String, String> config) {
-        var props = DefaultConfiguration.fromMaps(config);
-        String handler = props.get("class");
-        String blockStrategy = props.get("strategy");
-        long timeout = props.getLong("timeout", Long.MAX_VALUE);
+    public Result<String> stop(Long jobId, Long taskId) {
+        // kill handlerThread, and create new one
+        JobThread jobThread = JobExecutor.loadJobThread(jobId);
+        if (jobThread != null) {
+            JobExecutor.stopJob(jobId, "scheduling center kill job.");
+            return Result.success();
+        }
+
+        return Result.success("job thread already killed.");
+    }
+
+    @Override
+    public Result<Map<String, String>> stat() {
         return null;
     }
 
     @Override
-    public Result<String> start(Long processId) {
-        return null;
+    public Result<Map<String, String>> stat(Long taskId) {
+        boolean isRunningOrHasQueue = false;
+        JobThread jobThread = JobExecutor.loadJobThread(taskId);
+        if (jobThread != null && jobThread.isRunningOrHasQueue()) {
+            isRunningOrHasQueue = true;
+        }
+        if (isRunningOrHasQueue) {
+            return Result.fail(500, "job thread is running or has trigger queue.");
+        }
+        return Result.success();
+    }
+
+    @Override
+    public Result<LogResult> stat(Long taskId, Long lastVersion) {
+        String logFileName = JobFileAppender.getLogFile(taskId);
+        LogResult logResult = JobFileAppender.readLog(logFileName, lastVersion.intValue());
+        return Result.success(logResult);
     }
 }

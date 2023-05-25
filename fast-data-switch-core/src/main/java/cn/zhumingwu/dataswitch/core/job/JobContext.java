@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  *  job context
  *
- * @author  
+ * @author zhumingwu
  */
 public class JobContext {
     private static Logger logger = LoggerFactory.getLogger(JobFileAppender.class);

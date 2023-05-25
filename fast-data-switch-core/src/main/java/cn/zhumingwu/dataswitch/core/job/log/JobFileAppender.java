@@ -57,9 +57,9 @@ public class JobFileAppender {
         return logFileName;
     }
 
-    public static String getLogFile(int logId) {
+    public static String getLogFile(Long logId) {
         //todo
-        return logId + "";
+        return logId.toString();
     }
 
     /**

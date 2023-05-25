@@ -4,7 +4,7 @@
     "description": "描述信息",
     "type": "reader",
     "className": "cn.zhumingwu.plugin.JdbcSource",
-    "url": "http://www.fdsa.ltd",
+    "url": "https://www.zhumingwu.cn",
     "developer": "zhumingwu@126.com",
     "shareWith": [
       {
@@ -36,7 +36,7 @@
     "description": "描述信息",
     "type": "pipeline",
     "className": "cn.zhumingwu.plugin.ExpressionPipeline",
-    "url": "http://www.fdsa.ltd",
+    "url": "https://www.zhumingwu.cn",
     "developer": "zhumingwu@126.com",
     "shareWith": [],
     "config": [
@@ -52,7 +52,7 @@
     "description": "描述信息",
     "type": "reader",
     "className": "cn.zhumingwu.plugin.JdbcReader",
-    "url": "http://www.fdsa.ltd",
+    "url": "https://www.zhumingwu.cn",
     "developer": "zhumingwu@126.com",
     "shareWith": [
       {

@@ -15,7 +15,7 @@
     <modules>
         <module>fast-data-switch-core</module>
         <module>fast-data-switch-admin</module>
-        <module>fast-data-switch-web</module>
+        <module>fast-data-switch-client</module>
         <module>fast-data-switch-plugin</module>
         <module>fast-data-switch-plugin-distributed</module>
 <!--        <module>kafka-stream-demo</module>-->

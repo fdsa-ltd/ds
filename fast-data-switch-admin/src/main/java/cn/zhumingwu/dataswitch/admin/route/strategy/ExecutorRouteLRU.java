@@ -67,7 +67,7 @@ public class ExecutorRouteLRU extends ExecutorRouter {
 
     @Override
     public Result<String> route(TriggerParam triggerParam, List<String> addressList) {
-        String address = route(triggerParam.getJobId(), addressList);
+        String address = route(triggerParam.getJobId().intValue(), addressList);
         return Result.success(address);
     }
 }

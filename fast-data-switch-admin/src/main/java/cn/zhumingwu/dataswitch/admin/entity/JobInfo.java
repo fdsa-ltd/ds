@@ -15,9 +15,9 @@ public class JobInfo extends BaseEntity<Integer> {
     @Id
     @Column(name = "job_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id; // 主键ID
+    private Long id; // 主键ID
 
-    private Integer groupId; // 执行器主键ID
+    private Long groupId; // 执行器主键ID
     private String cronExpression; // 任务执行CRON表达式
 
     private String author; // 负责人

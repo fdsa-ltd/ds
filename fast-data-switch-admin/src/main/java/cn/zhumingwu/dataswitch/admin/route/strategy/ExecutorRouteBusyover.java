@@ -9,6 +9,7 @@ import cn.zhumingwu.dataswitch.core.util.I18nUtil;
 
 
 import java.util.List;
+import java.util.Map;
 
 public class ExecutorRouteBusyover extends ExecutorRouter {
 
@@ -17,10 +18,10 @@ public class ExecutorRouteBusyover extends ExecutorRouter {
         StringBuffer idleBeatResultSB = new StringBuffer();
         for (String address : addressList) {
             // beat
-            Result<String> idleBeatResult = null;
+            Result<Map<String, String>> idleBeatResult = null;
             try {
                 Executor executorBiz = JobScheduler.getExecutorClient(address);
-                idleBeatResult = executorBiz.idleBeat(triggerParam.getJobId());
+                idleBeatResult = executorBiz.stat(triggerParam.getJobId().longValue());
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 idleBeatResult = Result.fail(500, "" + e);
@@ -38,8 +39,8 @@ public class ExecutorRouteBusyover extends ExecutorRouter {
             // beat success
             if (idleBeatResult.getCode() == Result.OK) {
                 idleBeatResult.setMessage(idleBeatResultSB.toString());
-                idleBeatResult.setData(address);
-                return idleBeatResult;
+
+                return Result.success(address);
             }
         }
 

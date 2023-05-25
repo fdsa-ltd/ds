@@ -1,6 +1,7 @@
 package cn.zhumingwu.dataswitch.core.job.thread;
 
 import cn.zhumingwu.dataswitch.core.job.executor.JobExecutor;
+import cn.zhumingwu.dataswitch.core.job.handler.IJobHandler;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
 import cn.zhumingwu.dataswitch.core.job.log.JobFileAppender;
@@ -28,8 +29,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class JobThread extends Thread {
 
-    private int jobId;
-    private Process handler;
+    private Long jobId;
+    private IJobHandler handler;
 
     //使用消息队列
     private LinkedBlockingQueue<TriggerParam> triggerQueue;
@@ -40,14 +41,14 @@ public class JobThread extends Thread {
 
     private int idleTimes = 0; // idel times
 
-    public JobThread(int jobId, Process handler) {
+    public JobThread(Long jobId, IJobHandler handler) {
         this.jobId = jobId;
         this.handler = handler;
         this.triggerQueue = new LinkedBlockingQueue<TriggerParam>();
         this.triggerLogIdSet = Collections.synchronizedSet(new HashSet<Long>());
     }
 
-    public Process getHandler() {
+    public IJobHandler getHandler() {
         return handler;
     }
 
@@ -57,7 +58,7 @@ public class JobThread extends Thread {
      * @param triggerParam
      * @return
      */
-    public Result<String> pushTriggerQueue(TriggerParam triggerParam) {
+    public Result<Long> pushTriggerQueue(TriggerParam triggerParam) {
         // avoid repeat
         if (triggerLogIdSet.contains(triggerParam.getLogId())) {
             log.info(">>>>>>>>>>> repeate trigger job, logId:{}", triggerParam.getLogId());
@@ -66,7 +67,7 @@ public class JobThread extends Thread {
 
 //        triggerLogIdSet.add(triggerParam);
         triggerQueue.add(triggerParam);
-        return Result.success();
+        return Result.success(triggerParam.getLogId());
     }
 
     /**
@@ -142,7 +143,7 @@ public class JobThread extends Thread {
                                                     for (var entry : triggerParamTmp.getExecutorParams().entrySet()) {
                                                         record.add(new Column(entry.getKey(), entry.getValue()));
                                                     }
-                                                    handler.execute(record);
+                                                    handler.execute();
                                                     return Result.success();
                                                 }
                                             });
@@ -163,7 +164,7 @@ public class JobThread extends Thread {
                         for (var entry : triggerParam.getExecutorParams().entrySet()) {
                             record.add(new Column(entry.getKey(), entry.getValue()));
                         }
-                        handler.execute(record);
+                        handler.execute();
                     }
 
 
@@ -221,11 +222,10 @@ public class JobThread extends Thread {
 
         // destroy
         try {
-            handler.stop();
+            handler.destroy();
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
         }
-
         log.info(">>>>>>>>>>> project.JobThread stoped, hashCode:{}", Thread.currentThread());
     }
 }

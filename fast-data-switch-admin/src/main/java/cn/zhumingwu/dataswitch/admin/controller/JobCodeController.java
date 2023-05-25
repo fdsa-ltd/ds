@@ -56,7 +56,7 @@ public class JobCodeController {
 
         // log old code
         JobTask JobLogGlue = new JobTask();
-        JobLogGlue.setJobId(exists_jobInfo.getId());
+        JobLogGlue.setJobId(exists_jobInfo.getId().intValue());
         JobLogGlue.setGlueSource(glueSource);
         JobLogGlue.setGlueRemark(glueRemark);
 

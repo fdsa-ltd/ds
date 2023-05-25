@@ -53,7 +53,7 @@ public class CoordinatorImpl implements Coordinator {
             size = list.size();
         }
         for (var i = 0; i < size; i++) {
-            list.get(i).init(0L, config);
+            list.get(i).start(0L, config);
         }
         return null;
     }
@@ -69,27 +69,27 @@ public class CoordinatorImpl implements Coordinator {
 
     private Result<String> callback(HandleCallbackParam handleCallbackParam) {
         // valid log item
-        JobLog log = jobLogRepository.findById(handleCallbackParam.getLogId()).get();
-        if (log == null) {
+        var log = jobLogRepository.findById(handleCallbackParam.getLogId().intValue());
+        if (!log.isPresent()) {
             return Result.fail(5000, "log item not found.");
         }
-        if (log.getHandleCode() > 0) {
+        if (log.get().getHandleCode() > 0) {
             return Result.fail(5000, "log repeate callback."); // avoid repeat callback, trigger child job etc
         }
 
         // trigger success, to trigger child job
         String callbackMsg = null;
         if (handleCallbackParam.getExecuteResult().getCode() == 200) {
-            JobInfo JobInfo = JobInfoDao.findById(log.getJobId()).get();
-            if (JobInfo != null
-                    && JobInfo.getChildJobId() != null
-                    && JobInfo.getChildJobId().trim().length() > 0) {
+            var JobInfo = JobInfoDao.findById(log.get().getJobId());
+            if (JobInfo.isPresent()
+                    && JobInfo.get().getChildJobId() != null
+                    && JobInfo.get().getChildJobId().trim().length() > 0) {
                 callbackMsg =
                         "<br><br><span style=\"color:#00c0ef;\" > >>>>>>>>>>>"
                                 + I18nUtil.getInstance("").getString("jobconf_trigger_child_run")
                                 + "<<<<<<<<<<< </span><br>";
 
-                String[] childJobIds = JobInfo.getChildJobId().split(",");
+                String[] childJobIds = JobInfo.get().getChildJobId().split(",");
                 for (int i = 0; i < childJobIds.length; i++) {
                     int childJobId =
                             (childJobIds[i] != null
@@ -99,7 +99,7 @@ public class CoordinatorImpl implements Coordinator {
                                     : -1;
                     if (childJobId > 0) {
 
-                        JobTriggerPoolHelper.trigger(childJobId, TriggerTypeEnum.PARENT, -1, null, null);
+                        JobTriggerPoolHelper.trigger(Long.valueOf(childJobId), TriggerTypeEnum.PARENT, -1, null, null);
                         Result<String> triggerChildResult = Result.success();
 
                         // add msg
@@ -127,8 +127,8 @@ public class CoordinatorImpl implements Coordinator {
 
         // handle msg
         StringBuffer handleMsg = new StringBuffer();
-        if (log.getHandleMsg() != null) {
-            handleMsg.append(log.getHandleMsg()).append("<br>");
+        if (log.get().getHandleMsg() != null) {
+            handleMsg.append(log.get().getHandleMsg()).append("<br>");
         }
         if (handleCallbackParam.getExecuteResult().getMessage() != null) {
             handleMsg.append(handleCallbackParam.getExecuteResult().getMessage());
@@ -138,10 +138,10 @@ public class CoordinatorImpl implements Coordinator {
         }
 
         // success, save log
-        log.setHandleTime(new Date());
-        log.setHandleCode(handleCallbackParam.getExecuteResult().getCode());
-        log.setHandleMsg(handleMsg.toString());
-        jobLogRepository.save(log);
+        log.get().setHandleTime(new Date());
+        log.get().setHandleCode(handleCallbackParam.getExecuteResult().getCode());
+        log.get().setHandleMsg(handleMsg.toString());
+        jobLogRepository.save(log.get());
 
         return Result.success();
     }

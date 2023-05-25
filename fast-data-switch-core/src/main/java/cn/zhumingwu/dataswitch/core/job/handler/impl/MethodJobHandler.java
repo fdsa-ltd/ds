@@ -1,73 +1,49 @@
 package cn.zhumingwu.dataswitch.core.job.handler.impl;
 
+import cn.zhumingwu.dataswitch.core.job.handler.IJobHandler;
 import lombok.extern.slf4j.Slf4j;
-import cn.zhumingwu.dataswitch.core.model.Record;
-import cn.zhumingwu.dataswitch.core.pipeline.Process;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 @Slf4j
-public class MethodJobHandler implements Process {
+public class MethodJobHandler extends IJobHandler {
 
     private final Object target;
-    private final Method method;
-    private Method initMethod;
-    private Method destroyMethod;
+    private final Method executeMethod;
+    private final Method initMethod;
+    private final Method destroyMethod;
 
-    public MethodJobHandler(Object target, Method method, Method initMethod, Method destroyMethod) {
+    public MethodJobHandler(Object target, Method executeMethod, Method initMethod, Method destroyMethod) {
         this.target = target;
-        this.method = method;
+        this.executeMethod = executeMethod;
         this.initMethod = initMethod;
         this.destroyMethod = destroyMethod;
     }
 
 
     @Override
-    public void init() {
+    public void init() throws Exception {
         if (initMethod != null) {
-            try {
-                initMethod.invoke(target);
-            } catch (IllegalAccessException e) {
-                log.error("", e);
-            } catch (InvocationTargetException e) {
-                log.error("", e);
-            }
+            initMethod.invoke(target);
         }
     }
 
     @Override
-    public void execute(Record... records) {
-        Arrays.stream(records)
-                .map(m -> m.toNormalMap())
-                .forEach(context -> {
-                    try {
-                        method.invoke(target, context.values().toArray());
-                    } catch (IllegalAccessException e) {
-                        log.error("", e);
-                    } catch (InvocationTargetException e) {
-                        log.error("", e);
-                    }
-                });
-
+    public void execute() throws Exception {
+        if (executeMethod != null) {
+            executeMethod.invoke(target);
+        }
     }
 
     @Override
-    public void stop() {
+    public void destroy() throws Exception {
         if (destroyMethod != null) {
-            try {
-                destroyMethod.invoke(target);
-            } catch (IllegalAccessException e) {
-                log.error("", e);
-            } catch (InvocationTargetException e) {
-                log.error("", e);
-            }
+            destroyMethod.invoke(target);
         }
     }
 
     @Override
     public String toString() {
-        return super.toString() + "[" + target.getClass() + "#" + method.getName() + "]";
+        return super.toString() + "[" + target.getClass() + "#" + executeMethod.getName() + "]";
     }
 }

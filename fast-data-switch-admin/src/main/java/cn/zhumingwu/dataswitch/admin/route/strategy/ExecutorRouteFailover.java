@@ -9,6 +9,7 @@ import cn.zhumingwu.dataswitch.core.util.I18nUtil;
 
 
 import java.util.List;
+import java.util.Map;
 
 public class ExecutorRouteFailover extends ExecutorRouter {
 
@@ -18,10 +19,10 @@ public class ExecutorRouteFailover extends ExecutorRouter {
         StringBuffer beatResultSB = new StringBuffer();
         for (String address : addressList) {
             // beat
-            Result<String> beatResult = null;
+            Result<Map<String, String>> beatResult = null;
             try {
                 Executor executorBiz = JobScheduler.getExecutorClient(address);
-                beatResult = executorBiz.beat();
+                beatResult = executorBiz.stat();
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 beatResult = Result.fail(500, "" + e);
@@ -40,8 +41,7 @@ public class ExecutorRouteFailover extends ExecutorRouter {
             if (beatResult.getCode() == Result.success().getCode()) {
 
                 beatResult.setMessage(beatResultSB.toString());
-                beatResult.setData(address);
-                return beatResult;
+                return Result.success(address);
             }
         }
         return Result.fail(500, beatResultSB.toString());

@@ -79,7 +79,7 @@ public class ExecutorRouteConsistentHash extends ExecutorRouter {
 
     @Override
     public Result<String> route(TriggerParam triggerParam, List<String> addressList) {
-        String address = hashJob(triggerParam.getJobId(), addressList);
+        String address = hashJob(triggerParam.getJobId().intValue(), addressList);
         return Result.success(address);
     }
 }

@@ -869,7 +869,7 @@
       <div class="float-right d-none d-sm-block">
         <b>版本</b> ${I18n.admin_version}
       </div>
-      <strong>Copyright &copy; 2015-${.now?string('yyyy')}&nbsp;<a href="https://github.com/fdsa-ltd">fdsa.ltd</a>.</strong> 保留所有权利。
+      <strong>Copyright &copy; 2015-${.now?string('yyyy')}&nbsp;<a href="https://github.com/openfides">zhumingwu.cn</a>.</strong> 保留所有权利。
     </footer>
 
 </#macro>

@@ -19,5 +19,4 @@ public class LogResult implements Serializable {
         this.logContent = logContent;
         this.isEnd = isEnd;
     }
-
 }
